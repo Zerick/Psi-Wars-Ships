@@ -25,6 +25,7 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+.token
 
 # The file listing itself
 list

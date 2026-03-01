@@ -264,6 +264,26 @@ export default function ShipCard({
         </div>
       )}
 
+      {/* ── GM Faction selector ── */}
+      {isGm && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
+          <span style={{ fontSize: '9px', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-secondary)', minWidth: '44px' }}>Faction</span>
+          <select
+            value={ship.faction || 'player'}
+            onChange={e => onPatchShip && onPatchShip(ship.ship_id, { faction: e.target.value })}
+            style={{
+              flex: 1, background: 'var(--bg-deep)', border: '1px solid var(--border)',
+              color: ship.faction === 'hostile_npc' ? '#e8410a' : ship.faction === 'friendly_npc' ? '#4caf6a' : 'var(--text-secondary)',
+              fontSize: '10px', fontFamily: 'Barlow Condensed, sans-serif', padding: '2px 4px',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="player">Player</option>
+            <option value="hostile_npc">Hostile NPC</option>
+            <option value="friendly_npc">Friendly NPC</option>
+          </select>
+        </div>
+      )}
       {/* ── GM Remove button ── */}
       {isGm && (
         <button
