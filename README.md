@@ -289,3 +289,4 @@ psi-wars/
 ---
 
 *Slice 1 of the Psi-Wars Space Combat Simulator — built on the SquareBracketDiceBot dice engine (MIT) by Simonious.*
+# Psi-Wars-Ships
