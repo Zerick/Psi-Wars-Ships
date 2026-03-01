@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-deep:       #080c10;
+  --bg-panel:      #0d1520;
+  --bg-panel-alt:  #111d2e;
+  --bg-input:      #0a1219;
+  --border:        #1e3a52;
+  --border-bright: #2a5070;
+
+  --accent-red:    #e8410a;
+  --accent-red-dim:#7a2206;
+  --accent-blue:   #2d9cdb;
+  --accent-blue-dim:#1a5577;
+  --accent-gold:   #d4a017;
+
+  --text-primary:  #c8d8e8;
+  --text-secondary:#6a8aaa;
+  --text-mono:     #a8e6cf;
+
+  --gm-color:      #e8410a;
+  --player-color:  #2d9cdb;
+  --spectator-color: #556677;
+  --system-color:  #d4a017;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Scanline texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Grid texture on backgrounds */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(30, 58, 82, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 58, 82, 0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Mono font for dice / roll output */
+.font-mono {
+  font-family: 'Share Tech Mono', monospace !important;
+}
+
+.font-condensed {
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-blue-dim); }
+
+/* Log entry animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.log-entry-new {
+  animation: slideIn 0.25s ease-out forwards;
+}
+
+/* Pulse animation for connection dot */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.pulse { animation: pulse 2s ease-in-out infinite; }
+
+/* Glow effects */
+.glow-red  { box-shadow: 0 0 8px rgba(232, 65, 10, 0.4); }
+.glow-blue { box-shadow: 0 0 8px rgba(45, 156, 219, 0.4); }
+
+/* Button base */
+.btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 12px;
+  padding: 6px 14px;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+}
+
+.btn-approve {
+  border-color: #2a7a3a;
+  color: #4caf6a;
+}
+.btn-approve:hover {
+  background: #2a7a3a;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(76, 175, 106, 0.4);
+}
+
+.btn-override {
+  border-color: #8a6a00;
+  color: var(--accent-gold);
+}
+.btn-override:hover {
+  background: #8a6a00;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(212, 160, 23, 0.4);
+}
+
+.btn-reroll {
+  border-color: var(--accent-blue-dim);
+  color: var(--accent-blue);
+}
+.btn-reroll:hover {
+  background: var(--accent-blue-dim);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(45, 156, 219, 0.4);
+}
+
+.btn-primary {
+  border-color: var(--accent-red-dim);
+  color: var(--accent-red);
+  padding: 10px 24px;
+  font-size: 13px;
+}
+.btn-primary:hover {
+  background: var(--accent-red);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(232, 65, 10, 0.5);
+}
+
+.btn-secondary {
+  border-color: var(--accent-blue-dim);
+  color: var(--accent-blue);
+  padding: 10px 24px;
+  font-size: 13px;
+}
+.btn-secondary:hover {
+  background: var(--accent-blue-dim);
+  color: #fff;
+}
+
+/* Input styling */
+.tactical-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.tactical-input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 1px rgba(45, 156, 219, 0.2);
+}
+
+.tactical-input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Section labels */
+.section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Role badges */
+.badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid;
+}
+
+.badge-gm         { color: var(--gm-color);        border-color: var(--accent-red-dim); }
+.badge-player     { color: var(--player-color);     border-color: var(--accent-blue-dim); }
+.badge-spectator  { color: var(--spectator-color);  border-color: #334455; }
+
+/* Divider */
+.tac-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* Strikethrough for overridden original total */
+.struck { text-decoration: line-through; opacity: 0.45; }

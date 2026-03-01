@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+backend/venv/
+
+# Database
+backend/psiwars.db
+
+# Environment variables
+.env
+*.env
+
+# Data files (large / sensitive)
+urls.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# The file listing itself
+list
+slice2/
+slice3_new_files/
+note
+frontend/node_modules/
+frontend/dist/
