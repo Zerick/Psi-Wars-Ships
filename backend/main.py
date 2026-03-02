@@ -1008,6 +1008,7 @@ if _FRONTEND_DIST.exists():
         index = _FRONTEND_DIST / "index.html"
         return FileResponse(str(index))
 
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------

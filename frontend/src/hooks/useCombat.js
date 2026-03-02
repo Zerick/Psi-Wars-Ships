@@ -97,6 +97,23 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
         setCombat(prev => prev ? { ...prev } : prev)
         break
 
+      case 'chase_card':
+        // Inject or replace chase card in log (combat_card_id used for in-place update)
+        injectCard('combat_chase', {
+          combat_card_id: data.combat_card_id || `chase-${data.ship_id}`,
+          ship_id:        data.ship_id,
+          ship_name:      data.ship_name || data.ship_id?.slice(0, 8),
+          maneuver:       data.maneuver || '',
+          npc:            !!data.npc,
+          rolled:         !!data.rolled,
+          roll:           data.roll ?? null,
+          bonus:          data.bonus ?? null,
+          mos:            data.mos ?? null,
+          owner_user_id:  data.owner_user_id || null,
+          combat_id:      data.combat_id,
+        })
+        break
+
       case 'chase_resolved':
         setCombat(prev => {
           if (!prev) return prev
