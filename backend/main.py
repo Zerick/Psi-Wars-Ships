@@ -702,6 +702,7 @@ async def declare_route(
         "data": {"combat_id": combat_id, "ship_id": body.ship_id, "round": body.round_number},
     })
 
+    scenario = None
     # If all submitted, reveal and broadcast full declarations
     if result.get("all_submitted"):
         declarations = await _reveal_declarations(combat_id, body.round_number)
@@ -715,11 +716,64 @@ async def declare_route(
                 "type": "phase_changed",
                 "data": {"combat_id": combat_id, "round": combat["current_round"], "phase": combat["current_phase"]},
             })
+            # Broadcast chase_card events for all ships so the log can render Roll buttons
+            if combat["current_phase"] == "chase":
+                scenario = await _get_scenario(combat.get("scenario_id") or "", token["user_id"], True)
+                ships_by_id = {s["ship_id"]: s for s in (scenario.get("ships") or [])} if scenario else {}
+                for decl in declarations:
+                    sid = decl["ship_id"]
+                    ship_data = ships_by_id.get(sid, {})
+                    is_npc = ship_data.get("faction", "player") in ("hostile_npc", "friendly_npc")
+                    await manager.broadcast(session_id, {
+                        "type": "chase_card",
+                        "data": {
+                            "combat_id": combat_id,
+                            "ship_id": sid,
+                            "ship_name": ship_data.get("name", sid[:8]),
+                            "maneuver": decl.get("maneuver", ""),
+                            "npc": is_npc,
+                            "rolled": is_npc,  # NPC will auto-roll; player needs button
+                            "roll": None,
+                            "bonus": None,
+                            "mos": None,
+                            "owner_user_id": ship_data.get("assigned_user_id"),
+                            "combat_card_id": f"chase-{sid}-r{body.round_number}",
+                        },
+                    })
+            # Broadcast a chase card stub for each non-NPC ship so the log can show Roll button
+            if combat["current_phase"] == "chase":
+                for decl in declarations:
+                    if not decl.get("is_npc"):
+                        await manager.broadcast(session_id, {
+                            "type": "chase_card",
+                            "data": {
+                                "combat_id": combat_id,
+                                "ship_id": decl["ship_id"],
+                                "ship_name": decl.get("ship_name", ""),
+                                "chase_bonus": decl.get("chase_bonus", 0),
+                                "breakdown": decl.get("breakdown", []),
+                                "owner_user_id": decl.get("owner_user_id"),
+                                "npc": False,
+                                "rolled": False,
+                            },
+                        })
         npc_results = await _run_npc_chase_rolls(combat_id)
         for nr in npc_results:
+            decl = nr["declaration"]
             await manager.broadcast(session_id, {
-                "type": "chase_roll_submitted",
-                "data": {"combat_id": combat_id, "ship_id": nr["declaration"]["ship_id"]},
+                "type": "chase_card",
+                "data": {
+                    "combat_id": combat_id,
+                    "ship_id": decl["ship_id"],
+                    "ship_name": decl.get("ship_name", ""),
+                    "chase_bonus": decl.get("chase_bonus", 0),
+                    "breakdown": decl.get("breakdown", []),
+                    "roll": decl.get("chase_roll_result"),
+                    "mos": decl.get("chase_mos"),
+                    "npc": True,
+                    "rolled": True,
+                    "owner_user_id": decl.get("owner_user_id"),
+                },
             })
             if nr.get("all_rolled"):
                 await manager.broadcast(session_id, {
@@ -749,9 +803,20 @@ async def chase_roll_route(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    decl_out = result["declaration"]
     await manager.broadcast(session_id, {
-        "type": "chase_roll_submitted",
-        "data": {"combat_id": combat_id, "ship_id": body.ship_id},
+        "type": "chase_card",
+        "data": {
+            "combat_id": combat_id,
+            "ship_id": body.ship_id,
+            "ship_name": decl_out.get("ship_name", body.ship_id[:8]),
+            "npc": False,
+            "rolled": True,
+            "roll": body.roll,
+            "bonus": decl_out.get("chase_bonus_used"),
+            "mos": decl_out.get("chase_mos"),
+            "combat_card_id": f"chase-{body.ship_id}-r{decl_out.get('round_number', '')}",
+        },
     })
 
     if result["all_rolled"]:
