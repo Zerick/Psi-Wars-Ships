@@ -139,7 +139,7 @@ function PendingRoll({ roll, sessionId, token, onResolved }) {
   )
 }
 
-export default function GMPanel({ pendingRolls, sessionId, token, onRollResolved, scenario, participants, onCreateScenario, onAddShip, onRemoveShip, combat, onStartCombat, onAddPair, onUpdatePair, onSubmitDeclaration, onResolveChase, onResolveChasePair, onSubmitAttack, onSubmitDefense, onSubmitDamage, onAdvancePhase, onEndCombat, onPatchShip }) {
+export default function GMPanel({ pendingRolls, sessionId, token, onRollResolved, scenario, participants, onCreateScenario, onAddShip, onRemoveShip, combat, onStartCombat, onAddPair, onUpdatePair, onSubmitDeclaration, onResolveChase, onResolveChasePair, onSubmitAttack, onSubmitDefense, onSubmitDamage, onAdvancePhase, onEndCombat, onPatchShip, onUpdateRange }) {
   return (
     <div style={{
       width: '280px',
@@ -211,7 +211,9 @@ export default function GMPanel({ pendingRolls, sessionId, token, onRollResolved
             <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#d4a017', marginBottom: '8px' }}>
               Declaration — Round {combat.current_round}
             </div>
-            {(scenario?.ships || []).map((ship) => {
+            {(scenario?.ships || [])
+              .filter(ship => !ship.faction || ship.faction === 'player')
+              .map((ship) => {
               const alreadySubmitted = (combat.declarations || []).some(
                 (d) => d.ship_id === ship.ship_id && d.submitted
               )

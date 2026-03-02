@@ -12,17 +12,25 @@ import InlineEdit from "./InlineEdit";
 
 // Faction → border colour
 const FACTION_BORDER = {
+  player:       "border-blue-600",
+  hostile_npc:  "border-red-600",
+  friendly_npc: "border-emerald-600",
+  neutral:      "border-slate-600",
+  // legacy
   imperial: "border-blue-600",
-  trader: "border-amber-500",
-  redjack: "border-red-600",
-  neutral: "border-slate-600",
+  trader:   "border-amber-500",
+  redjack:  "border-red-600",
 };
 
 const FACTION_GLOW = {
+  player:       "shadow-blue-900/40",
+  hostile_npc:  "shadow-red-900/40",
+  friendly_npc: "shadow-emerald-900/40",
+  neutral:      "shadow-slate-900/40",
+  // legacy
   imperial: "shadow-blue-900/40",
-  trader: "shadow-amber-900/40",
-  redjack: "shadow-red-900/40",
-  neutral: "shadow-slate-900/40",
+  trader:   "shadow-amber-900/40",
+  redjack:  "shadow-red-900/40",
 };
 
 const CLASS_BADGE = {
