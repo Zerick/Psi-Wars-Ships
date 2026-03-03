@@ -1,21 +1,16 @@
 // hooks/useCombat.js
 // Combat state management + combat log card injection.
-// Cards are injected into logEntries (passed via callback) when WS events arrive.
 
 import { useState, useEffect, useCallback } from "react";
 
 const API = import.meta.env.VITE_API_URL || "";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 function uid() {
   return Math.random().toString(36).slice(2)
 }
 
-// ---------------------------------------------------------------------------
 export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, onInjectLog }) {
-  const [combat, setCombat]   = useState(null)
+  const [combat,  setCombat]  = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
 
@@ -41,11 +36,17 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
   // ------------------------------------------------------------------
   const injectCard = useCallback((type, data) => {
     if (!onInjectLog) return
-    onInjectLog({
-      entry_id:   uid(),
-      entry_type: type,
-      data,
-    })
+    onInjectLog({ entry_id: uid(), entry_type: type, data })
+  }, [onInjectLog])
+
+  // ------------------------------------------------------------------
+  // Update an existing card by combat_card_id
+  // ------------------------------------------------------------------
+  const updateCard = useCallback((cardId, updater) => {
+    if (!onInjectLog) return
+    // We inject a replacement card with the same combat_card_id — SessionView
+    // deduplicates by combat_card_id and replaces in-place.
+    onInjectLog({ entry_id: uid(), entry_type: '__update__', combat_card_id: cardId, updater })
   }, [onInjectLog])
 
   // ------------------------------------------------------------------
@@ -59,7 +60,11 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
 
       case 'combat_started':
         setCombat(data)
-        injectCard('combat_phase', { round: data.current_round, phase: 'COMBAT BEGINS', description: '' })
+        injectCard('combat_phase', {
+          round: data.current_round,
+          phase: 'COMBAT BEGINS',
+          description: '',
+        })
         break
 
       case 'phase_changed': {
@@ -71,10 +76,56 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
           end_round:   'End of Round',
         }
         injectCard('combat_phase', {
-          round: data.round,
-          phase: (data.phase || '').toUpperCase().replace('_', ' '),
+          round:       data.round,
+          phase:       (data.phase || '').toUpperCase().replace(/_/g, ' '),
           description: phaseLabels[data.phase] || '',
         })
+        break
+      }
+
+      case 'chase_phase_started': {
+        // Inject one Roll card per ship — GM presses the button for each
+        setCombat(prev => prev ? { ...prev, current_phase: 'chase', current_round: data.round } : prev)
+        ;(data.ships || []).forEach(ship => {
+          injectCard('combat_chase', {
+            combat_card_id: `chase-${data.combat_id}-r${data.round}-${ship.ship_id}`,
+            combat_id:      data.combat_id,
+            ship_id:        ship.ship_id,
+            ship_name:      ship.ship_name,
+            chase_bonus:    ship.chase_bonus,
+            breakdown:      ship.breakdown,
+            npc:            ship.npc,
+            faction:        ship.faction,
+            owner_user_id:  ship.owner_user_id,
+            rolled:         false,
+            roll:           null,
+            mos:            null,
+          })
+        })
+        break
+      }
+
+      case 'chase_roll_submitted': {
+        // Update the matching chase card to show the roll result
+        const cardId = `chase-${data.combat_id}-r${data.round || ''}-${data.ship_id}`
+        // We re-inject with rolled=true — SessionView replaces by combat_card_id
+        // We need to find the round; it may be in the data or we derive from combat state
+        // Simplest: broadcast includes ship_id and the result, we update any card matching ship_id
+        // Since combat_card_id encodes the round we broadcast round in chase_roll_submitted
+        // (already added in main.py). If round missing fall back to searching by ship_id.
+        setCombat(prev => prev ? { ...prev } : prev)
+        // The card update is handled via onInjectLog with a special __update__ sentinel
+        // We inject a new entry that SessionView will merge by combat_card_id
+        if (onInjectLog) {
+          onInjectLog({
+            entry_type:     '__chase_roll_update__',
+            combat_id:      data.combat_id,
+            ship_id:        data.ship_id,
+            roll:           data.roll,
+            bonus:          data.bonus,
+            mos:            data.mos,
+          })
+        }
         break
       }
 
@@ -90,27 +141,6 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
           if (idx >= 0) decls[idx] = { ...decls[idx], submitted: true }
           else decls.push({ ship_id: data.ship_id, submitted: true })
           return { ...prev, declarations: decls }
-        })
-        break
-
-      case 'chase_roll_submitted':
-        setCombat(prev => prev ? { ...prev } : prev)
-        break
-
-      case 'chase_card':
-        // Inject or replace chase card in log (combat_card_id used for in-place update)
-        injectCard('combat_chase', {
-          combat_card_id: data.combat_card_id || `chase-${data.ship_id}`,
-          ship_id:        data.ship_id,
-          ship_name:      data.ship_name || data.ship_id?.slice(0, 8),
-          maneuver:       data.maneuver || '',
-          npc:            !!data.npc,
-          rolled:         !!data.rolled,
-          roll:           data.roll ?? null,
-          bonus:          data.bonus ?? null,
-          mos:            data.mos ?? null,
-          owner_user_id:  data.owner_user_id || null,
-          combat_id:      data.combat_id,
         })
         break
 
@@ -131,25 +161,40 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
               })
             }
           })
+          // Always inject a range summary card
+          const r = data.updated_ranges[0]
+          if (r) {
+            injectCard('combat_chase_resolution', {
+              winner:         r.advantage_ship_id ? 'Advantage gained' : 'No advantage',
+              loser:          '',
+              victory_margin: '',
+              new_range:      r.range_band,
+              description:    `Range: ${r.range_band}${r.matched_speed ? ' · Matched Speed' : ''}${r.advantage_ship_id ? ` · Advantage: ${r.advantage_ship_id}` : ''}`,
+            })
+          }
         }
         break
 
       case 'action_submitted':
-        if (data.attack_hit && data.dodge_roll == null) {
-          injectCard('combat_dodge', {
-            combat_card_id: `dodge-${data.action_id}`,
-            action_id:      data.action_id,
-            combat_id:      data.combat_id,
-            ship_id:        data.target_ship_id,
-            ship_name:      data.target_ship_name || 'Defender',
-            attacker_name:  data.acting_ship_name || 'Attacker',
-            dodge_bonus:    data.dodge_effective || 9,
-            breakdown:      [{ label: 'Dodge', value: data.dodge_effective || 9 }],
-            owner_user_id:  data.target_owner_user_id,
-            npc:            !!data.target_is_npc,
-            rolled:         false,
-          })
-        }
+        // NPC attack: inject attack card (already rolled, npc=true)
+        injectCard('combat_attack', {
+          combat_card_id: `attack-${data.action_id}`,
+          action_id:      data.action_id,
+          combat_id:      data.combat_id,
+          ship_id:        data.acting_ship_id,
+          ship_name:      data.acting_ship_name || 'Attacker',
+          target_name:    data.target_ship_name || 'Target',
+          weapon_name:    data.weapon_name || 'Weapon',
+          attack_bonus:   data.attack_total,
+          breakdown:      data.attack_modifiers
+            ? Object.entries(data.attack_modifiers || {}).map(([k, v]) => ({ label: k, value: v }))
+            : [],
+          npc:            true,
+          rolled:         true,
+          roll:           data.attack_roll,
+          hit:            data.attack_hit,
+          owner_user_id:  null,
+        })
         break
 
       case 'defense_submitted':
@@ -160,10 +205,12 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
           ship_id:        data.target_ship_id,
           ship_name:      data.target_ship_name || 'Defender',
           attacker_name:  data.acting_ship_name || 'Attacker',
-          dodge_bonus:    data.dodge_effective || 9,
-          breakdown:      [{ label: 'Dodge', value: data.dodge_effective || 9 }],
+          dodge_bonus:    data.dodge_total || data.dodge_effective || 9,
+          breakdown:      data.dodge_modifiers
+            ? Object.entries(data.dodge_modifiers || {}).map(([k, v]) => ({ label: k, value: v }))
+            : [],
           owner_user_id:  data.target_owner_user_id,
-          npc:            !!data.target_is_npc,
+          npc:            true,
           roll:           data.dodge_roll,
           dodged:         data.dodge_success,
           rolled:         true,
@@ -174,13 +221,14 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
         injectCard('combat_damage', {
           ship_name:     data.target_ship_name || 'Target',
           attacker_name: data.acting_ship_name || 'Attacker',
-          damage_rolled: data.damage_rolled,
+          damage_rolled: data.damage_raw,
           damage_net:    data.damage_net,
           hp_before:     data.hp_before,
           hp_after:      data.hp_after,
           screen_before: data.screen_before,
           screen_after:  data.screen_after,
-          description:   data.damage_description || '',
+          wound_after:   data.wound_level_after,
+          description:   data.wound_level_after ? `Wound: ${data.wound_level_after}` : '',
         })
         break
 
@@ -196,6 +244,11 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
 
       case 'round_ended':
         setCombat(prev => prev ? { ...prev, current_round: data.round } : prev)
+        injectCard('combat_phase', {
+          round: data.round - 1,
+          phase: 'ROUND COMPLETE',
+          description: `Beginning Round ${data.round}`,
+        })
         break
 
       case 'range_updated':
@@ -216,13 +269,12 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
       default:
         break
     }
-  }, [wsLastMessage, injectCard])
+  }, [wsLastMessage, injectCard, onInjectLog])
 
   // ------------------------------------------------------------------
   // API actions
   // ------------------------------------------------------------------
   const startCombat = useCallback(async (styleOrObj = 'stat_only') => {
-    // Accept either a string or {initiative_roll_style: ...} object
     const style = typeof styleOrObj === 'object' ? (styleOrObj.initiative_roll_style || 'stat_only') : styleOrObj
     const res = await fetch(
       `${API}/scenarios/${scenarioId}/combat/start?session_id=${sessionId}&token=${token}`,
@@ -245,7 +297,8 @@ export function useCombat({ sessionId, token, scenarioId, isGm, wsLastMessage, o
   }, [token])
 
   const rollChase = useCallback(async (combat_id, ship_id) => {
-    const roll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6)
+    // Roll 3d6 client-side, send to backend
+    const roll = Math.ceil(Math.random()*6) + Math.ceil(Math.random()*6) + Math.ceil(Math.random()*6)
     const res = await fetch(`${API}/combats/${combat_id}/chase/roll?token=${token}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ship_id, roll }),

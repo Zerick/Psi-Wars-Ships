@@ -1,9 +1,6 @@
 # =============================================================================
 # Psi-Wars Space Combat Simulator — main.py
 # =============================================================================
-# FastAPI application entry point.
-# REST endpoints + WebSocket endpoint.
-# =============================================================================
 import logging
 import re
 import json
@@ -53,12 +50,13 @@ from combat_manager import (
     mark_ship_acted as _mark_ship_acted,
     end_combat as _end_combat,
     run_npc_declarations as _run_npc_declarations,
-    run_npc_chase_rolls as _run_npc_chase_rolls,
+    # run_npc_chase_rolls intentionally NOT imported — GM triggers manually
     run_npc_action as _run_npc_action,
+    calculate_chase_bonus as _calculate_chase_bonus,
 )
 from ship_library import SHIP_LIBRARY
 from typing import Optional, Any
-
+import aiosqlite
 
 
 # ---------------------------------------------------------------------------
@@ -71,7 +69,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Lifespan — runs on startup/shutdown
+# Lifespan
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -96,9 +94,9 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
-# Auth helper
+# Auth helpers
 # ---------------------------------------------------------------------------
-def _require_token(token: str = Query(..., description="Bearer token issued at join")):
+def _require_token(token: str = Query(...)):
     data = sm.resolve_token(token)
     if not data:
         raise HTTPException(status_code=401, detail="Invalid or expired token.")
@@ -111,14 +109,14 @@ def _require_gm(token_data: dict = Depends(_require_token)):
     return token_data
 
 # ---------------------------------------------------------------------------
-# Pydantic request models
+# Pydantic models
 # ---------------------------------------------------------------------------
 class CreateSessionRequest(BaseModel):
     display_name: str
 
 class JoinSessionRequest(BaseModel):
     display_name: str
-    role: str = "player"   # 'player' | 'spectator'
+    role: str = "player"
 
 class ChatRequest(BaseModel):
     content: str
@@ -126,10 +124,6 @@ class ChatRequest(BaseModel):
 class OverrideRequest(BaseModel):
     value: int
 
-
-# ---------------------------------------------------------------------------
-# Pydantic request models — Slice 2
-# ---------------------------------------------------------------------------
 class CreateScenarioBody(BaseModel):
     name: str
 
@@ -152,12 +146,8 @@ class PatchWeaponBody(BaseModel):
 class AssignShipBody(BaseModel):
     user_id: str
 
-
-# ---------------------------------------------------------------------------
-# Pydantic request models — Slice 3 Combat
-# ---------------------------------------------------------------------------
 class StartCombatBody(BaseModel):
-    initiative_roll_style: str = "stat_only"  # stat_only | stat_plus_1d6
+    initiative_roll_style: str = "stat_only"
 
 class DeclarationBody(BaseModel):
     ship_id: str
@@ -183,6 +173,119 @@ class AttackBody(BaseModel):
 
 class DefenseBody(BaseModel):
     dodge_roll: int
+
+# ---------------------------------------------------------------------------
+# Helper: build per-ship chase card data for WS broadcast
+# ---------------------------------------------------------------------------
+async def _build_chase_cards(combat: dict, db_path: str = "psiwars.db") -> list[dict]:
+    """
+    Build one chase card payload per ship in the combat.
+    Used when broadcasting the chase phase start so the frontend can render
+    a Roll button for each ship.
+    """
+    cards = []
+    async with aiosqlite.connect(db_path) as db:
+        db.row_factory = aiosqlite.Row
+
+        round_number = combat["current_round"]
+
+        for init_row in combat["initiative_order"]:
+            ship_id = init_row["ship_id"]
+
+            # Fetch ship and pilot
+            async with db.execute("SELECT * FROM ships WHERE ship_id=?", (ship_id,)) as cur:
+                ship_row = await cur.fetchone()
+            async with db.execute("SELECT * FROM pilots WHERE ship_id=?", (ship_id,)) as cur:
+                pilot_row = await cur.fetchone()
+
+            if not ship_row:
+                continue
+
+            ship  = dict(ship_row)
+            pilot = dict(pilot_row) if pilot_row else {}
+
+            # Coerce booleans
+            for f in ["afterburner_available", "afterburner_active"]:
+                if f in ship:
+                    ship[f] = bool(ship[f])
+
+            # Fetch declaration for this round (may not exist yet if round just started)
+            async with db.execute(
+                """SELECT * FROM combat_declarations
+                   WHERE combat_id=? AND ship_id=? AND round_number=?""",
+                (combat["combat_id"], ship_id, round_number)
+            ) as cur:
+                decl_row = await cur.fetchone()
+            decl = dict(decl_row) if decl_row else {}
+
+            # Fetch range row (first one found — single opponent scenario)
+            range_row = None
+            for r in combat.get("ranges", []):
+                if r["ship_a_id"] == ship_id or r["ship_b_id"] == ship_id:
+                    range_row = r
+                    break
+            if range_row is None:
+                range_row = {"advantage_ship_id": None}
+
+            # Calculate chase bonus with breakdown
+            handling = ship.get("handling", 0)
+            sr = ship.get("sr", 0)
+            move = ship.get("move_space", 0)
+            ship_class = ship.get("ship_class", "fighter")
+
+            if decl.get("afterburner_active") and ship.get("afterburner_available"):
+                move += ship.get("afterburner_move_bonus", 0)
+
+            if ship_class == "fighter":
+                speed_bonus = min(move // 25, 20)
+            elif ship_class == "corvette":
+                speed_bonus = min(move // 50, 15)
+            else:
+                speed_bonus = 0
+
+            breakdown = [
+                {"label": "Handling", "value": handling},
+                {"label": "SR", "value": sr},
+                {"label": "Speed", "value": speed_bonus},
+            ]
+
+            adv_bonus = 0
+            if range_row.get("advantage_ship_id") == ship_id:
+                adv_bonus = 2
+                breakdown.append({"label": "Advantage", "value": 2})
+
+            maneuver = decl.get("maneuver", "")
+            man_bonus = 0
+            if maneuver in ("evade", "move_evade"):
+                man_bonus = -2
+                breakdown.append({"label": "Evade", "value": -2})
+            elif maneuver == "stunt":
+                man_bonus = 2
+                breakdown.append({"label": "Stunt", "value": 2})
+            elif maneuver == "high_g_stunt":
+                man_bonus = 3
+                breakdown.append({"label": "High-G Stunt", "value": 3})
+
+            chase_bonus = handling + sr + speed_bonus + adv_bonus + man_bonus
+
+            faction = ship.get("faction", "player")
+            is_npc = faction in ("hostile_npc", "friendly_npc")
+
+            cards.append({
+                "ship_id":        ship_id,
+                "ship_name":      ship.get("name", "Unknown"),
+                "chase_bonus":    chase_bonus,
+                "breakdown":      breakdown,
+                "npc":            is_npc,
+                "faction":        faction,
+                "rolled":         False,
+                "roll":           None,
+                "mos":            None,
+                "combat_id":      combat["combat_id"],
+                "owner_user_id":  ship.get("assigned_user_id"),
+            })
+
+    return cards
 
 # ---------------------------------------------------------------------------
 # REST — Sessions
@@ -216,7 +319,6 @@ async def join_session(invite_code: str, body: JoinSessionRequest):
     if not result:
         raise HTTPException(status_code=404, detail="Invite code not found.")
 
-    # Broadcast participant-joined event to existing members
     session_id = result["session_id"]
     await manager.broadcast(session_id, {
         "type": "participant_joined",
@@ -227,7 +329,6 @@ async def join_session(invite_code: str, body: JoinSessionRequest):
         }
     })
 
-    # Also broadcast the system log entry that was created
     log_entries = lm.get_log(session_id, limit=1)
     if log_entries:
         latest = log_entries[-1]
@@ -246,7 +347,7 @@ async def get_log(session_id: str, token: dict = Depends(_require_token)):
     return lm.get_log(session_id)
 
 # ---------------------------------------------------------------------------
-# REST — Chat / Roll submission
+# REST — Chat / Roll
 # ---------------------------------------------------------------------------
 ROLL_RE = re.compile(r'\[\[([^\]]+)\]\]')
 
@@ -259,14 +360,11 @@ async def post_chat(session_id: str, body: ChatRequest, token: dict = Depends(_r
     if not content:
         raise HTTPException(status_code=400, detail="content is required.")
 
-    author_id = token["user_id"]
+    author_id   = token["user_id"]
     author_name = token["display_name"]
-
-    # Check for [[roll]] expressions
     roll_matches = ROLL_RE.findall(content)
 
     if not roll_matches:
-        # Plain chat entry — broadcast immediately
         entry = lm.append_chat(session_id, author_id, author_name, content)
         await manager.broadcast(session_id, {"type": "log_entry", "data": entry})
         return {"status": "broadcast", "entry": entry}
@@ -275,14 +373,11 @@ async def post_chat(session_id: str, body: ChatRequest, token: dict = Depends(_r
     for expression in roll_matches:
         roll_result = rh.process_roll(expression, author_name, author_id)
         if not roll_result:
-            # Roll failed — treat remaining message as chat
             entry = lm.append_chat(session_id, author_id, author_name, content)
             await manager.broadcast(session_id, {"type": "log_entry", "data": entry})
             return {"status": "broadcast", "entry": entry}
 
-        # Strip the [[...]] from content to get the label text
         label = ROLL_RE.sub("", content).strip()
-
         log_entry, pending = lm.create_pending_roll(
             session_id=session_id,
             author_id=author_id,
@@ -293,18 +388,17 @@ async def post_chat(session_id: str, body: ChatRequest, token: dict = Depends(_r
             content=label,
         )
 
-        # Send pending roll to GM only
         await manager.send_to_role(session_id, "gm", {
             "type": "pending_roll",
             "data": {
-                "pending_id": pending["pending_id"],
-                "entry_id": log_entry["entry_id"],
-                "rolled_by": author_name,
-                "expression": roll_result["expression"],
-                "breakdown": roll_result["breakdown"],
+                "pending_id":   pending["pending_id"],
+                "entry_id":     log_entry["entry_id"],
+                "rolled_by":    author_name,
+                "expression":   roll_result["expression"],
+                "breakdown":    roll_result["breakdown"],
                 "dice_results": json.loads(roll_result["dice_results"]) if isinstance(roll_result["dice_results"], str) else roll_result["dice_results"],
-                "total": roll_result["total"],
-                "label": label,
+                "total":        roll_result["total"],
+                "label":        label,
             }
         })
 
@@ -316,11 +410,7 @@ async def post_chat(session_id: str, body: ChatRequest, token: dict = Depends(_r
 # REST — GM Roll Actions
 # ---------------------------------------------------------------------------
 @app.post("/sessions/{session_id}/rolls/{pending_id}/approve")
-async def approve_roll(
-    session_id: str,
-    pending_id: str,
-    token: dict = Depends(_require_gm)
-):
+async def approve_roll(session_id: str, pending_id: str, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     entry = lm.approve_pending_roll(pending_id)
@@ -331,12 +421,7 @@ async def approve_roll(
 
 
 @app.post("/sessions/{session_id}/rolls/{pending_id}/override")
-async def override_roll(
-    session_id: str,
-    pending_id: str,
-    body: OverrideRequest,
-    token: dict = Depends(_require_gm)
-):
+async def override_roll(session_id: str, pending_id: str, body: OverrideRequest, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     entry = lm.override_pending_roll(pending_id, body.value)
@@ -347,15 +432,10 @@ async def override_roll(
 
 
 @app.post("/sessions/{session_id}/rolls/{pending_id}/reroll")
-async def reroll(
-    session_id: str,
-    pending_id: str,
-    token: dict = Depends(_require_gm)
-):
+async def reroll(session_id: str, pending_id: str, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
 
-    # Get the original expression from the pending roll
     pending_rows = lm.get_pending_rolls(session_id)
     target = next((p for p in pending_rows if p["pending_id"] == pending_id), None)
     if not target:
@@ -367,24 +447,19 @@ async def reroll(
         raise HTTPException(status_code=500, detail="Re-roll failed.")
 
     import json as _json
-    updated = lm.reroll_pending(
-        pending_id,
-        roll_result["dice_results"],
-        roll_result["total"]
-    )
+    lm.reroll_pending(pending_id, roll_result["dice_results"], roll_result["total"])
 
-    # Send updated pending to GM only
     await manager.send_to_role(session_id, "gm", {
         "type": "pending_roll",
         "data": {
-            "pending_id": pending_id,
-            "entry_id": target["log_entry_id"] if "log_entry_id" in target else target.get("entry_id",""),
-            "rolled_by": target["author_name"],
-            "expression": target["expression"],
-            "breakdown": roll_result["breakdown"],
+            "pending_id":   pending_id,
+            "entry_id":     target.get("log_entry_id", target.get("entry_id", "")),
+            "rolled_by":    target["author_name"],
+            "expression":   target["expression"],
+            "breakdown":    roll_result["breakdown"],
             "dice_results": _json.loads(roll_result["dice_results"]) if isinstance(roll_result["dice_results"], str) else roll_result["dice_results"],
-            "total": roll_result["total"],
-            "label": target.get("content", ""),
+            "total":        roll_result["total"],
+            "label":        target.get("content", ""),
         }
     })
     return {"status": "rerolled"}
@@ -409,46 +484,33 @@ async def get_participants(session_id: str, token: dict = Depends(_require_token
 # WebSocket
 # ---------------------------------------------------------------------------
 @app.websocket("/ws/{session_id}")
-async def websocket_endpoint(
-    websocket: WebSocket,
-    session_id: str,
-    token: str = Query(...)
-):
+async def websocket_endpoint(websocket: WebSocket, session_id: str, token: str = Query(...)):
     token_data = sm.resolve_token(token)
     if not token_data or token_data["session_id"] != session_id:
         await websocket.close(code=4001)
         return
 
     user_id = token_data["user_id"]
-    role = token_data["role"]
+    role    = token_data["role"]
 
     await manager.connect(websocket, session_id, user_id, role)
 
-    # Send a welcome ping so the client knows it's connected
     try:
-        await websocket.send_json({
-            "type": "connected",
-            "data": {"user_id": user_id, "role": role}
-        })
+        await websocket.send_json({"type": "connected", "data": {"user_id": user_id, "role": role}})
     except Exception:
         pass
 
     try:
         while True:
-            # We don't expect messages from the client over WS in Slice 1
-            # (all actions go through REST). Keep alive.
             data = await websocket.receive_text()
-            # Echo pings
             if data == "ping":
                 await websocket.send_text("pong")
     except WebSocketDisconnect:
         manager.disconnect(websocket, session_id)
         log.info(f"WS disconnected: session={session_id} user={user_id}")
 
-# ---------------------------------------------------------------------------
-
 # =============================================================================
-# REST — Slice 2: Ship Library, Scenarios, Ships
+# REST — Ship Library, Scenarios, Ships
 # =============================================================================
 
 @app.get("/library/ships")
@@ -457,11 +519,7 @@ async def get_ship_library(token: dict = Depends(_require_token)):
 
 
 @app.post("/scenarios")
-async def create_scenario_route(
-    session_id: str = Query(...),
-    body: CreateScenarioBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def create_scenario_route(session_id: str = Query(...), body: CreateScenarioBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     scenario = await _create_scenario(session_id, body.name)
@@ -487,12 +545,7 @@ async def get_scenario_route(scenario_id: str, token: dict = Depends(_require_to
 
 
 @app.post("/scenarios/{scenario_id}/ships")
-async def add_ship_route(
-    scenario_id: str,
-    session_id: str = Query(...),
-    body: AddShipBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def add_ship_route(scenario_id: str, session_id: str = Query(...), body: AddShipBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     ship = await _add_ship(scenario_id, body.library_key, body.ship)
@@ -501,13 +554,7 @@ async def add_ship_route(
 
 
 @app.patch("/scenarios/{scenario_id}/ships/{ship_id}")
-async def patch_ship_route(
-    scenario_id: str,
-    ship_id: str,
-    session_id: str = Query(...),
-    body: PatchShipBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def patch_ship_route(scenario_id: str, ship_id: str, session_id: str = Query(...), body: PatchShipBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     ship = await _patch_ship(ship_id, body.fields)
@@ -518,13 +565,7 @@ async def patch_ship_route(
 
 
 @app.patch("/scenarios/{scenario_id}/ships/{ship_id}/pilot")
-async def patch_pilot_route(
-    scenario_id: str,
-    ship_id: str,
-    session_id: str = Query(...),
-    body: PatchPilotBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def patch_pilot_route(scenario_id: str, ship_id: str, session_id: str = Query(...), body: PatchPilotBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     ship = await _patch_pilot(ship_id, body.fields)
@@ -535,14 +576,7 @@ async def patch_pilot_route(
 
 
 @app.patch("/scenarios/{scenario_id}/ships/{ship_id}/systems/{system_name}")
-async def patch_system_route(
-    scenario_id: str,
-    ship_id: str,
-    system_name: str,
-    session_id: str = Query(...),
-    body: PatchSystemBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def patch_system_route(scenario_id: str, ship_id: str, system_name: str, session_id: str = Query(...), body: PatchSystemBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     ship = await _patch_system(ship_id, system_name, body.status)
@@ -553,14 +587,7 @@ async def patch_system_route(
 
 
 @app.patch("/scenarios/{scenario_id}/ships/{ship_id}/weapons/{weapon_id}")
-async def patch_weapon_route(
-    scenario_id: str,
-    ship_id: str,
-    weapon_id: str,
-    session_id: str = Query(...),
-    body: PatchWeaponBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def patch_weapon_route(scenario_id: str, ship_id: str, weapon_id: str, session_id: str = Query(...), body: PatchWeaponBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     ship = await _patch_weapon(ship_id, weapon_id, body.fields)
@@ -571,13 +598,7 @@ async def patch_weapon_route(
 
 
 @app.put("/scenarios/{scenario_id}/ships/{ship_id}/assign")
-async def assign_ship_route(
-    scenario_id: str,
-    ship_id: str,
-    session_id: str = Query(...),
-    body: AssignShipBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def assign_ship_route(scenario_id: str, ship_id: str, session_id: str = Query(...), body: AssignShipBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     ship = await _assign_ship(ship_id, body.user_id)
@@ -591,12 +612,7 @@ async def assign_ship_route(
 
 
 @app.delete("/scenarios/{scenario_id}/ships/{ship_id}")
-async def delete_ship_route(
-    scenario_id: str,
-    ship_id: str,
-    session_id: str = Query(...),
-    token: dict = Depends(_require_gm),
-):
+async def delete_ship_route(scenario_id: str, ship_id: str, session_id: str = Query(...), token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     await _delete_ship(ship_id)
@@ -604,35 +620,33 @@ async def delete_ship_route(
     return {"ok": True}
 
 # =============================================================================
-# REST — Slice 3: Combat Engine
+# REST — Combat Engine
 # =============================================================================
 
 @app.post("/scenarios/{scenario_id}/combat/start")
-async def start_combat_route(
-    scenario_id: str,
-    session_id: str = Query(...),
-    body: StartCombatBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def start_combat_route(scenario_id: str, session_id: str = Query(...), body: StartCombatBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     body = body or StartCombatBody()
     combat = await _start_combat(scenario_id, body.initiative_roll_style)
     await manager.broadcast(session_id, {"type": "combat_started", "data": combat})
 
-    # Advance setup -> declaration and fire NPC auto-declarations
+    # Advance setup -> declaration
     combat = await _advance_phase(combat["combat_id"])
     await manager.broadcast(session_id, {
         "type": "phase_changed",
         "data": {"combat_id": combat["combat_id"], "round": combat["current_round"], "phase": combat["current_phase"]},
     })
+
+    # Auto-submit NPC declarations
     npc_decls = await _run_npc_declarations(combat["combat_id"])
     for nd in npc_decls:
         await manager.broadcast(session_id, {
             "type": "declaration_submitted",
             "data": {"combat_id": combat["combat_id"], "ship_id": nd["ship_id"]},
         })
-    # If all ships are NPCs, phase already advanced to chase
+
+    # If all ships are NPCs, phase auto-advances to chase — broadcast chase cards
     combat = await _get_combat(combat["combat_id"])
     if combat and combat["current_phase"] == "chase":
         decls = await _reveal_declarations(combat["combat_id"], combat["current_round"])
@@ -644,7 +658,12 @@ async def start_combat_route(
             "type": "phase_changed",
             "data": {"combat_id": combat["combat_id"], "round": combat["current_round"], "phase": "chase"},
         })
-        await _run_npc_chase_rolls(combat["combat_id"])
+        # Broadcast per-ship chase cards — GM will press Roll buttons manually
+        chase_cards = await _build_chase_cards(combat)
+        await manager.broadcast(session_id, {
+            "type": "chase_phase_started",
+            "data": {"combat_id": combat["combat_id"], "round": combat["current_round"], "ships": chase_cards},
+        })
 
     return combat
 
@@ -652,25 +671,16 @@ async def start_combat_route(
 @app.get("/scenarios/{scenario_id}/combat")
 async def get_scenario_combat(scenario_id: str, token: dict = Depends(_require_token)):
     combat = await _get_active_combat(scenario_id)
-    return combat  # may be None — frontend handles that
+    return combat
 
 
 @app.get("/combats/{combat_id}/ranges")
-async def get_ranges_route(
-    combat_id: str,
-    token: dict = Depends(_require_token),
-):
+async def get_ranges_route(combat_id: str, token: dict = Depends(_require_token)):
     return await _get_combat_ranges(combat_id)
 
 
 @app.patch("/combats/{combat_id}/ranges/{range_id}")
-async def update_range_route(
-    combat_id: str,
-    range_id: str,
-    session_id: str = Query(...),
-    body: UpdateRangeBody = None,
-    token: dict = Depends(_require_gm),
-):
+async def update_range_route(combat_id: str, range_id: str, session_id: str = Query(...), body: UpdateRangeBody = None, token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     rng = await _update_range(range_id, body.fields)
@@ -681,11 +691,7 @@ async def update_range_route(
 
 
 @app.post("/combats/{combat_id}/declare")
-async def declare_route(
-    combat_id: str,
-    body: DeclarationBody,
-    token: dict = Depends(_require_token),
-):
+async def declare_route(combat_id: str, body: DeclarationBody, token: dict = Depends(_require_token)):
     session_id = token["session_id"]
     try:
         result = await _submit_declaration(
@@ -696,14 +702,11 @@ async def declare_route(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Broadcast that THIS ship declared (not WHAT it declared)
     await manager.broadcast(session_id, {
         "type": "declaration_submitted",
         "data": {"combat_id": combat_id, "ship_id": body.ship_id, "round": body.round_number},
     })
 
-    scenario = None
-    # If all submitted, reveal and broadcast full declarations
     if result.get("all_submitted"):
         declarations = await _reveal_declarations(combat_id, body.round_number)
         await manager.broadcast(session_id, {
@@ -716,106 +719,39 @@ async def declare_route(
                 "type": "phase_changed",
                 "data": {"combat_id": combat_id, "round": combat["current_round"], "phase": combat["current_phase"]},
             })
-            # Broadcast chase_card events for all ships so the log can render Roll buttons
-            if combat["current_phase"] == "chase":
-                scenario = await _get_scenario(combat.get("scenario_id") or "", token["user_id"], True)
-                ships_by_id = {s["ship_id"]: s for s in (scenario.get("ships") or [])} if scenario else {}
-                for decl in declarations:
-                    sid = decl["ship_id"]
-                    ship_data = ships_by_id.get(sid, {})
-                    is_npc = ship_data.get("faction", "player") in ("hostile_npc", "friendly_npc")
-                    await manager.broadcast(session_id, {
-                        "type": "chase_card",
-                        "data": {
-                            "combat_id": combat_id,
-                            "ship_id": sid,
-                            "ship_name": ship_data.get("name", sid[:8]),
-                            "maneuver": decl.get("maneuver", ""),
-                            "npc": is_npc,
-                            "rolled": is_npc,  # NPC will auto-roll; player needs button
-                            "roll": None,
-                            "bonus": None,
-                            "mos": None,
-                            "owner_user_id": ship_data.get("assigned_user_id"),
-                            "combat_card_id": f"chase-{sid}-r{body.round_number}",
-                        },
-                    })
-            # Broadcast a chase card stub for each non-NPC ship so the log can show Roll button
-            if combat["current_phase"] == "chase":
-                for decl in declarations:
-                    if not decl.get("is_npc"):
-                        await manager.broadcast(session_id, {
-                            "type": "chase_card",
-                            "data": {
-                                "combat_id": combat_id,
-                                "ship_id": decl["ship_id"],
-                                "ship_name": decl.get("ship_name", ""),
-                                "chase_bonus": decl.get("chase_bonus", 0),
-                                "breakdown": decl.get("breakdown", []),
-                                "owner_user_id": decl.get("owner_user_id"),
-                                "npc": False,
-                                "rolled": False,
-                            },
-                        })
-        npc_results = await _run_npc_chase_rolls(combat_id)
-        for nr in npc_results:
-            decl = nr["declaration"]
+        # Broadcast chase cards — no auto NPC rolls
+        if combat and combat["current_phase"] == "chase":
+            chase_cards = await _build_chase_cards(combat)
             await manager.broadcast(session_id, {
-                "type": "chase_card",
-                "data": {
-                    "combat_id": combat_id,
-                    "ship_id": decl["ship_id"],
-                    "ship_name": decl.get("ship_name", ""),
-                    "chase_bonus": decl.get("chase_bonus", 0),
-                    "breakdown": decl.get("breakdown", []),
-                    "roll": decl.get("chase_roll_result"),
-                    "mos": decl.get("chase_mos"),
-                    "npc": True,
-                    "rolled": True,
-                    "owner_user_id": decl.get("owner_user_id"),
-                },
+                "type": "chase_phase_started",
+                "data": {"combat_id": combat_id, "round": combat["current_round"], "ships": chase_cards},
             })
-            if nr.get("all_rolled"):
-                await manager.broadcast(session_id, {
-                    "type": "chase_resolved",
-                    "data": {"combat_id": combat_id, "updated_ranges": nr["updated_ranges"]},
-                })
-                updated = await _get_combat(combat_id)
-                if updated:
-                    await manager.broadcast(session_id, {
-                        "type": "phase_changed",
-                        "data": {"combat_id": combat_id, "round": updated["current_round"], "phase": updated["current_phase"]},
-                    })
 
     return result
 
 
 @app.post("/combats/{combat_id}/chase/roll")
-async def chase_roll_route(
-    combat_id: str,
-    body: ChaseRollBody,
-    token: dict = Depends(_require_token),
-):
-    """Player submits their chase roll result (from the dice engine)."""
+async def chase_roll_route(combat_id: str, body: ChaseRollBody, token: dict = Depends(_require_token)):
+    """
+    GM or player submits a chase roll for a ship.
+    NPC ships: GM presses the Roll button in the log.
+    Player ships: player presses their own Roll button.
+    """
     session_id = token["session_id"]
     try:
         result = await _roll_chase_for_ship(combat_id, body.ship_id, body.roll)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    decl_out = result["declaration"]
     await manager.broadcast(session_id, {
-        "type": "chase_card",
+        "type": "chase_roll_submitted",
         "data": {
             "combat_id": combat_id,
-            "ship_id": body.ship_id,
-            "ship_name": decl_out.get("ship_name", body.ship_id[:8]),
-            "npc": False,
-            "rolled": True,
-            "roll": body.roll,
-            "bonus": decl_out.get("chase_bonus_used"),
-            "mos": decl_out.get("chase_mos"),
-            "combat_card_id": f"chase-{body.ship_id}-r{decl_out.get('round_number', '')}",
+            "ship_id":   body.ship_id,
+            "roll":      body.roll,
+            "mos":       result["declaration"].get("chase_mos"),
+            "bonus":     result["declaration"].get("chase_bonus_used"),
+            "round":     result["declaration"].get("round_number"),
         },
     })
 
@@ -830,10 +766,53 @@ async def chase_roll_route(
                 "type": "phase_changed",
                 "data": {"combat_id": combat_id, "round": combat["current_round"], "phase": combat["current_phase"]},
             })
+
+        # Action phase: run NPC actions automatically
         if combat and combat["current_phase"] == "action":
             for init_row in combat["initiative_order"]:
                 npc_action = await _run_npc_action(combat_id, init_row["ship_id"])
                 if npc_action:
+                    # Auto-apply damage to ship
+                    if npc_action.get("damage_net") is not None:
+                        target_id = npc_action["target_ship_id"]
+                        async with aiosqlite.connect("psiwars.db") as db:
+                            db.row_factory = aiosqlite.Row
+                            async with db.execute("SELECT * FROM ships WHERE ship_id=?", (target_id,)) as cur:
+                                t_row = await cur.fetchone()
+                        if t_row:
+                            t = dict(t_row)
+                            new_hp  = max(0, t.get("hp_current", 0) - npc_action["damage_net"])
+                            new_fs  = max(0, t.get("force_screen_current", 0) - (npc_action.get("damage_screen_absorbed") or 0))
+                            fields  = {
+                                "hp_current":           new_hp,
+                                "wound_level":          npc_action.get("wound_level_after") or t.get("wound_level", "none"),
+                                "force_screen_current": new_fs,
+                            }
+                            if npc_action.get("wound_level_after") == "lethal":
+                                fields["is_destroyed"] = True
+                            updated_ship = await _patch_ship(target_id, fields)
+                            if updated_ship:
+                                await manager.broadcast(session_id, {"type": "ship_updated", "data": updated_ship})
+
+                        # Enrich action with ship/weapon names for log cards
+                        async with aiosqlite.connect("psiwars.db") as _db2:
+                            _db2.row_factory = aiosqlite.Row
+                            async with _db2.execute("SELECT name FROM ships WHERE ship_id=?", (init_row["ship_id"],)) as _c:
+                                _actor = await _c.fetchone()
+                            async with _db2.execute("SELECT name FROM ships WHERE ship_id=?", (target_id,)) as _c:
+                                _tgt = await _c.fetchone()
+                            _wpn = None
+                            if npc_action.get("weapon_id"):
+                                async with _db2.execute("SELECT name FROM weapons WHERE weapon_id=?", (npc_action["weapon_id"],)) as _c:
+                                    _wpn = await _c.fetchone()
+                        npc_action["acting_ship_name"] = _actor["name"] if _actor else "Attacker"
+                        npc_action["target_ship_name"] = _tgt["name"] if _tgt else "Target"
+                        npc_action["weapon_name"]      = _wpn["name"] if _wpn else "Weapon"
+                        npc_action["hp_before"]        = t.get("hp_current", 0) if t_row else None
+                        npc_action["hp_after"]         = new_hp if t_row else None
+                        npc_action["screen_before"]    = t.get("force_screen_current", 0) if t_row else None
+                        npc_action["screen_after"]     = new_fs if t_row else None
+
                     await manager.broadcast(session_id, {"type": "action_submitted", "data": npc_action})
                     if npc_action.get("damage_net") is not None:
                         await manager.broadcast(session_id, {"type": "damage_submitted", "data": npc_action})
@@ -841,31 +820,52 @@ async def chase_roll_route(
                         "type": "ship_acted",
                         "data": {"combat_id": combat_id, "ship_id": init_row["ship_id"]},
                     })
+
+                    # Check if target is destroyed — end combat automatically
+                    if npc_action.get("wound_level_after") == "lethal":
+                        ended = await _end_combat(combat_id)
+                        await manager.broadcast(session_id, {"type": "combat_ended", "data": {"combat_id": combat_id}})
+                        return result
+
+            # After all NPC actions, check if all have acted → new round
             combat = await _get_combat(combat_id)
             if combat and all(i["has_acted"] for i in combat["initiative_order"]):
-                combat = await _advance_phase(combat_id)
-                combat = await _advance_phase(combat_id)
+                combat = await _advance_phase(combat_id)  # action -> end_round
+                combat = await _advance_phase(combat_id)  # end_round -> declaration (new round)
                 await manager.broadcast(session_id, {
                     "type": "round_ended",
                     "data": {"combat_id": combat_id, "round": combat["current_round"]},
                 })
+                # Auto-submit NPC declarations for new round
                 npc_decls = await _run_npc_declarations(combat_id)
                 for nd in npc_decls:
                     await manager.broadcast(session_id, {
                         "type": "declaration_submitted",
                         "data": {"combat_id": combat_id, "ship_id": nd["ship_id"]},
                     })
+                # If all NPC, advance to chase and broadcast chase cards
+                combat = await _get_combat(combat_id)
+                if combat and combat["current_phase"] == "chase":
+                    decls = await _reveal_declarations(combat_id, combat["current_round"])
+                    await manager.broadcast(session_id, {
+                        "type": "declarations_revealed",
+                        "data": {"combat_id": combat_id, "round": combat["current_round"], "declarations": decls},
+                    })
+                    await manager.broadcast(session_id, {
+                        "type": "phase_changed",
+                        "data": {"combat_id": combat_id, "round": combat["current_round"], "phase": "chase"},
+                    })
+                    chase_cards = await _build_chase_cards(combat)
+                    await manager.broadcast(session_id, {
+                        "type": "chase_phase_started",
+                        "data": {"combat_id": combat_id, "round": combat["current_round"], "ships": chase_cards},
+                    })
 
     return result
 
 
 @app.post("/combats/{combat_id}/actions")
-async def submit_attack_route(
-    combat_id: str,
-    session_id: str = Query(...),
-    body: AttackBody = None,
-    token: dict = Depends(_require_token),
-):
+async def submit_attack_route(combat_id: str, session_id: str = Query(...), body: AttackBody = None, token: dict = Depends(_require_token)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     combat = await _get_combat(combat_id)
@@ -884,13 +884,7 @@ async def submit_attack_route(
 
 
 @app.post("/combats/{combat_id}/actions/{action_id}/defense")
-async def submit_defense_route(
-    combat_id: str,
-    action_id: str,
-    session_id: str = Query(...),
-    body: DefenseBody = None,
-    token: dict = Depends(_require_token),
-):
+async def submit_defense_route(combat_id: str, action_id: str, session_id: str = Query(...), body: DefenseBody = None, token: dict = Depends(_require_token)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     try:
@@ -902,30 +896,52 @@ async def submit_defense_route(
 
 
 @app.post("/combats/{combat_id}/actions/{action_id}/damage")
-async def submit_damage_route(
-    combat_id: str,
-    action_id: str,
-    session_id: str = Query(...),
-    token: dict = Depends(_require_token),
-):
+async def submit_damage_route(combat_id: str, action_id: str, session_id: str = Query(...), token: dict = Depends(_require_token)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     try:
         action = await _submit_damage(action_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+    # Auto-apply damage to ship — no GM click required
+    target_id = action.get("target_ship_id")
+    if target_id and action.get("damage_net") is not None:
+        async with aiosqlite.connect("psiwars.db") as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute("SELECT * FROM ships WHERE ship_id=?", (target_id,)) as cur:
+                t_row = await cur.fetchone()
+        if t_row:
+            t = dict(t_row)
+            new_hp = max(0, t.get("hp_current", 0) - action["damage_net"])
+            new_fs = max(0, t.get("force_screen_current", 0) - (action.get("damage_screen_absorbed") or 0))
+            fields = {
+                "hp_current":           new_hp,
+                "wound_level":          action.get("wound_level_after") or t.get("wound_level", "none"),
+                "force_screen_current": new_fs,
+            }
+            if action.get("wound_level_after") == "lethal":
+                fields["is_destroyed"] = True
+            updated_ship = await _patch_ship(target_id, fields)
+            if updated_ship:
+                await manager.broadcast(session_id, {"type": "ship_updated", "data": updated_ship})
+            action["hp_before"]     = t.get("hp_current", 0)
+            action["hp_after"]      = new_hp
+            action["screen_before"] = t.get("force_screen_current", 0)
+            action["screen_after"]  = new_fs
+
     await manager.broadcast(session_id, {"type": "damage_submitted", "data": action})
+
+    # If ship destroyed, end combat
+    if action.get("wound_level_after") == "lethal":
+        ended = await _end_combat(combat_id)
+        await manager.broadcast(session_id, {"type": "combat_ended", "data": {"combat_id": combat_id}})
+
     return action
 
 
 @app.post("/combats/{combat_id}/actions/{action_id}/acted")
-async def mark_acted_route(
-    combat_id: str,
-    action_id: str,
-    session_id: str = Query(...),
-    ship_id: str = Query(...),
-    token: dict = Depends(_require_gm),
-):
+async def mark_acted_route(combat_id: str, action_id: str, session_id: str = Query(...), ship_id: str = Query(...), token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     combat = await _mark_ship_acted(combat_id, ship_id)
@@ -955,17 +971,17 @@ async def mark_acted_route(
                 "type": "phase_changed",
                 "data": {"combat_id": combat_id, "round": combat["current_round"], "phase": "chase"},
             })
-            await _run_npc_chase_rolls(combat_id)
+            chase_cards = await _build_chase_cards(combat)
+            await manager.broadcast(session_id, {
+                "type": "chase_phase_started",
+                "data": {"combat_id": combat_id, "round": combat["current_round"], "ships": chase_cards},
+            })
 
     return combat
 
 
 @app.post("/combats/{combat_id}/phase/advance")
-async def advance_phase_route(
-    combat_id: str,
-    session_id: str = Query(...),
-    token: dict = Depends(_require_gm),
-):
+async def advance_phase_route(combat_id: str, session_id: str = Query(...), token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     try:
@@ -980,15 +996,8 @@ async def advance_phase_route(
     return combat
 
 
-# (player-roll route removed in v2 — chase rolls use POST /combats/{combat_id}/chase/roll)
-
-
 @app.post("/combats/{combat_id}/end")
-async def end_combat_route(
-    combat_id: str,
-    session_id: str = Query(...),
-    token: dict = Depends(_require_gm),
-):
+async def end_combat_route(combat_id: str, session_id: str = Query(...), token: dict = Depends(_require_gm)):
     if token["session_id"] != session_id:
         raise HTTPException(status_code=403, detail="Token not valid for this session.")
     combat = await _end_combat(combat_id)
@@ -996,7 +1005,8 @@ async def end_combat_route(
     return combat
 
 
-# Serve built frontend (production mode)
+# ---------------------------------------------------------------------------
+# Serve built frontend
 # ---------------------------------------------------------------------------
 _FRONTEND_DIST = Path(__file__).parent.parent / "frontend" / "dist"
 
@@ -1007,7 +1017,6 @@ if _FRONTEND_DIST.exists():
     async def serve_spa(full_path: str):
         index = _FRONTEND_DIST / "index.html"
         return FileResponse(str(index))
-
 
 # ---------------------------------------------------------------------------
 # Entry point

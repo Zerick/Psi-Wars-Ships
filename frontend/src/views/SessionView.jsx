@@ -68,11 +68,34 @@ export default function SessionView({ session, onLeave }) {
   }, [sessionId, token, role])
 
   // -------------------------------------------------------------------------
-  // Combat log card injection — called by useCombat when events arrive
+  // Combat log card injection
   // -------------------------------------------------------------------------
   const injectCombatLog = useCallback((entry) => {
     setLogEntries(prev => {
-      // If same combat_card_id exists, replace it (e.g. dodge card updated after roll)
+      // Handle chase roll update sentinel — find card by ship_id and mark rolled
+      if (entry.entry_type === '__chase_roll_update__') {
+        return prev.map(e => {
+          if (e.entry_type === 'combat_chase' &&
+              e.data?.ship_id === entry.ship_id &&
+              e.data?.combat_id === entry.combat_id) {
+            const mos = entry.bonus != null && entry.roll != null
+              ? entry.bonus - entry.roll
+              : null
+            return {
+              ...e,
+              data: {
+                ...e.data,
+                rolled: true,
+                roll:   entry.roll,
+                mos,
+              }
+            }
+          }
+          return e
+        })
+      }
+
+      // Normal card: replace by combat_card_id if exists
       if (entry.data?.combat_card_id) {
         const idx = prev.findIndex(e => e.data?.combat_card_id === entry.data.combat_card_id)
         if (idx >= 0) {
@@ -81,6 +104,7 @@ export default function SessionView({ session, onLeave }) {
           return updated
         }
       }
+
       return [...prev, entry]
     })
   }, [])
@@ -162,7 +186,9 @@ export default function SessionView({ session, onLeave }) {
   })
 
   // -------------------------------------------------------------------------
-  // Chase roll handler — called from Roll button in log card
+  // Chase roll handler
+  // GM can roll for any ship (NPC or player-owned).
+  // Players can roll for their own ship.
   // -------------------------------------------------------------------------
   const handleChaseRoll = useCallback(async (combat_id, ship_id) => {
     try {
@@ -173,7 +199,7 @@ export default function SessionView({ session, onLeave }) {
   }, [rollChase])
 
   // -------------------------------------------------------------------------
-  // Dodge roll handler — called from Roll button in log card
+  // Dodge roll handler
   // -------------------------------------------------------------------------
   const handleDodgeRoll = useCallback(async (combat_id, ship_id, action_id) => {
     try {
@@ -322,6 +348,7 @@ export default function SessionView({ session, onLeave }) {
           <LogFeed
             entries={logEntries}
             myUserId={userId}
+            isGm={role === 'gm'}
             onChaseRoll={handleChaseRoll}
             onDodgeRoll={handleDodgeRoll}
           />

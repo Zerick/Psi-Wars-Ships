@@ -99,7 +99,7 @@ function SystemEntry({ entry }) {
 }
 
 // ---------------------------------------------------------------------------
-// Combat card entry types
+// Combat card helpers
 // ---------------------------------------------------------------------------
 
 const CARD_BORDER = {
@@ -163,24 +163,51 @@ function RollButton({ label, onClick, disabled }) {
   )
 }
 
-// Chase roll card — shown for each ship during chase phase
-function ChaseCard({ entry, onRoll }) {
-  const { ship_name, chase_bonus, breakdown, roll, mos, npc, rolled, combat_id, ship_id } = entry.data
-  const canRoll = !rolled && !npc && onRoll
+// ---------------------------------------------------------------------------
+// Chase card
+// GM can roll for ANY ship (NPC or player).
+// Player can roll only for their own ship.
+// ---------------------------------------------------------------------------
+function ChaseCard({ entry, onRoll, isGm }) {
+  const { ship_name, chase_bonus, breakdown, roll, mos, npc, rolled, combat_id, ship_id, owner_user_id, faction } = entry.data
 
+  // GM can roll for any ship. Player can only roll their own.
+  const canRoll = !rolled && onRoll && (isGm || (!npc && owner_user_id))
+
+  const factionColor = faction === 'hostile_npc' ? '#e8410a'
+    : faction === 'friendly_npc' ? '#4caf6a'
+    : 'var(--text-secondary)'
+
+  // MOS: negative = success (rolled under), positive = failure (rolled over)
   const mosColor = mos == null ? 'var(--text-secondary)'
-    : mos <= 0 ? 'var(--accent-blue)'
-    : mos <= 4 ? 'var(--accent-yellow, #d4a017)'
-    : 'var(--accent-red)'
+    : mos <= 0 ? '#4caf6a'
+    : mos <= 4 ? '#d4a017'
+    : '#e8410a'
 
-  const mosLabel = mos == null ? '' : mos <= 0 ? 'Success' : `Failure by ${mos}`
+  const mosLabel = mos == null ? ''
+    : mos <= 0 ? `Success by ${Math.abs(mos)}`
+    : `Failure by ${mos}`
 
   return (
     <div style={cardStyle('chase')}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
         <CardLabel text="Chase" color={CARD_BORDER.chase} />
         <span style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600 }}>{ship_name}</span>
-        {npc && <span style={{ fontSize: '9px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>NPC</span>}
+        {npc && (
+          <span style={{
+            fontSize: '9px', color: factionColor,
+            fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em',
+            border: `1px solid ${factionColor}44`, padding: '1px 5px',
+          }}>
+            {faction === 'hostile_npc' ? 'HOSTILE' : faction === 'friendly_npc' ? 'FRIENDLY' : 'NPC'}
+          </span>
+        )}
+        {rolled && (
+          <span style={{
+            fontSize: '9px', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700,
+            letterSpacing: '0.1em', color: '#4caf6a', border: '1px solid #4caf6a44', padding: '1px 5px',
+          }}>ROLLED</span>
+        )}
       </div>
 
       {/* Bonus breakdown */}
@@ -195,11 +222,10 @@ function ChaseCard({ entry, onRoll }) {
       {rolled && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <StatPill label="Roll" value={roll} />
-          <StatPill label="Bonus" value={chase_bonus} />
+          <StatPill label="Target" value={chase_bonus} />
           <span className="font-mono" style={{ fontSize: '15px', fontWeight: 700, color: mosColor }}>
             {mosLabel}
           </span>
-          {/* Plaintext summary */}
           <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
             [{ship_name}: rolled {roll} vs {chase_bonus}{mos != null ? `, MOS ${mos <= 0 ? Math.abs(mos) : -mos}` : ''}]
           </span>
@@ -207,35 +233,41 @@ function ChaseCard({ entry, onRoll }) {
       )}
 
       {canRoll && (
-        <RollButton label={`Roll Chase (need ≤ ${chase_bonus})`} onClick={() => onRoll(combat_id, ship_id)} />
+        <RollButton
+          label={`Roll Chase${npc && isGm ? ` (${ship_name})` : ''} — need ≤ ${chase_bonus}`}
+          onClick={() => onRoll(combat_id, ship_id)}
+        />
       )}
     </div>
   )
 }
 
-// Chase resolution card — shows what changed after all ships rolled
+// Chase resolution card
 function ChaseResolutionCard({ entry }) {
   const { winner, loser, victory_margin, range_change, advantage_change, new_range, description } = entry.data
   return (
     <div style={cardStyle('resolution')}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
         <CardLabel text="Chase Result" color={CARD_BORDER.resolution} />
-        <span style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600 }}>{winner} wins</span>
-        <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>by {victory_margin}</span>
+        {winner && <span style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600 }}>{winner}</span>}
+        {victory_margin && <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>by {victory_margin}</span>}
       </div>
       <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
         {description}
       </div>
-      <div style={{ marginTop: '4px', fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
-        [{winner} beats {loser} by {victory_margin} — {description}]
-      </div>
+      {new_range && (
+        <div style={{ marginTop: '4px', fontSize: '10px', color: 'var(--accent-blue)', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700 }}>
+          Range: {new_range}
+        </div>
+      )}
     </div>
   )
 }
 
-// Attack card
+// Attack card — NPC attacks are pre-rolled (npc=true, rolled=true)
 function AttackCard({ entry, onRoll }) {
-  const { ship_name, target_name, weapon_name, attack_bonus, breakdown, roll, hit, mos, npc, rolled, combat_id, ship_id, action_id } = entry.data
+  const { ship_name, target_name, weapon_name, attack_bonus, attack_skill_base, attack_total, breakdown, roll, hit, npc, rolled, combat_id, ship_id, action_id } = entry.data
+  const displayBonus = attack_total || attack_bonus
   const canRoll = !rolled && !npc && onRoll
 
   return (
@@ -244,30 +276,32 @@ function AttackCard({ entry, onRoll }) {
         <CardLabel text="Attack" color={CARD_BORDER.attack} />
         <span style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600 }}>{ship_name}</span>
         <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>→ {target_name}</span>
-        <span style={{ fontSize: '11px', color: 'var(--accent-yellow, #d4a017)' }}>{weapon_name}</span>
-        {npc && <span style={{ fontSize: '9px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>NPC</span>}
+        {weapon_name && <span style={{ fontSize: '11px', color: '#d4a017' }}>{weapon_name}</span>}
+        {npc && <span style={{ fontSize: '9px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>NPC</span>}
       </div>
-      <div style={{ marginBottom: '6px', fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
-        {breakdown && breakdown.map((b, i) => (
-          <span key={i}>{i > 0 ? ' + ' : ''}{b.label} {b.value >= 0 ? '+' : ''}{b.value}</span>
-        ))}
-        {' '}= <span className="font-mono" style={{ color: 'var(--accent-blue)', fontWeight: 700 }}>{attack_bonus}</span>
-      </div>
+      {breakdown && breakdown.length > 0 && (
+        <div style={{ marginBottom: '6px', fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
+          {breakdown.map((b, i) => (
+            <span key={i}>{i > 0 ? ' · ' : ''}{b.label}: {b.value >= 0 ? '+' : ''}{b.value}</span>
+          ))}
+          {displayBonus != null && <> = <span className="font-mono" style={{ color: 'var(--accent-blue)', fontWeight: 700 }}>{displayBonus}</span></>}
+        </div>
+      )}
       {rolled && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <StatPill label="Roll" value={roll} />
-          <StatPill label="Skill" value={attack_bonus} />
+          {displayBonus != null && <StatPill label="Skill" value={displayBonus} />}
           <span className="font-mono" style={{
             fontSize: '15px', fontWeight: 700,
-            color: hit ? 'var(--accent-blue)' : 'var(--accent-red)',
+            color: hit ? '#4caf6a' : '#e8410a',
           }}>{hit ? 'HIT' : 'MISS'}</span>
           <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
-            [{ship_name} attacks {target_name} with {weapon_name}: rolled {roll} vs {attack_bonus} — {hit ? 'HIT' : 'MISS'}]
+            [{ship_name} attacks {target_name}{weapon_name ? ` with ${weapon_name}` : ''}: rolled {roll} vs {displayBonus} — {hit ? 'HIT' : 'MISS'}]
           </span>
         </div>
       )}
       {canRoll && (
-        <RollButton label={`Roll Attack (need ≤ ${attack_bonus})`} onClick={() => onRoll(combat_id, ship_id, action_id)} />
+        <RollButton label={`Roll Attack (need ≤ ${displayBonus})`} onClick={() => onRoll(combat_id, ship_id, action_id)} />
       )}
     </div>
   )
@@ -284,21 +318,23 @@ function DodgeCard({ entry, onRoll }) {
         <CardLabel text="Dodge" color={CARD_BORDER.dodge} />
         <span style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600 }}>{ship_name}</span>
         <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>← from {attacker_name}</span>
-        {npc && <span style={{ fontSize: '9px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>NPC</span>}
+        {npc && <span style={{ fontSize: '9px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.1em' }}>NPC</span>}
       </div>
-      <div style={{ marginBottom: '6px', fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
-        {breakdown && breakdown.map((b, i) => (
-          <span key={i}>{i > 0 ? ' + ' : ''}{b.label} {b.value >= 0 ? '+' : ''}{b.value}</span>
-        ))}
-        {' '}= <span className="font-mono" style={{ color: 'var(--accent-blue)', fontWeight: 700 }}>{dodge_bonus}</span>
-      </div>
+      {breakdown && breakdown.length > 0 && (
+        <div style={{ marginBottom: '6px', fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
+          {breakdown.map((b, i) => (
+            <span key={i}>{i > 0 ? ' + ' : ''}{b.label} {b.value >= 0 ? '+' : ''}{b.value}</span>
+          ))}
+          {' '}= <span className="font-mono" style={{ color: 'var(--accent-blue)', fontWeight: 700 }}>{dodge_bonus}</span>
+        </div>
+      )}
       {rolled && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <StatPill label="Roll" value={roll} />
           <StatPill label="Dodge" value={dodge_bonus} />
           <span className="font-mono" style={{
             fontSize: '15px', fontWeight: 700,
-            color: dodged ? 'var(--accent-blue)' : 'var(--accent-red)',
+            color: dodged ? '#4caf6a' : '#e8410a',
           }}>{dodged ? 'DODGED' : 'HIT'}</span>
           <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
             [{ship_name} dodge: rolled {roll} vs {dodge_bonus} — {dodged ? 'DODGED' : 'FAILED'}]
@@ -314,20 +350,27 @@ function DodgeCard({ entry, onRoll }) {
 
 // Damage card
 function DamageCard({ entry }) {
-  const { ship_name, attacker_name, damage_rolled, damage_net, hp_before, hp_after, screen_before, screen_after, description } = entry.data
+  const { ship_name, attacker_name, damage_rolled, damage_net, hp_before, hp_after, screen_before, screen_after, wound_after, description } = entry.data
+  const destroyed = wound_after === 'lethal'
   return (
     <div style={cardStyle('damage')}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
         <CardLabel text="Damage" color={CARD_BORDER.damage} />
         <span style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600 }}>{ship_name}</span>
         <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>from {attacker_name}</span>
+        {destroyed && (
+          <span style={{
+            fontSize: '9px', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700,
+            letterSpacing: '0.1em', color: '#e8410a', border: '1px solid #e8410a55', padding: '1px 5px',
+          }}>DESTROYED</span>
+        )}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-        <StatPill label="Damage" value={damage_rolled} />
+        {damage_rolled != null && <StatPill label="Rolled" value={damage_rolled} />}
         {damage_net != null && <StatPill label="Net" value={damage_net} highlight />}
         {hp_before != null && hp_after != null && (
           <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
-            HP: <span className="font-mono">{hp_before}</span> → <span className="font-mono" style={{ color: 'var(--accent-red)' }}>{hp_after}</span>
+            HP: <span className="font-mono">{hp_before}</span> → <span className="font-mono" style={{ color: '#e8410a' }}>{hp_after}</span>
           </span>
         )}
         {screen_before != null && screen_after != null && screen_before !== screen_after && (
@@ -335,10 +378,17 @@ function DamageCard({ entry }) {
             Screen: <span className="font-mono">{screen_before}</span> → <span className="font-mono" style={{ color: 'var(--accent-blue)' }}>{screen_after}</span>
           </span>
         )}
+        {wound_after && wound_after !== 'none' && (
+          <span style={{
+            fontSize: '10px', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700,
+            color: destroyed ? '#e8410a' : '#d4a017',
+            border: `1px solid ${destroyed ? '#e8410a55' : '#d4a01744'}`, padding: '1px 5px',
+          }}>{wound_after.toUpperCase()}</span>
+        )}
       </div>
       {description && (
         <div style={{ marginTop: '4px', fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'Barlow Condensed, sans-serif' }}>
-          [{attacker_name} hits {ship_name}: {damage_net} net damage — {description}]
+          [{attacker_name} hits {ship_name}: {damage_net} net damage{description ? ` — ${description}` : ''}]
         </div>
       )}
     </div>
@@ -354,10 +404,12 @@ function PhaseCard({ entry }) {
       display: 'flex', alignItems: 'center', gap: '8px',
       borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
     }}>
-      <span style={{
-        fontSize: '9px', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700,
-        letterSpacing: '0.15em', textTransform: 'uppercase', color: CARD_BORDER.resolution, minWidth: '50px',
-      }}>Round {round}</span>
+      {round != null && round !== '' && (
+        <span style={{
+          fontSize: '9px', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700,
+          letterSpacing: '0.15em', textTransform: 'uppercase', color: CARD_BORDER.resolution, minWidth: '60px',
+        }}>Round {round}</span>
+      )}
       <span style={{
         fontSize: '11px', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 600,
         letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-primary)',
@@ -369,9 +421,10 @@ function PhaseCard({ entry }) {
 
 // ---------------------------------------------------------------------------
 // Main LogFeed
+// isGm prop allows GM to press Roll buttons on NPC ships
 // ---------------------------------------------------------------------------
-export default function LogFeed({ entries, onChaseRoll, onAttackRoll, onDodgeRoll, myUserId }) {
-  const bottomRef   = useRef(null)
+export default function LogFeed({ entries, onChaseRoll, onAttackRoll, onDodgeRoll, myUserId, isGm }) {
+  const bottomRef    = useRef(null)
   const containerRef = useRef(null)
   const [userScrolled, setUserScrolled] = useState(false)
 
@@ -394,28 +447,45 @@ export default function LogFeed({ entries, onChaseRoll, onAttackRoll, onDodgeRol
   }
 
   function renderEntry(entry, i) {
-    const key = entry.entry_id || entry.combat_card_id || i
+    const key = entry.entry_id || entry.data?.combat_card_id || i
 
     switch (entry.entry_type) {
       case 'roll':   return <RollEntry   key={key} entry={entry} />
       case 'system': return <SystemEntry key={key} entry={entry} />
-      case 'combat_phase':      return <PhaseCard      key={key} entry={entry} />
+      case 'combat_phase': return <PhaseCard key={key} entry={entry} />
+
       case 'combat_chase': {
-        // Only show roll button if this is the player's ship
+        // GM can roll for any ship. Player can roll only if it's their ship.
         const isMyShip = myUserId && entry.data?.owner_user_id === myUserId
-        return <ChaseCard key={key} entry={entry} onRoll={isMyShip && !entry.data?.rolled ? onChaseRoll : null} />
+        const canRoll  = !entry.data?.rolled && (isGm || isMyShip)
+        return (
+          <ChaseCard
+            key={key}
+            entry={entry}
+            onRoll={canRoll ? onChaseRoll : null}
+            isGm={isGm}
+          />
+        )
       }
-      case 'combat_chase_resolution': return <ChaseResolutionCard key={key} entry={entry} />
+
+      case 'combat_chase_resolution':
+        return <ChaseResolutionCard key={key} entry={entry} />
+
       case 'combat_attack': {
         const isMyShip = myUserId && entry.data?.owner_user_id === myUserId
         return <AttackCard key={key} entry={entry} onRoll={isMyShip && !entry.data?.rolled ? onAttackRoll : null} />
       }
+
       case 'combat_dodge': {
         const isMyShip = myUserId && entry.data?.owner_user_id === myUserId
         return <DodgeCard key={key} entry={entry} onRoll={isMyShip && !entry.data?.rolled ? onDodgeRoll : null} />
       }
-      case 'combat_damage': return <DamageCard key={key} entry={entry} />
-      default: return <ChatEntry key={key} entry={entry} />
+
+      case 'combat_damage':
+        return <DamageCard key={key} entry={entry} />
+
+      default:
+        return <ChatEntry key={key} entry={entry} />
     }
   }
 
