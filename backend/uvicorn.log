@@ -1,0 +1,32 @@
+INFO:     Will watch for changes in these directories: ['/home/psiwars/psi-wars/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [9807] using WatchFiles
+INFO:     Started server process [9809]
+INFO:     Waiting for application startup.
+2026-03-03 22:04:35,567 [INFO] models: Initialising database at ./psiwars.db
+2026-03-03 22:04:35,568 [INFO] models: Database ready.
+2026-03-03 22:04:35,571 [INFO] main: Psi-Wars backend starting on 0.0.0.0:8000
+INFO:     Application startup complete.
+INFO:     192.168.0.17:51145 - "GET / HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51145 - "GET /assets/index-Dbk_Wg1B.js HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51146 - "GET /assets/index-Bic9_aXh.css HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51145 - "GET /favicon.ico HTTP/1.1" 200 OK
+2026-03-03 22:04:45,954 [INFO] session_manager: Session created: d3c7a1fa-3331-4624-bea0-61a3b900cf44 invite=KILO-42 gm=GM
+INFO:     192.168.0.17:51147 - "POST /sessions HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51147 - "GET /library/ships?token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51148 - "WebSocket /ws/d3c7a1fa-3331-4624-bea0-61a3b900cf44?token=16926bea-d742-4fc5-8b9f-d1c7ded014de" [accepted]
+2026-03-03 22:04:46,055 [INFO] ws_manager: WS connected: session=d3c7a1fa-3331-4624-bea0-61a3b900cf44 user=cd200b07-6af1-48f0-9c23-07e74675e84a role=gm
+INFO:     connection open
+INFO:     192.168.0.17:51149 - "GET /sessions/d3c7a1fa-3331-4624-bea0-61a3b900cf44/log?token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51151 - "GET /sessions/d3c7a1fa-3331-4624-bea0-61a3b900cf44/participants?token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "GET /sessions/d3c7a1fa-3331-4624-bea0-61a3b900cf44/scenario?token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "GET /sessions/d3c7a1fa-3331-4624-bea0-61a3b900cf44/pending-rolls?token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "POST /scenarios?session_id=d3c7a1fa-3331-4624-bea0-61a3b900cf44&token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "GET /scenarios/af866933-3e19-414b-bcdb-3e161ce5f044/combat?token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "POST /scenarios/af866933-3e19-414b-bcdb-3e161ce5f044/ships?session_id=d3c7a1fa-3331-4624-bea0-61a3b900cf44&token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "POST /scenarios/af866933-3e19-414b-bcdb-3e161ce5f044/ships?session_id=d3c7a1fa-3331-4624-bea0-61a3b900cf44&token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "PATCH /scenarios/af866933-3e19-414b-bcdb-3e161ce5f044/ships/c888f9cd-cd7d-4e4a-bfc4-1840c6a26ce0?session_id=d3c7a1fa-3331-4624-bea0-61a3b900cf44&token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "PATCH /scenarios/af866933-3e19-414b-bcdb-3e161ce5f044/ships/c7e72f98-3738-4c6f-8156-ed72fc69fd30?session_id=d3c7a1fa-3331-4624-bea0-61a3b900cf44&token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51150 - "POST /scenarios/af866933-3e19-414b-bcdb-3e161ce5f044/combat/start?session_id=d3c7a1fa-3331-4624-bea0-61a3b900cf44&token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51152 - "POST /combats/e091299b-7129-4c53-a476-7575cee55a29/chase/roll?token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
+INFO:     192.168.0.17:51152 - "POST /combats/e091299b-7129-4c53-a476-7575cee55a29/chase/roll?token=16926bea-d742-4fc5-8b9f-d1c7ded014de HTTP/1.1" 200 OK
