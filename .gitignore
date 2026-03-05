@@ -26,6 +26,7 @@ Thumbs.db
 .idea/
 *.swp
 .token
+*.log
 
 # The file listing itself
 list
