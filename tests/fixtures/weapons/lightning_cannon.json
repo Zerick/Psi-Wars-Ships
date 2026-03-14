@@ -1,0 +1,24 @@
+{
+  "weapon_id": "lightning_cannon",
+  "name": "Lightning Cannon",
+  "damage": "6d\u00d730(5) burn sur arc",
+  "acc": 6,
+  "range": "2000/6000",
+  "rof": "1/30",
+  "rcl": 2,
+  "shots": "NA",
+  "ewt": "NA",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn_sur",
+  "armor_divisor": "(5)",
+  "notes": "Relic weapon. ROF 1/30 (fires once per 30 turns). Surge effect. May only fire within visual range. Pilot rolls better of Gunner or psionic skill.",
+  "tags": [
+    "arc",
+    "relic",
+    "psionic",
+    "lightning"
+  ],
+  "version": "1.0.0"
+}

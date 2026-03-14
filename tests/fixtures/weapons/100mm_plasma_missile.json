@@ -1,0 +1,23 @@
+{
+  "weapon_id": "100mm_plasma_missile",
+  "name": "100mm Plasma Missile",
+  "damage": "6d\u00d710 burn ex",
+  "acc": 3,
+  "range": "2000/10000",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "6",
+  "ewt": "25",
+  "st_requirement": "11B",
+  "bulk": "-8",
+  "weapon_type": "missile",
+  "damage_type": "burn_ex",
+  "armor_divisor": null,
+  "notes": "",
+  "tags": [
+    "missile",
+    "plasma",
+    "light"
+  ],
+  "version": "1.0.0"
+}

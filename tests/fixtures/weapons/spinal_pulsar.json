@@ -1,0 +1,23 @@
+{
+  "weapon_id": "spinal_pulsar",
+  "name": "Spinal Pulsar",
+  "damage": "6d\u00d71200(3) burn ex",
+  "acc": 9,
+  "range": "100 mi",
+  "rof": "1/10",
+  "rcl": 2,
+  "shots": "5",
+  "ewt": "250kt",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn_ex",
+  "armor_divisor": "(3)",
+  "notes": "Spinal mount super-weapon. ROF 1/10.",
+  "tags": [
+    "trader",
+    "super_weapon",
+    "spinal"
+  ],
+  "version": "1.0.0"
+}

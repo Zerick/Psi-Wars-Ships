@@ -1,0 +1,23 @@
+{
+  "weapon_id": "spire_plasma_cannon",
+  "name": "Spire-Scale Plasma Cannon",
+  "damage": "6d\u00d7200(2) burn ex",
+  "acc": 9,
+  "range": "100 mi/300 mi",
+  "rof": "1/10",
+  "rcl": 3,
+  "shots": "NA",
+  "ewt": "850t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "plasma",
+  "damage_type": "burn_ex",
+  "armor_divisor": "(2)",
+  "notes": "ROF 1/10. Massive plasma weapon.",
+  "tags": [
+    "rath",
+    "plasma",
+    "capital_scale"
+  ],
+  "version": "1.0.0"
+}

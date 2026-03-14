@@ -1,0 +1,23 @@
+{
+  "weapon_id": "guillotine_weapon",
+  "name": "Guillotine",
+  "damage": "6d\u00d7100(5) cut",
+  "acc": 0,
+  "range": "collision",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "NA",
+  "ewt": "500",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "ram",
+  "damage_type": "cut",
+  "armor_divisor": null,
+  "notes": "Close-range cutting weapon. Collision range only.",
+  "tags": [
+    "rath",
+    "melee",
+    "capital_scale"
+  ],
+  "version": "1.0.0"
+}

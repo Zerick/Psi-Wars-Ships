@@ -1,0 +1,93 @@
+{
+  "template_id": "dominion_class_heavy_cruiser_v1",
+  "version": "1.0.0",
+  "name": "Dominion-Class Heavy Cruiser",
+  "faction_origin": "empire",
+  "sm": 12,
+  "ship_class": "cruiser",
+  "attributes": {
+    "st_hp": 5000,
+    "ht": "12",
+    "hnd": -2,
+    "sr": 6
+  },
+  "mobility": {
+    "accel": 5,
+    "top_speed": 100,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 3000,
+    "dr_rear": 3000,
+    "dr_left": 3000,
+    "dr_right": 3000,
+    "dr_top": 3000,
+    "dr_bottom": 3000,
+    "dr_material": null,
+    "fdr_max": 5000,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital-Scale Tactical Ultra-Scanner; Large Area Jammer; Distortion Scrambler"
+  },
+  "occ_raw": "1200ASV",
+  "loc_raw": "gGs20t",
+  "logistics": {
+    "lwt": 150000.0,
+    "load": 13000.0,
+    "range_miles": null,
+    "cost": "$30B",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 5,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "heavy_force_screen",
+    "capital_ship"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "capital_scale_cannon",
+      "mount": "turret",
+      "linked_count": 8,
+      "arc": "all",
+      "notes": "8 capital-scale turrets (Total ROF 16)."
+    },
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 corvette-scale turrets."
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 plasma flak turrets."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "An Imperial heavy cruiser with heavy force screens that ignore all armor divisors.",
+  "tags": [
+    "empire",
+    "cruiser",
+    "heavy"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/dominion-class-heavy-cruiser"
+}

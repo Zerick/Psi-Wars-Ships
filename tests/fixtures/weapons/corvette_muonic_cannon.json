@@ -1,0 +1,23 @@
+{
+  "weapon_id": "corvette_muonic_cannon",
+  "name": "Corvette-Scale Muonic Cannon",
+  "damage": "6d\u00d720(10) burn",
+  "acc": 9,
+  "range": "15 mi/45 mi",
+  "rof": "3",
+  "rcl": 2,
+  "shots": "100",
+  "ewt": "80t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(10)",
+  "notes": "",
+  "tags": [
+    "beam",
+    "corvette_scale",
+    "muonic"
+  ],
+  "version": "1.0.0"
+}

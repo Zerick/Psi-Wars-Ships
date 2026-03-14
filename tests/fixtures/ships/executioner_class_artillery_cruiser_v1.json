@@ -1,0 +1,93 @@
+{
+  "template_id": "executioner_class_artillery_cruiser_v1",
+  "version": "1.0.0",
+  "name": "Executioner-Class Artillery Cruiser",
+  "faction_origin": "empire",
+  "sm": 13,
+  "ship_class": "cruiser",
+  "attributes": {
+    "st_hp": 7000,
+    "ht": "12",
+    "hnd": -5,
+    "sr": 6
+  },
+  "mobility": {
+    "accel": 1,
+    "top_speed": 50,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 4000,
+    "dr_rear": 2500,
+    "dr_left": 2500,
+    "dr_right": 2500,
+    "dr_top": 2500,
+    "dr_bottom": 2500,
+    "dr_material": null,
+    "fdr_max": 7500,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital-Scale Tactical Ultra-Scanner; Large Area Jammer; Distortion Scrambler"
+  },
+  "occ_raw": "2000ASV",
+  "loc_raw": "gGs4t",
+  "logistics": {
+    "lwt": 370000.0,
+    "load": 20000.0,
+    "range_miles": null,
+    "cost": "$80B",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 3,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "heavy_force_screen",
+    "capital_ship"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "pulsar_super_cannon",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Pulsar Super-Cannon. ROF 1/10. Extreme range."
+    },
+    {
+      "weapon_ref": "super_heavy_cannon",
+      "mount": "turret",
+      "linked_count": 2,
+      "arc": "all",
+      "notes": "2 super-heavy turrets (Total ROF 6)."
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 plasma flak turrets."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "An Imperial artillery cruiser with a devastating Pulsar Super-Cannon. Designed for bombardment from extreme range.",
+  "tags": [
+    "empire",
+    "cruiser",
+    "artillery"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/executioner-class-artillery-cruiser"
+}

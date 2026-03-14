@@ -1,0 +1,23 @@
+{
+  "weapon_id": "mauler_beam",
+  "name": "Mauler Beam",
+  "damage": "5d\u00d7100 cr",
+  "acc": 9,
+  "range": "1 mi/3 mi",
+  "rof": "1",
+  "rcl": 2,
+  "shots": "NA",
+  "ewt": "30T",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "cr",
+  "armor_divisor": null,
+  "notes": "Short-range crushing beam weapon.",
+  "tags": [
+    "rath",
+    "beam",
+    "capital_scale"
+  ],
+  "version": "1.0.0"
+}

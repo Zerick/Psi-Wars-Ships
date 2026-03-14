@@ -1,0 +1,23 @@
+{
+  "weapon_id": "sp74tr_heavy_plasma_gatling",
+  "name": "SP74-TR Heavy Plasma Gatling",
+  "damage": "6d\u00d715(2) burn ex",
+  "acc": 6,
+  "range": "3 mi/8 mi",
+  "rof": "8",
+  "rcl": 3,
+  "shots": "88/3F",
+  "ewt": "4000",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "plasma",
+  "damage_type": "burn_ex",
+  "armor_divisor": "(2)",
+  "notes": "Saturation fire weapon. Can aim at spot near target for +4 to hit but loses armor divisor.",
+  "tags": [
+    "redjack",
+    "plasma",
+    "gatling"
+  ],
+  "version": "1.0.0"
+}

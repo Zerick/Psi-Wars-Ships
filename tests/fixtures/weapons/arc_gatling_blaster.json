@@ -1,0 +1,24 @@
+{
+  "weapon_id": "arc_gatling_blaster",
+  "name": "ARC Gatling Blaster",
+  "damage": "6d\u00d75(5) burn",
+  "acc": 9,
+  "range": "2700/8000",
+  "rof": "12",
+  "rcl": 2,
+  "shots": "200/Fp",
+  "ewt": "1600",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "",
+  "tags": [
+    "arc",
+    "fighter_scale",
+    "beam",
+    "gatling"
+  ],
+  "version": "1.0.0"
+}

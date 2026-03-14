@@ -1,0 +1,100 @@
+{
+  "template_id": "tempest_class_interceptor_v1",
+  "version": "1.0.0",
+  "name": "Tempest Class Interceptor",
+  "faction_origin": "empire",
+  "sm": 4,
+  "ship_class": "interceptor",
+  "attributes": {
+    "st_hp": 85,
+    "ht": "11f",
+    "hnd": 5,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 25,
+    "top_speed": 800,
+    "stall_speed": 40
+  },
+  "afterburner": {
+    "accel": 35,
+    "top_speed": 1000,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": 4000,
+    "is_high_g": true
+  },
+  "defense": {
+    "dr_front": 10,
+    "dr_rear": 10,
+    "dr_left": 10,
+    "dr_right": 10,
+    "dr_top": 10,
+    "dr_bottom": 10,
+    "dr_material": "carbide_composite",
+    "fdr_max": 100,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Medium Tactical Ultra-Scanner; Distortion Jammer; Decoy; ESM"
+  },
+  "occ_raw": "1S",
+  "loc_raw": "g3rR2Wi",
+  "logistics": {
+    "lwt": 5.5,
+    "load": 0.7,
+    "range_miles": 20000,
+    "cost": "$10M",
+    "hyperdrive_rating": 1,
+    "jump_capacity": 1,
+    "endurance": null,
+    "signature_cost": 5
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "double_dr_vs_shaped_charge",
+    "ejection_seat"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "imperial_fighter_blaster",
+      "mount": "fixed_front",
+      "linked_count": 2,
+      "arc": "front",
+      "notes": "Two linked blasters. Total ROF 6 (+1)."
+    },
+    {
+      "weapon_ref": "100mm_plasma_lance_missile",
+      "mount": "wing_left",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "6 light missiles."
+    },
+    {
+      "weapon_ref": "100mm_plasma_missile",
+      "mount": "wing_right",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "6 light missiles."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "The Empire's fastest interceptor. Next-Gen Syntech engines. Afterburner is always High-G.",
+  "tags": [
+    "empire",
+    "interceptor"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/tempest-class-interceptor"
+}

@@ -1,0 +1,24 @@
+{
+  "weapon_id": "sc4tr_plasma_gatling",
+  "name": "SC4-TR Plasma Gatling",
+  "damage": "6d\u00d78(2) burn ex",
+  "acc": 6,
+  "range": "3 mi/10 mi",
+  "rof": "8",
+  "rcl": 3,
+  "shots": "160/F",
+  "ewt": "1200",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "plasma",
+  "damage_type": "burn_ex",
+  "armor_divisor": "(2)",
+  "notes": "",
+  "tags": [
+    "redjack",
+    "plasma",
+    "gatling",
+    "fighter_scale"
+  ],
+  "version": "1.0.0"
+}

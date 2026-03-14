@@ -1,0 +1,22 @@
+{
+  "weapon_id": "fighter_cannon_generic",
+  "name": "Fighter Cannon",
+  "damage": "6d\u00d75(5) burn",
+  "acc": 9,
+  "range": "2700/8000",
+  "rof": "3",
+  "rcl": 2,
+  "shots": "200/Fp",
+  "ewt": "1000",
+  "st_requirement": "75M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "Generic fighter-scale blaster cannon.",
+  "tags": [
+    "beam",
+    "fighter_scale"
+  ],
+  "version": "1.0.0"
+}

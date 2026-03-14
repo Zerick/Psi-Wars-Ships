@@ -1,0 +1,85 @@
+{
+  "template_id": "skirmisher_class_corvette_v1",
+  "version": "1.0.0",
+  "name": "Skirmisher-Class Corvette",
+  "faction_origin": "rath",
+  "sm": 8,
+  "ship_class": "corvette",
+  "attributes": {
+    "st_hp": 500,
+    "ht": "9f",
+    "hnd": 0,
+    "sr": 4
+  },
+  "mobility": {
+    "accel": 10,
+    "top_speed": 75,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 500,
+    "dr_rear": 250,
+    "dr_left": 250,
+    "dr_right": 250,
+    "dr_top": 250,
+    "dr_bottom": 250,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 4,
+    "ecm_rating": -2,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Obsolete electronics suite. ECM -2."
+  },
+  "occ_raw": "8ASV",
+  "loc_raw": "g2t",
+  "logistics": {
+    "lwt": 1300.0,
+    "load": 45.0,
+    "range_miles": null,
+    "cost": "$80M",
+    "hyperdrive_rating": 1,
+    "jump_capacity": 3,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "fragile",
+    "vtol"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "quad_repeater_cannon",
+      "mount": "turret",
+      "linked_count": 2,
+      "arc": "all",
+      "notes": "Two turret-mounted quad repeaters."
+    },
+    {
+      "weapon_ref": "isomeric_heavy_torpedo",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "4 heavy torpedoes."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A Rath corvette. Fragile but fast for its size, with heavy torpedo armament.",
+  "tags": [
+    "rath",
+    "corvette"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/skirmisher-class-corvette"
+}

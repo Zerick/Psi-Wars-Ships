@@ -1,0 +1,23 @@
+{
+  "weapon_id": "100mm_plasma_lance_missile",
+  "name": "100mm Plasma Lance Missile",
+  "damage": "6d\u00d720(10) burn",
+  "acc": 3,
+  "range": "2000/10000",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "6",
+  "ewt": "25",
+  "st_requirement": "11B",
+  "bulk": "-8",
+  "weapon_type": "missile",
+  "damage_type": "burn",
+  "armor_divisor": "(10)",
+  "notes": "",
+  "tags": [
+    "missile",
+    "plasma_lance",
+    "light"
+  ],
+  "version": "1.0.0"
+}

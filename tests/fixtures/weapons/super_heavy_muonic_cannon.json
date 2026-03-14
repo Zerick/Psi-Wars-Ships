@@ -1,0 +1,24 @@
+{
+  "weapon_id": "super_heavy_muonic_cannon",
+  "name": "Super-Heavy Muonic Cannon",
+  "damage": "6d\u00d770(10) burn sur",
+  "acc": 9,
+  "range": "170 mi/500 mi",
+  "rof": "3",
+  "rcl": 2,
+  "shots": "NA",
+  "ewt": "5000t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn_sur",
+  "armor_divisor": "(10)",
+  "notes": "Trader-tech super-heavy turret weapon. Surge effect.",
+  "tags": [
+    "trader",
+    "super_heavy",
+    "muonic",
+    "surge"
+  ],
+  "version": "1.0.0"
+}

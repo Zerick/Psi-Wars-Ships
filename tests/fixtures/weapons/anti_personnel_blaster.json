@@ -1,0 +1,22 @@
+{
+  "weapon_id": "anti_personnel_blaster",
+  "name": "Anti-Personnel Blaster Cannon",
+  "damage": "10d(5) burn",
+  "acc": 9,
+  "range": "600/1800",
+  "rof": "3",
+  "rcl": 2,
+  "shots": "540/Fp",
+  "ewt": "45",
+  "st_requirement": "16M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "ROF 12 when linked (x4). Designed for anti-personnel use.",
+  "tags": [
+    "beam",
+    "anti_personnel"
+  ],
+  "version": "1.0.0"
+}

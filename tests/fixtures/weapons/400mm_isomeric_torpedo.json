@@ -1,0 +1,23 @@
+{
+  "weapon_id": "400mm_isomeric_torpedo",
+  "name": "400mm Isomeric Torpedo",
+  "damage": "5d\u00d7200 cr ex",
+  "acc": 3,
+  "range": "300/10 mi",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "1",
+  "ewt": "2500",
+  "st_requirement": "150M",
+  "bulk": "-15",
+  "weapon_type": "torpedo",
+  "damage_type": "cr_ex",
+  "armor_divisor": null,
+  "notes": "Unguided. Uses Gunner (Torpedo).",
+  "tags": [
+    "torpedo",
+    "isomeric",
+    "fighter_scale"
+  ],
+  "version": "1.0.0"
+}

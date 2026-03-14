@@ -1,0 +1,101 @@
+{
+  "template_id": "spire_class_mobile_fortress_v1",
+  "version": "1.0.0",
+  "name": "Spire-Class Mobile Fortress",
+  "faction_origin": "rath",
+  "sm": 11,
+  "ship_class": "battleship",
+  "attributes": {
+    "st_hp": 3000,
+    "ht": "9f",
+    "hnd": -4,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 1,
+    "top_speed": 25,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 5000,
+    "dr_rear": 3000,
+    "dr_left": 3000,
+    "dr_right": 3000,
+    "dr_top": 3000,
+    "dr_bottom": 3000,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital electronics. Nuclear self-destruct."
+  },
+  "occ_raw": "2500ASV",
+  "loc_raw": "gG13t",
+  "logistics": {
+    "lwt": 30000.0,
+    "load": 15000.0,
+    "range_miles": null,
+    "cost": "$3.5B",
+    "hyperdrive_rating": 1,
+    "jump_capacity": 3,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "fragile",
+    "capital_ship",
+    "nuclear_self_destruct"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "spire_plasma_cannon",
+      "mount": "turret",
+      "linked_count": 1,
+      "arc": "all",
+      "notes": "Spire-scale plasma cannon. ROF 1/10."
+    },
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 corvette turrets."
+    },
+    {
+      "weapon_ref": "quad_repeater_cannon",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 quad repeater turrets."
+    },
+    {
+      "weapon_ref": "isomeric_heavy_torpedo",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "1 heavy torpedo."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A Rath mobile fortress. Fragile but bristling with weapons. Nuclear self-destruct.",
+  "tags": [
+    "rath",
+    "battleship",
+    "fortress"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/spire-class-mobile-fortress"
+}

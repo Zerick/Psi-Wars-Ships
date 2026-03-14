@@ -1,0 +1,99 @@
+{
+  "template_id": "piranha_class_fighter_v1",
+  "version": "1.0.0",
+  "name": "Piranha Class Fighter",
+  "faction_origin": "rath",
+  "sm": 4,
+  "ship_class": "fighter",
+  "attributes": {
+    "st_hp": 105,
+    "ht": "9f",
+    "hnd": 1,
+    "sr": 4
+  },
+  "mobility": {
+    "accel": 10,
+    "top_speed": 400,
+    "stall_speed": 85
+  },
+  "afterburner": {
+    "accel": 15,
+    "top_speed": 500,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": 4500,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 50,
+    "dr_rear": 25,
+    "dr_left": 25,
+    "dr_right": 25,
+    "dr_top": 50,
+    "dr_bottom": 25,
+    "dr_material": "nanopolymer",
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 4,
+    "ecm_rating": -2,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Obsolete Ultra-Scanner; Obsolete Targeting +4; Obsolete Distortion Jammer -2; Tactical ESM"
+  },
+  "occ_raw": "1SV",
+  "loc_raw": "g3rR2Wi",
+  "logistics": {
+    "lwt": 9.0,
+    "load": 3.6,
+    "range_miles": 18000,
+    "cost": "$2.5M",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "obsolete_electronics"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "quad_repeater_cannon",
+      "mount": "turret",
+      "linked_count": 1,
+      "arc": "all",
+      "notes": "Single turret-mounted quad repeater."
+    },
+    {
+      "weapon_ref": "160mm_plasma_lance_missile",
+      "mount": "wing_left",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "8 missiles."
+    },
+    {
+      "weapon_ref": "160mm_plasma_missile",
+      "mount": "wing_right",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "8 missiles."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A Rath Industries fighter with obsolete but rugged electronics. DR 50 front/bottom, 25 elsewhere.",
+  "tags": [
+    "rath",
+    "fighter"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/piranha-class-fighter"
+}

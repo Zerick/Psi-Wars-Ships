@@ -1,0 +1,101 @@
+{
+  "template_id": "mauler_class_battlecarrier_v1",
+  "version": "1.0.0",
+  "name": "Mauler-Class Battle-Carrier",
+  "faction_origin": "rath",
+  "sm": 12,
+  "ship_class": "battleship",
+  "attributes": {
+    "st_hp": 5000,
+    "ht": "9f",
+    "hnd": -4,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 2,
+    "top_speed": 50,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 6000,
+    "dr_rear": 2500,
+    "dr_left": 2500,
+    "dr_right": 2500,
+    "dr_top": 2500,
+    "dr_bottom": 2500,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital electronics. Nuclear self-destruct."
+  },
+  "occ_raw": "1200ASV",
+  "loc_raw": "gG10t",
+  "logistics": {
+    "lwt": 110000.0,
+    "load": 30000.0,
+    "range_miles": null,
+    "cost": "$10B",
+    "hyperdrive_rating": 1,
+    "jump_capacity": 7,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "fragile",
+    "capital_ship",
+    "nuclear_self_destruct"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "capital_scale_cannon",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 capital turrets."
+    },
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 corvette turrets."
+    },
+    {
+      "weapon_ref": "mauler_beam",
+      "mount": "fixed_front",
+      "linked_count": 2,
+      "arc": "front",
+      "notes": "2 short-range Mauler Beams."
+    },
+    {
+      "weapon_ref": "guillotine_weapon",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Guillotine close-range weapon."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A Rath battle-carrier. Fragile but massively armed. Carries fighters. Nuclear self-destruct.",
+  "tags": [
+    "rath",
+    "battleship",
+    "carrier"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/mauler-class-battle-carrier"
+}

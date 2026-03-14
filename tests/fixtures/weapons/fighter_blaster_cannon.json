@@ -1,0 +1,22 @@
+{
+  "weapon_id": "fighter_blaster_cannon",
+  "name": "Fighter-Scale Blaster Cannon",
+  "damage": "6d\u00d75(5) burn",
+  "acc": 9,
+  "range": "1 mi/3 mi",
+  "rof": "8",
+  "rcl": 2,
+  "shots": "200",
+  "ewt": "1200",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "Vespa variant of Hornet-style cannon.",
+  "tags": [
+    "beam",
+    "fighter_scale"
+  ],
+  "version": "1.0.0"
+}

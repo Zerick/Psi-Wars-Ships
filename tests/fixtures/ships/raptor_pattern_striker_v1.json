@@ -1,0 +1,106 @@
+{
+  "template_id": "raptor_pattern_striker_v1",
+  "version": "1.0.0",
+  "name": "Raptor Pattern Striker",
+  "faction_origin": "empire",
+  "sm": 6,
+  "ship_class": "striker",
+  "attributes": {
+    "st_hp": 130,
+    "ht": "12",
+    "hnd": 2,
+    "sr": 4
+  },
+  "mobility": {
+    "accel": 6,
+    "top_speed": 350,
+    "stall_speed": 25
+  },
+  "afterburner": {
+    "accel": 9,
+    "top_speed": 400,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": 8500,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 100,
+    "dr_rear": 50,
+    "dr_left": 50,
+    "dr_right": 50,
+    "dr_top": 50,
+    "dr_bottom": 50,
+    "dr_material": "carbide_composite",
+    "fdr_max": 300,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Medium Tactical Ultra-Scanner; Targeting +5; Distortion Jammer; Decoy; ESM"
+  },
+  "occ_raw": "1SV+1xr",
+  "loc_raw": "g3rR2Wi",
+  "logistics": {
+    "lwt": 27.0,
+    "load": 6.9,
+    "range_miles": 34000,
+    "cost": "$10M",
+    "hyperdrive_rating": 1,
+    "jump_capacity": 2,
+    "endurance": null,
+    "signature_cost": 10
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "double_dr_vs_shaped_charge"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "arc_gatling_blaster",
+      "mount": "fixed_front",
+      "linked_count": 2,
+      "arc": "front",
+      "notes": "Two linked ARC gatling blasters. Total ROF 24."
+    },
+    {
+      "weapon_ref": "160mm_plasma_lance_missile",
+      "mount": "wing_left",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "6 missiles."
+    },
+    {
+      "weapon_ref": "160mm_plasma_missile",
+      "mount": "wing_right",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "6 missiles."
+    },
+    {
+      "weapon_ref": "400mm_isomeric_torpedo",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "3 torpedoes."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "The Raptor is the standard Maradonian heavy strike fighter. Heavier than the Valiant with force screens and torpedoes.",
+  "tags": [
+    "empire",
+    "striker"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/raptor-pattern-striker"
+}

@@ -1,0 +1,88 @@
+{
+  "template_id": "grappler_class_assault_boat_v1",
+  "version": "1.0.0",
+  "name": "Grappler Class Assault Boat",
+  "faction_origin": "redjack",
+  "sm": 5,
+  "ship_class": "striker",
+  "attributes": {
+    "st_hp": 120,
+    "ht": "12",
+    "hnd": 1,
+    "sr": 4
+  },
+  "mobility": {
+    "accel": 6,
+    "top_speed": 350,
+    "stall_speed": 0
+  },
+  "afterburner": {
+    "accel": 10,
+    "top_speed": 425,
+    "hnd_mod": 1,
+    "fuel_multiplier": 4.0,
+    "range_override": 4250,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 100,
+    "dr_rear": 50,
+    "dr_left": 50,
+    "dr_right": 50,
+    "dr_top": 50,
+    "dr_bottom": 50,
+    "dr_material": "nanopolymer",
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Redjack Assault Boat electronics. Medium Tactical Ultra-Scanner; Targeting +5; Distortion Jammer; Decoy; ESM"
+  },
+  "occ_raw": "1SV+6SV",
+  "loc_raw": "g2Wi3rR",
+  "logistics": {
+    "lwt": 19.3,
+    "load": 6.9,
+    "range_miles": 17000,
+    "cost": "$4.5M",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": 5
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "double_dr_vs_shaped_charge",
+    "vtol",
+    "boarding_craft"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "sc4tr_plasma_gatling",
+      "mount": "turret",
+      "linked_count": 2,
+      "arc": "all",
+      "notes": "Two turret-mounted plasma gatlings."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A Redjack boarding craft. Carries 6 combat passengers. VTOL capable.",
+  "tags": [
+    "redjack",
+    "striker",
+    "boarding"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/grappler-class-assault-boat"
+}

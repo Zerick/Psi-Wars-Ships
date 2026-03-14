@@ -1,0 +1,23 @@
+{
+  "weapon_id": "160mm_plasma_lance_missile",
+  "name": "160mm Plasma Lance Missile",
+  "damage": "6d\u00d730(10) burn",
+  "acc": 3,
+  "range": "1000/25 mi",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "8",
+  "ewt": "200",
+  "st_requirement": "23M",
+  "bulk": "-11",
+  "weapon_type": "missile",
+  "damage_type": "burn",
+  "armor_divisor": "(10)",
+  "notes": "",
+  "tags": [
+    "missile",
+    "plasma_lance",
+    "fighter_scale"
+  ],
+  "version": "1.0.0"
+}

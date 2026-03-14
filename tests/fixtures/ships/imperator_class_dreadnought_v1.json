@@ -1,0 +1,100 @@
+{
+  "template_id": "imperator_class_dreadnought_v1",
+  "version": "1.0.0",
+  "name": "Imperator-Class Dreadnought",
+  "faction_origin": "empire",
+  "sm": 14,
+  "ship_class": "dreadnought",
+  "attributes": {
+    "st_hp": 9000,
+    "ht": "12",
+    "hnd": -4,
+    "sr": 6
+  },
+  "mobility": {
+    "accel": 1,
+    "top_speed": 75,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 5000,
+    "dr_rear": 3000,
+    "dr_left": 3000,
+    "dr_right": 3000,
+    "dr_top": 3000,
+    "dr_bottom": 3000,
+    "dr_material": null,
+    "fdr_max": 15000,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital-Scale Tactical Ultra-Scanner; Large Area Jammer; Distortion Scrambler"
+  },
+  "occ_raw": "8500ASV",
+  "loc_raw": "gGs40t",
+  "logistics": {
+    "lwt": 850000.0,
+    "load": 100000.0,
+    "range_miles": null,
+    "cost": "$190B",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 5,
+    "endurance": "50-year fusion reactor",
+    "signature_cost": 30
+  },
+  "traits": [
+    "heavy_force_screen",
+    "capital_ship"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "super_heavy_cannon",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 super-heavy turrets (Total ROF 12)."
+    },
+    {
+      "weapon_ref": "capital_scale_cannon",
+      "mount": "turret",
+      "linked_count": 12,
+      "arc": "all",
+      "notes": "12 capital turrets (Total ROF 24)."
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 8,
+      "arc": "all",
+      "notes": "8 plasma flak turrets (4 front, 4 rear)."
+    },
+    {
+      "weapon_ref": "tractor_beam_st1000",
+      "mount": "turret",
+      "linked_count": 2,
+      "arc": "all",
+      "notes": "2 ST 1000 tractor beams."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "The most iconic vessel of the Imperial fleet. A looming behemoth of firepower.",
+  "tags": [
+    "empire",
+    "dreadnought",
+    "capital_ship"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/imperator-class-dreadnought"
+}

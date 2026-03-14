@@ -1,0 +1,94 @@
+{
+  "template_id": "toad_class_heavy_corvette_v1",
+  "version": "1.0.0",
+  "name": "Toad-Class Heavy Corvette",
+  "faction_origin": "rath",
+  "sm": 9,
+  "ship_class": "corvette",
+  "attributes": {
+    "st_hp": 1600,
+    "ht": "9f",
+    "hnd": 0,
+    "sr": 4
+  },
+  "mobility": {
+    "accel": 10,
+    "top_speed": 80,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 1000,
+    "dr_rear": 500,
+    "dr_left": 500,
+    "dr_right": 500,
+    "dr_top": 500,
+    "dr_bottom": 500,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 4,
+    "ecm_rating": -2,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Obsolete electronics. ECM -2."
+  },
+  "occ_raw": "70ASV",
+  "loc_raw": "g2t",
+  "logistics": {
+    "lwt": 4250.0,
+    "load": 600.0,
+    "range_miles": null,
+    "cost": "$500M",
+    "hyperdrive_rating": 1,
+    "jump_capacity": 7,
+    "endurance": "3 months",
+    "signature_cost": null
+  },
+  "traits": [
+    "fragile",
+    "vtol",
+    "self_destruct"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "quad_repeater_cannon",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 turret-mounted quad repeaters."
+    },
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 1,
+      "arc": "all",
+      "notes": "1 corvette-scale cannon turret."
+    },
+    {
+      "weapon_ref": "isomeric_torpedo_bay_single",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Torpedo bay, 4 torpedoes."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A massive Rath heavy corvette. Fragile but heavily armed. Nuclear self-destruct device.",
+  "tags": [
+    "rath",
+    "corvette",
+    "heavy"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/toad-class-heavy-corvette"
+}

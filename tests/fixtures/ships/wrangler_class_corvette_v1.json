@@ -1,0 +1,100 @@
+{
+  "template_id": "wrangler_class_corvette_v1",
+  "version": "1.0.0",
+  "name": "Wrangler-Class Corvette",
+  "faction_origin": "redjack",
+  "sm": 7,
+  "ship_class": "corvette",
+  "attributes": {
+    "st_hp": 280,
+    "ht": "14",
+    "hnd": 0,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 2,
+    "top_speed": 150,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 500,
+    "dr_rear": 500,
+    "dr_left": 500,
+    "dr_right": 500,
+    "dr_top": 500,
+    "dr_bottom": 500,
+    "dr_material": "nanopolymer",
+    "fdr_max": 250,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 150,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 30,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Ultrascanner Open Mount 150mi search/15mi scan; LPI; Distortion Jammer; Large FTL Comm 30 parsec"
+  },
+  "occ_raw": "4ASV",
+  "loc_raw": "G4t4rL",
+  "logistics": {
+    "lwt": 250.0,
+    "load": 66.0,
+    "range_miles": 200000,
+    "cost": "$45M",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 7,
+    "endurance": "30 days",
+    "signature_cost": null
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "vtol"
+  ],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [
+    {
+      "slot_id": "turret_1",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular turret."
+    },
+    {
+      "slot_id": "turret_2",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular turret."
+    },
+    {
+      "slot_id": "turret_3",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular turret."
+    },
+    {
+      "slot_id": "turret_4",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular turret."
+    }
+  ],
+  "craft_complement": [],
+  "description": "A Redjack utility corvette with 4 modular weapon turrets.",
+  "tags": [
+    "redjack",
+    "corvette",
+    "utility"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/wrangler-class-corvette"
+}

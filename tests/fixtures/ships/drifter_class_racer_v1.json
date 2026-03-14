@@ -1,0 +1,116 @@
+{
+  "template_id": "drifter_class_racer_v1",
+  "version": "1.0.0",
+  "name": "Drifter Class Racer",
+  "faction_origin": "redjack",
+  "sm": 4,
+  "ship_class": "racer",
+  "attributes": {
+    "st_hp": 80,
+    "ht": "12",
+    "hnd": 4,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 25,
+    "top_speed": 750,
+    "stall_speed": 55
+  },
+  "afterburner": {
+    "accel": 40,
+    "top_speed": 850,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": 3000,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 15,
+    "dr_rear": 15,
+    "dr_left": 15,
+    "dr_right": 15,
+    "dr_top": 15,
+    "dr_bottom": 15,
+    "dr_material": "carbide_composite",
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": 0,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "No combat electronics by default (ECM 0). Optional combat package adds scanner, targeting +5, ECM -4, decoys."
+  },
+  "occ_raw": "1S+1rx",
+  "loc_raw": "g2Wi3rR",
+  "logistics": {
+    "lwt": 6.5,
+    "load": 2.5,
+    "range_miles": 12000,
+    "cost": "$3.5M",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": 5
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "double_dr_vs_shaped_charge",
+    "ejection_seat",
+    "modular"
+  ],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [
+    {
+      "slot_id": "engine",
+      "slot_type": "engine",
+      "weight_class": "any",
+      "max_weight": 6000.0,
+      "notes": "Modular engine. Default: Plasma Thruster. Alternatives: Next Gen, Hyperium, Plasma Fan."
+    },
+    {
+      "slot_id": "main_weapon",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 1200.0,
+      "notes": "Underslung weapon mount, rated 1200 lbs."
+    },
+    {
+      "slot_id": "wing_left",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 600.0,
+      "notes": "Left wing hardpoint. Missiles, fuel, or thruster pods."
+    },
+    {
+      "slot_id": "wing_right",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 600.0,
+      "notes": "Right wing hardpoint. Missiles, fuel, or thruster pods."
+    },
+    {
+      "slot_id": "accessory",
+      "slot_type": "accessory",
+      "weight_class": "any",
+      "max_weight": 1650.0,
+      "notes": "Behind cockpit. Silverfish force screen, Hyperlight hyperdrive, or Longstrider fuel."
+    }
+  ],
+  "craft_complement": [],
+  "description": "A cockpit strapped to a great array of engines. Galaxy-famous racer design.",
+  "tags": [
+    "redjack",
+    "racer",
+    "modular"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/drifter-class-racer"
+}

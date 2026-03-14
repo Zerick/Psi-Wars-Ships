@@ -1,0 +1,79 @@
+{
+  "template_id": "scarab_class_defense_frigate_v1",
+  "version": "1.0.0",
+  "name": "Scarab-Class Defense Frigate",
+  "faction_origin": "trader",
+  "sm": 8,
+  "ship_class": "frigate",
+  "attributes": {
+    "st_hp": 400,
+    "ht": "13",
+    "hnd": 2,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 1,
+    "top_speed": 250,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 500,
+    "dr_rear": 200,
+    "dr_left": 500,
+    "dr_right": 500,
+    "dr_top": 200,
+    "dr_bottom": 200,
+    "dr_material": "nanopolymer",
+    "fdr_max": 1000,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 150,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 30,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Ultrascanner Open Mount 150mi; Targeting +5; Distortion Jammer; Tactical ESM; FTL Comm 30 parsec"
+  },
+  "occ_raw": "9ASV",
+  "loc_raw": "2rR",
+  "logistics": {
+    "lwt": 600.0,
+    "load": 75.0,
+    "range_miles": null,
+    "cost": "$350M",
+    "hyperdrive_rating": 2,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "vtol"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "corvette_muonic_cannon",
+      "mount": "turret",
+      "linked_count": 2,
+      "arc": "all",
+      "notes": "Two linked corvette-scale muonic turrets."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A Trader defense frigate. Higher DR on front and sides (500), lower on top/bottom/rear (200). Force screen 1000.",
+  "tags": [
+    "trader",
+    "frigate",
+    "defense"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/scarab-class-defense-frigate"
+}

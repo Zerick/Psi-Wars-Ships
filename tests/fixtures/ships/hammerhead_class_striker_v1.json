@@ -1,0 +1,101 @@
+{
+  "template_id": "hammerhead_class_striker_v1",
+  "version": "1.0.0",
+  "name": "Hammerhead Class Striker",
+  "faction_origin": "rath",
+  "sm": 4,
+  "ship_class": "striker",
+  "attributes": {
+    "st_hp": 105,
+    "ht": "8x",
+    "hnd": 0,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 15,
+    "top_speed": 400,
+    "stall_speed": 75
+  },
+  "afterburner": {
+    "accel": 20,
+    "top_speed": 500,
+    "hnd_mod": 1,
+    "fuel_multiplier": 4.0,
+    "range_override": 4500,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 500,
+    "dr_rear": 100,
+    "dr_left": 100,
+    "dr_right": 100,
+    "dr_top": 100,
+    "dr_bottom": 500,
+    "dr_material": "nanopolymer",
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 4,
+    "ecm_rating": -2,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Obsolete Ultra-Scanner; Obsolete Targeting +4; Obsolete Distortion Jammer -2; Tactical ESM"
+  },
+  "occ_raw": "1SV",
+  "loc_raw": "g2Wi3rR",
+  "logistics": {
+    "lwt": 10.0,
+    "load": 0.6,
+    "range_miles": 18000,
+    "cost": "$2M",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "explosive",
+    "obsolete_electronics",
+    "ramming_prow"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "quad_repeater_cannon",
+      "mount": "turret",
+      "linked_count": 1,
+      "arc": "all",
+      "notes": "Turret-mounted quad repeater."
+    },
+    {
+      "weapon_ref": "internal_torpedo_400mm",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Internal single-use torpedo."
+    },
+    {
+      "weapon_ref": "ramming_prow",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Reinforced ramming prow."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A heavily armored Rath suicide striker. DR 500 front/bottom, 100 elsewhere. HT 8x (explosive). Designed to ram targets.",
+  "tags": [
+    "rath",
+    "striker"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/hammerhead-class-striker"
+}

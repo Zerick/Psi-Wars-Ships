@@ -1,0 +1,23 @@
+{
+  "weapon_id": "spinal_blaster",
+  "name": "Spinal Blaster",
+  "damage": "6d\u00d7600(5) burn",
+  "acc": 9,
+  "range": "100 mi",
+  "rof": "1/10",
+  "rcl": 2,
+  "shots": "5",
+  "ewt": "250kt",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "Spinal mount. ROF 1/10.",
+  "tags": [
+    "trader",
+    "super_weapon",
+    "spinal"
+  ],
+  "version": "1.0.0"
+}

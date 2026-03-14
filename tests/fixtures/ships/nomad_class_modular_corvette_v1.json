@@ -1,0 +1,115 @@
+{
+  "template_id": "nomad_class_modular_corvette_v1",
+  "version": "1.0.0",
+  "name": "Nomad-Class Modular Corvette",
+  "faction_origin": "redjack",
+  "sm": 7,
+  "ship_class": "corvette",
+  "attributes": {
+    "st_hp": 225,
+    "ht": "13",
+    "hnd": 1,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 7,
+    "top_speed": 300,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 150,
+    "dr_rear": 75,
+    "dr_left": 75,
+    "dr_right": 75,
+    "dr_top": 75,
+    "dr_bottom": 75,
+    "dr_material": "nanopolymer",
+    "fdr_max": 500,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 150,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 30,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Ultrascanner Open Mount 150mi search/15mi scan; LPI; Distortion Jammer; Large FTL Comm 30 parsec"
+  },
+  "occ_raw": "4ASV",
+  "loc_raw": "g2t3rR",
+  "logistics": {
+    "lwt": 125.0,
+    "load": 25.0,
+    "range_miles": null,
+    "cost": "$25M",
+    "hyperdrive_rating": 3,
+    "jump_capacity": 10,
+    "endurance": "60 days",
+    "signature_cost": 10
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "vtol",
+    "modular"
+  ],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [
+    {
+      "slot_id": "turret_1",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular combat turret with 360 degree rotation."
+    },
+    {
+      "slot_id": "turret_2",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular combat turret with 360 degree rotation."
+    },
+    {
+      "slot_id": "engine",
+      "slot_type": "engine",
+      "weight_class": "any",
+      "max_weight": null,
+      "notes": "Modular engine including hyperdrive."
+    },
+    {
+      "slot_id": "electronics",
+      "slot_type": "electronics",
+      "weight_class": "any",
+      "max_weight": null,
+      "notes": "Modular electronics lab."
+    },
+    {
+      "slot_id": "cargo",
+      "slot_type": "cargo",
+      "weight_class": "any",
+      "max_weight": null,
+      "notes": "Modular hold: passenger accommodations or cargo."
+    },
+    {
+      "slot_id": "armor",
+      "slot_type": "armor",
+      "weight_class": "any",
+      "max_weight": null,
+      "notes": "Modular armor overlay."
+    }
+  ],
+  "craft_complement": [],
+  "description": "The most modular corvette in the galaxy. Everything can be swapped.",
+  "tags": [
+    "redjack",
+    "corvette",
+    "modular"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/nomad-class-modular-corvette"
+}

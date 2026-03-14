@@ -1,0 +1,79 @@
+{
+  "template_id": "prestige_pattern_shuttle_v1",
+  "version": "1.0.0",
+  "name": "Prestige-Pattern Diplomatic Shuttle",
+  "faction_origin": "empire",
+  "sm": 7,
+  "ship_class": "shuttle",
+  "attributes": {
+    "st_hp": 200,
+    "ht": "13",
+    "hnd": 0,
+    "sr": 4
+  },
+  "mobility": {
+    "accel": 2,
+    "top_speed": 200,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 200,
+    "dr_rear": 200,
+    "dr_left": 200,
+    "dr_right": 200,
+    "dr_top": 200,
+    "dr_bottom": 200,
+    "dr_material": null,
+    "fdr_max": 300,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Medium Tactical Ultra-Scanner; Targeting +5; Distortion Jammer; Tactical ESM; Diplomatic comm suite"
+  },
+  "occ_raw": "2+2ASV+12SV",
+  "loc_raw": "g3rR2Wi",
+  "logistics": {
+    "lwt": 80.0,
+    "load": 30.0,
+    "range_miles": null,
+    "cost": "$20M",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 5,
+    "endurance": "1 month",
+    "signature_cost": 5
+  },
+  "traits": [
+    "vtol",
+    "diplomatic_vessel"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "anti_personnel_blaster",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 linked anti-personnel blaster turrets. Total ROF 12."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "Standard Imperial diplomatic and VIP transport shuttle. Carries up to 12 passengers in comfort.",
+  "tags": [
+    "empire",
+    "shuttle",
+    "diplomatic"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/prestige-pattern-diplomatic-shuttle"
+}

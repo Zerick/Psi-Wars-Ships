@@ -1,0 +1,87 @@
+{
+  "template_id": "trader_ark_v1",
+  "version": "1.0.0",
+  "name": "Trader Ark",
+  "faction_origin": "trader",
+  "sm": 16,
+  "ship_class": "carrier",
+  "attributes": {
+    "st_hp": 25000,
+    "ht": "13",
+    "hnd": -5,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 1,
+    "top_speed": 50,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 5000,
+    "dr_rear": 5000,
+    "dr_left": 5000,
+    "dr_right": 5000,
+    "dr_top": 5000,
+    "dr_bottom": 5000,
+    "dr_material": null,
+    "fdr_max": 10000,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital Ultra-Scanner 4000mi; Targeting +5; Area Jammer; Scrambler; FTL Comm 300pc"
+  },
+  "occ_raw": "1000000ASV",
+  "loc_raw": "12T6rT",
+  "logistics": {
+    "lwt": 15000000.0,
+    "load": 5000000.0,
+    "range_miles": null,
+    "cost": "$10T",
+    "hyperdrive_rating": 1,
+    "jump_capacity": null,
+    "endurance": "Fusion reactor",
+    "signature_cost": null
+  },
+  "traits": [
+    "heavy_force_screen",
+    "capital_ship",
+    "trader_tech_penalty"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "trader_capital_cannon",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 Trader capital-scale muonic turrets. Surge."
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 plasma flak turrets."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A small Trader Ark. Larger arks have more HP and larger populations. Mobile cities in space.",
+  "tags": [
+    "trader",
+    "carrier",
+    "ark"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/trader-ark"
+}

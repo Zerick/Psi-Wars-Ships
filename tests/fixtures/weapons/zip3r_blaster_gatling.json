@@ -1,0 +1,24 @@
+{
+  "weapon_id": "zip3r_blaster_gatling",
+  "name": "ZIP-3R Light Blaster Gatling",
+  "damage": "6d\u00d74(5) burn",
+  "acc": 9,
+  "range": "2 mi/5 mi",
+  "rof": "16",
+  "rcl": 2,
+  "shots": "200/F",
+  "ewt": "1200",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "Popular Redjack fighter weapon. High ROF, good penetration.",
+  "tags": [
+    "redjack",
+    "beam",
+    "gatling",
+    "fighter_scale"
+  ],
+  "version": "1.0.0"
+}

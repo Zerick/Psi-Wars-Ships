@@ -1,0 +1,23 @@
+{
+  "weapon_id": "quad_repeater_cannon",
+  "name": "Quad Repeater Cannon",
+  "damage": "6d\u00d74(5) burn",
+  "acc": 8,
+  "range": "1000/3000",
+  "rof": "8",
+  "rcl": 2,
+  "shots": "400/Fp",
+  "ewt": "1000",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "",
+  "tags": [
+    "beam",
+    "repeater",
+    "obsolete"
+  ],
+  "version": "1.0.0"
+}

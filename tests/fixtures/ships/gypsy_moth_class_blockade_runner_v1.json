@@ -1,0 +1,88 @@
+{
+  "template_id": "gypsy_moth_class_blockade_runner_v1",
+  "version": "1.0.0",
+  "name": "Gypsy Moth-Class Blockade Runner",
+  "faction_origin": "trader",
+  "sm": 6,
+  "ship_class": "corvette",
+  "attributes": {
+    "st_hp": 220,
+    "ht": "13",
+    "hnd": 3,
+    "sr": 4
+  },
+  "mobility": {
+    "accel": 3,
+    "top_speed": 300,
+    "stall_speed": 30
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 50,
+    "dr_rear": 50,
+    "dr_left": 50,
+    "dr_right": 50,
+    "dr_top": 50,
+    "dr_bottom": 50,
+    "dr_material": "nanopolymer",
+    "fdr_max": 500,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": true,
+    "sensor_notes": "Medium Tactical Ultra-Scanner; Targeting +5; Distortion Jammer; Tactical ESM; Neural Interface; Tactical Computers +2 Tactics"
+  },
+  "occ_raw": "9ASV",
+  "loc_raw": "2Wi4RL",
+  "logistics": {
+    "lwt": 90.0,
+    "load": 40.0,
+    "range_miles": null,
+    "cost": "$90M",
+    "hyperdrive_rating": 2,
+    "jump_capacity": null,
+    "endurance": "Energy bank",
+    "signature_cost": 10
+  },
+  "traits": [
+    "responsive_structure",
+    "vtol",
+    "configurable_wings",
+    "trader_tech_penalty",
+    "neural_interface_required"
+  ],
+  "modes": {
+    "High Maneuverability": {
+      "hnd": 4,
+      "accel": 3,
+      "top_speed": 150
+    }
+  },
+  "weapons": [
+    {
+      "weapon_ref": "muonic_fighter_cannon",
+      "mount": "fixed_front",
+      "linked_count": 2,
+      "arc": "front",
+      "notes": "Two linked muonic cannons."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "A Trader blockade runner with responsive structure and configurable wings. Neural interface required.",
+  "tags": [
+    "trader",
+    "corvette",
+    "blockade_runner"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/gypsy-moth-class-blockade-runner"
+}

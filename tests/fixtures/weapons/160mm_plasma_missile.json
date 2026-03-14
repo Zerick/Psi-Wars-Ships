@@ -1,0 +1,23 @@
+{
+  "weapon_id": "160mm_plasma_missile",
+  "name": "160mm Plasma Burst Missile",
+  "damage": "6d\u00d715 burn ex",
+  "acc": 3,
+  "range": "1000/25 mi",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "8",
+  "ewt": "200",
+  "st_requirement": "23M",
+  "bulk": "-11",
+  "weapon_type": "missile",
+  "damage_type": "burn_ex",
+  "armor_divisor": null,
+  "notes": "",
+  "tags": [
+    "missile",
+    "plasma",
+    "fighter_scale"
+  ],
+  "version": "1.0.0"
+}

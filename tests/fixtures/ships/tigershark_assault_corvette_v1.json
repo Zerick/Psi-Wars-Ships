@@ -1,0 +1,130 @@
+{
+  "template_id": "tigershark_assault_corvette_v1",
+  "version": "1.0.0",
+  "name": "Tigershark Assault Corvette",
+  "faction_origin": "redjack",
+  "sm": 8,
+  "ship_class": "corvette",
+  "attributes": {
+    "st_hp": 400,
+    "ht": "14",
+    "hnd": 1,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 6,
+    "top_speed": 250,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 1000,
+    "dr_rear": 400,
+    "dr_left": 400,
+    "dr_right": 400,
+    "dr_top": 400,
+    "dr_bottom": 400,
+    "dr_material": "nanopolymer",
+    "fdr_max": 750,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 150,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 30,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Ultrascanner Open Mount 150mi search/15mi scan; LPI; Distortion Jammer; Large FTL Comm 30 parsec"
+  },
+  "occ_raw": "15ASV",
+  "loc_raw": "g6t4rR",
+  "logistics": {
+    "lwt": 600.0,
+    "load": 140.0,
+    "range_miles": 200000,
+    "cost": "$130M",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 7,
+    "endurance": "30 days",
+    "signature_cost": 15
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "vtol",
+    "hardpoints"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Forward corvette-scale turret, 2 cannons (total ROF 2)."
+    },
+    {
+      "weapon_ref": "tractor_beam_st160",
+      "mount": "rear_turret",
+      "linked_count": 1,
+      "arc": "rear",
+      "notes": "Rear-mounted ST 160 tractor beam."
+    }
+  ],
+  "module_slots": [
+    {
+      "slot_id": "fighter_turret_1",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Fighter-scale modular turret. Full rotation."
+    },
+    {
+      "slot_id": "fighter_turret_2",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Fighter-scale modular turret. Full rotation."
+    },
+    {
+      "slot_id": "fighter_turret_3",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Fighter-scale modular turret. Full rotation."
+    },
+    {
+      "slot_id": "fighter_turret_4",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Fighter-scale modular turret. Full rotation."
+    },
+    {
+      "slot_id": "hardpoint_left",
+      "slot_type": "hardpoint",
+      "weight_class": "any",
+      "max_weight": 40000.0,
+      "notes": "Rear hardpoint. Grappler assault boat, cargo pod, fuel pod, or engine pod."
+    },
+    {
+      "slot_id": "hardpoint_right",
+      "slot_type": "hardpoint",
+      "weight_class": "any",
+      "max_weight": 40000.0,
+      "notes": "Rear hardpoint. Grappler assault boat, cargo pod, fuel pod, or engine pod."
+    }
+  ],
+  "craft_complement": [],
+  "description": "A Redjack raiding corvette with modular turrets and rear hardpoints for Grappler assault boats.",
+  "tags": [
+    "redjack",
+    "corvette",
+    "raider"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/tigershark-class-assault-corvette"
+}

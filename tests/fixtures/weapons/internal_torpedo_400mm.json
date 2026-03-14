@@ -1,0 +1,23 @@
+{
+  "weapon_id": "internal_torpedo_400mm",
+  "name": "400mm Internal Torpedo",
+  "damage": "5d\u00d7200 cr ex",
+  "acc": 0,
+  "range": "collision",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "1",
+  "ewt": "2500",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "torpedo",
+  "damage_type": "cr_ex",
+  "armor_divisor": null,
+  "notes": "Internal mount. Collision range only. Single use.",
+  "tags": [
+    "torpedo",
+    "internal",
+    "single_use"
+  ],
+  "version": "1.0.0"
+}

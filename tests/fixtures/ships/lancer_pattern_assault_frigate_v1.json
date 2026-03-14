@@ -1,0 +1,86 @@
+{
+  "template_id": "lancer_pattern_assault_frigate_v1",
+  "version": "1.0.0",
+  "name": "Lancer-Pattern Assault Frigate",
+  "faction_origin": "empire",
+  "sm": 9,
+  "ship_class": "frigate",
+  "attributes": {
+    "st_hp": 700,
+    "ht": "12",
+    "hnd": 0,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 2,
+    "top_speed": 250,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 2500,
+    "dr_rear": 500,
+    "dr_left": 500,
+    "dr_right": 500,
+    "dr_top": 500,
+    "dr_bottom": 500,
+    "dr_material": "carbide_composite",
+    "fdr_max": 1000,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 150,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 30,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Tactical Ultra-Scanner 150mi; Targeting +5; Distortion Jammer; Area Jammer; Scrambler"
+  },
+  "occ_raw": "90ASV",
+  "loc_raw": "g3rR2t",
+  "logistics": {
+    "lwt": 2750.0,
+    "load": 285.0,
+    "range_miles": null,
+    "cost": "$750M",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 4,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "vtol"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "disruptor_cannon",
+      "mount": "turret",
+      "linked_count": 1,
+      "arc": "all",
+      "notes": "Disruptor cannon turret. Surge damage."
+    },
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 2,
+      "arc": "all",
+      "notes": "2 corvette-scale cannon turrets (Total ROF 6)."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "An Imperial assault frigate with a disruptor cannon for disabling targets. DR 2500 front, 500 elsewhere.",
+  "tags": [
+    "empire",
+    "frigate",
+    "assault"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/lancer-pattern-assault-frigate"
+}

@@ -1,0 +1,100 @@
+{
+  "template_id": "valkyrie_pattern_fighter_v1",
+  "version": "1.0.0",
+  "name": "Valkyrie Pattern Fighter",
+  "faction_origin": "empire",
+  "sm": 4,
+  "ship_class": "fighter",
+  "attributes": {
+    "st_hp": 90,
+    "ht": "12",
+    "hnd": 5,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 15,
+    "top_speed": 600,
+    "stall_speed": 50
+  },
+  "afterburner": {
+    "accel": 22,
+    "top_speed": 700,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": 4500,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 75,
+    "dr_rear": 75,
+    "dr_left": 75,
+    "dr_right": 75,
+    "dr_top": 75,
+    "dr_bottom": 75,
+    "dr_material": "diamondoid",
+    "fdr_max": 300,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Medium Tactical Ultra-Scanner; Distortion Jammer; Decoy; ESM; Psychotronic Modules"
+  },
+  "occ_raw": "1SV",
+  "loc_raw": "g3rRWi",
+  "logistics": {
+    "lwt": 7.0,
+    "load": 1.1,
+    "range_miles": 18000,
+    "cost": "$15M",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": 10
+  },
+  "traits": [
+    "psionic_amplifier",
+    "psychotronic_modules"
+  ],
+  "modes": {
+    "With Hypersled": {
+      "st_hp": 115,
+      "hnd": 3,
+      "accel": 8,
+      "top_speed": 350,
+      "stall_speed": 80
+    }
+  },
+  "weapons": [
+    {
+      "weapon_ref": "arc_gatling_blaster",
+      "mount": "fixed_front",
+      "linked_count": 2,
+      "arc": "front",
+      "notes": "Two linked ARC gatling blasters. Total ROF 24 (+4)."
+    },
+    {
+      "weapon_ref": "lightning_cannon",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Relic weapon. ROF 1/30. Psionic targeting."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "The premier Maradonian psionic fighter. Psychotronic modules amplify pilot abilities. Optional Hypersled adds mass and hyperspace capability.",
+  "tags": [
+    "empire",
+    "fighter"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/valkyrie-pattern-fighter"
+}

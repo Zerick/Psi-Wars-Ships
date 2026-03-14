@@ -1,0 +1,22 @@
+{
+  "weapon_id": "corvette_scale_cannon",
+  "name": "Corvette-Scale Cannon",
+  "damage": "6d\u00d730(5) burn",
+  "acc": 9,
+  "range": "10 mi/30 mi",
+  "rof": "1",
+  "rcl": 3,
+  "shots": "NA",
+  "ewt": "25t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "",
+  "tags": [
+    "beam",
+    "corvette_scale"
+  ],
+  "version": "1.0.0"
+}

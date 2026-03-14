@@ -1,0 +1,115 @@
+{
+  "template_id": "raider_class_assault_carrier_v1",
+  "version": "1.0.0",
+  "name": "Raider-Class Assault Carrier",
+  "faction_origin": "redjack",
+  "sm": 9,
+  "ship_class": "carrier",
+  "attributes": {
+    "st_hp": 800,
+    "ht": "14",
+    "hnd": 0,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 12,
+    "top_speed": 125,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 2000,
+    "dr_rear": 400,
+    "dr_left": 400,
+    "dr_right": 400,
+    "dr_top": 400,
+    "dr_bottom": 400,
+    "dr_material": "nanopolymer",
+    "fdr_max": 750,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 150,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 30,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Ultrascanner Open Mount 150mi; Targeting +5; Distortion Jammer; Large FTL 30pc; Area Jammer"
+  },
+  "occ_raw": "80ASV",
+  "loc_raw": "g6t4rR",
+  "logistics": {
+    "lwt": 4500.0,
+    "load": 600.0,
+    "range_miles": null,
+    "cost": "$2B",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 7,
+    "endurance": "30 days",
+    "signature_cost": 20
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "vtol"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 corvette-scale cannon turrets."
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 plasma flak turrets."
+    }
+  ],
+  "module_slots": [
+    {
+      "slot_id": "fighter_turret_1",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular fighter turret."
+    },
+    {
+      "slot_id": "fighter_turret_2",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular fighter turret."
+    },
+    {
+      "slot_id": "fighter_turret_3",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular fighter turret."
+    },
+    {
+      "slot_id": "fighter_turret_4",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Modular fighter turret."
+    }
+  ],
+  "craft_complement": [],
+  "description": "A Redjack assault carrier. Carries fighters and has modular fighter-scale turrets.",
+  "tags": [
+    "redjack",
+    "carrier",
+    "assault"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/raider-class-assault-carrier"
+}

@@ -1,0 +1,115 @@
+{
+  "template_id": "trader_ark_tender_v1",
+  "version": "1.0.0",
+  "name": "Trader Ark Tender",
+  "faction_origin": "trader",
+  "sm": 15,
+  "ship_class": "battleship",
+  "attributes": {
+    "st_hp": 15000,
+    "ht": "13",
+    "hnd": -4,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 1,
+    "top_speed": 150,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 10000,
+    "dr_rear": 10000,
+    "dr_left": 10000,
+    "dr_right": 10000,
+    "dr_top": 10000,
+    "dr_bottom": 10000,
+    "dr_material": null,
+    "fdr_max": 20000,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital Ultra-Scanner; Targeting +5; Full electronic warfare suite; FTL Comm 300pc"
+  },
+  "occ_raw": "10000ASV",
+  "loc_raw": "12T9rT",
+  "logistics": {
+    "lwt": 3000000.0,
+    "load": 900000.0,
+    "range_miles": null,
+    "cost": "$1.5T",
+    "hyperdrive_rating": 1,
+    "jump_capacity": null,
+    "endurance": "Fusion reactor",
+    "signature_cost": null
+  },
+  "traits": [
+    "heavy_force_screen",
+    "capital_ship",
+    "trader_tech_penalty"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "spinal_pulsar",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Spinal Pulsar. ROF 1/10."
+    },
+    {
+      "weapon_ref": "spinal_blaster",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Spinal Blaster. ROF 1/10."
+    },
+    {
+      "weapon_ref": "spinal_muonic_blaster",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Spinal Muonic Blaster. ROF 1/10. Surge."
+    },
+    {
+      "weapon_ref": "super_heavy_muonic_cannon",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 super-heavy muonic turrets. Surge."
+    },
+    {
+      "weapon_ref": "capital_muonic_cannon",
+      "mount": "turret",
+      "linked_count": 8,
+      "arc": "all",
+      "notes": "8 capital muonic turrets. Surge."
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 8,
+      "arc": "all",
+      "notes": "8 plasma flak turrets."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "An Ark Tender at full original battleship capability. Immensely powerful. Trader tech penalty applies.",
+  "tags": [
+    "trader",
+    "battleship",
+    "ark_tender"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/trader-ark-tender"
+}

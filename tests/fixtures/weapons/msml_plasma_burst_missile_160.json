@@ -1,0 +1,23 @@
+{
+  "weapon_id": "msml_plasma_burst_missile_160",
+  "name": "160mm MSML Plasma Burst Missile",
+  "damage": "6d\u00d715 burn ex",
+  "acc": 4,
+  "range": "1000/30 mi",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "4",
+  "ewt": "1200",
+  "st_requirement": "M",
+  "bulk": "-15",
+  "weapon_type": "missile",
+  "damage_type": "burn_ex",
+  "armor_divisor": null,
+  "notes": "",
+  "tags": [
+    "missile",
+    "plasma",
+    "redjack"
+  ],
+  "version": "1.0.0"
+}

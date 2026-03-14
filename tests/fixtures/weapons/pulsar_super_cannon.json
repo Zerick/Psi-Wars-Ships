@@ -1,0 +1,23 @@
+{
+  "weapon_id": "pulsar_super_cannon",
+  "name": "Pulsar Super-Cannon",
+  "damage": "6d\u00d7600(3) burn ex",
+  "acc": 6,
+  "range": "1000 mi/3000 mi",
+  "rof": "1/10",
+  "rcl": 3,
+  "shots": "10",
+  "ewt": "15t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn_ex",
+  "armor_divisor": "(3)",
+  "notes": "ROF 1/10. Super-weapon class. Extreme range artillery.",
+  "tags": [
+    "imperial",
+    "super_weapon",
+    "capital_scale"
+  ],
+  "version": "1.0.0"
+}

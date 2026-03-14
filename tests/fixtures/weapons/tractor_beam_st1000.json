@@ -1,0 +1,23 @@
+{
+  "weapon_id": "tractor_beam_st1000",
+  "name": "ST 1000 Tractor Beam",
+  "damage": "0",
+  "acc": 0,
+  "range": "2000",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "NA",
+  "ewt": "10000",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "tractor",
+  "damage_type": "special",
+  "armor_divisor": null,
+  "notes": "ST 1000 tractor beam. Range 2000, Move 10. Capital-scale.",
+  "tags": [
+    "tractor",
+    "utility",
+    "capital_scale"
+  ],
+  "version": "1.0.0"
+}

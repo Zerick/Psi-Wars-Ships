@@ -1,0 +1,99 @@
+{
+  "template_id": "peltast_class_striker_v1",
+  "version": "1.0.0",
+  "name": "Peltast Class Striker",
+  "faction_origin": "empire",
+  "sm": 4,
+  "ship_class": "striker",
+  "attributes": {
+    "st_hp": 85,
+    "ht": "10f",
+    "hnd": 4,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 10,
+    "top_speed": 450,
+    "stall_speed": 50
+  },
+  "afterburner": {
+    "accel": 15,
+    "top_speed": 550,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": 5500,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 15,
+    "dr_rear": 15,
+    "dr_left": 15,
+    "dr_right": 15,
+    "dr_top": 15,
+    "dr_bottom": 15,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Medium Tactical Ultra-Scanner; Distortion Jammer; Decoy; ESM"
+  },
+  "occ_raw": "1S",
+  "loc_raw": "g3rR2Wi",
+  "logistics": {
+    "lwt": 7.2,
+    "load": 3.0,
+    "range_miles": 22000,
+    "cost": "$2.25M",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": 5
+  },
+  "traits": [
+    "ejection_seat",
+    "contragravity_stall_reduction"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "imperial_fighter_blaster",
+      "mount": "fixed_front",
+      "linked_count": 2,
+      "arc": "front",
+      "notes": "Two linked blasters. Total ROF 6 (+1)."
+    },
+    {
+      "weapon_ref": "160mm_plasma_lance_missile",
+      "mount": "wing_left",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "6 missiles per wing rack."
+    },
+    {
+      "weapon_ref": "400mm_isomeric_torpedo",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Single torpedo, internal bay."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "An Imperial strike fighter. Wings include contragravity that reduces stall to 20.",
+  "tags": [
+    "empire",
+    "striker"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/peltast-class-striker"
+}

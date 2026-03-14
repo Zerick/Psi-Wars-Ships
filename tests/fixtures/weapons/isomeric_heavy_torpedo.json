@@ -1,0 +1,23 @@
+{
+  "weapon_id": "isomeric_heavy_torpedo",
+  "name": "Isomeric Heavy Torpedo",
+  "damage": "5d\u00d7300 cr ex",
+  "acc": 3,
+  "range": "150/100 mi",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "4",
+  "ewt": "30t",
+  "st_requirement": "M",
+  "bulk": "-20",
+  "weapon_type": "torpedo",
+  "damage_type": "cr_ex",
+  "armor_divisor": null,
+  "notes": "Heavy torpedo variant. Unguided.",
+  "tags": [
+    "torpedo",
+    "isomeric",
+    "heavy"
+  ],
+  "version": "1.0.0"
+}

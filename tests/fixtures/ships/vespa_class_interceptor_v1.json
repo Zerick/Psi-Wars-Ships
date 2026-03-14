@@ -1,0 +1,91 @@
+{
+  "template_id": "vespa_class_interceptor_v1",
+  "version": "1.0.0",
+  "name": "Vespa-Class Interceptor",
+  "faction_origin": "trader",
+  "sm": 4,
+  "ship_class": "interceptor",
+  "attributes": {
+    "st_hp": 95,
+    "ht": "12",
+    "hnd": 4,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 15,
+    "top_speed": 450,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 10,
+    "dr_rear": 10,
+    "dr_left": 10,
+    "dr_right": 10,
+    "dr_top": 10,
+    "dr_bottom": 10,
+    "dr_material": "nanopolymer",
+    "fdr_max": 150,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Medium Tactical Ultra-Scanner; Targeting +5; Distortion Jammer; Tactical ESM; Hyperspectral Sensors +3 notice"
+  },
+  "occ_raw": "1SV",
+  "loc_raw": "G2Wi4RL",
+  "logistics": {
+    "lwt": 6.9,
+    "load": 0.4,
+    "range_miles": 22000,
+    "cost": "$6M",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": 5
+  },
+  "traits": [
+    "vtol",
+    "configurable_wings"
+  ],
+  "modes": {
+    "High Maneuverability": {
+      "hnd": 5,
+      "accel": 3,
+      "top_speed": 250
+    }
+  },
+  "weapons": [
+    {
+      "weapon_ref": "fighter_blaster_cannon",
+      "mount": "fixed_front",
+      "linked_count": 2,
+      "arc": "front",
+      "notes": "Two linked blaster cannons. Total ROF 16 (+3)."
+    },
+    {
+      "weapon_ref": "particle_cannon_stinger",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front",
+      "notes": "Underslung stinger. ROF 1/3."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "Export variant of the Hornet. Standard controls instead of neural interface. No Trader tech penalty.",
+  "tags": [
+    "trader",
+    "interceptor"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/vespa-class-interceptor"
+}

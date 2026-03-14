@@ -1,0 +1,24 @@
+{
+  "weapon_id": "trader_capital_cannon",
+  "name": "Trader Capital-Scale Cannon",
+  "damage": "6d\u00d740(10) burn sur",
+  "acc": 9,
+  "range": "35 mi/90 mi",
+  "rof": "4",
+  "rcl": 2,
+  "shots": "NA",
+  "ewt": "500t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn_sur",
+  "armor_divisor": "(10)",
+  "notes": "Trader-tech muonic capital weapon. Surge effect.",
+  "tags": [
+    "trader",
+    "capital_scale",
+    "muonic",
+    "surge"
+  ],
+  "version": "1.0.0"
+}

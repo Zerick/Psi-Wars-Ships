@@ -1,0 +1,94 @@
+{
+  "template_id": "arcana_pattern_carrier_v1",
+  "version": "1.0.0",
+  "name": "Arcana-Pattern Carrier",
+  "faction_origin": "empire",
+  "sm": 13,
+  "ship_class": "carrier",
+  "attributes": {
+    "st_hp": 6000,
+    "ht": "13",
+    "hnd": -5,
+    "sr": 6
+  },
+  "mobility": {
+    "accel": 1,
+    "top_speed": 50,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 2500,
+    "dr_rear": 2500,
+    "dr_left": 2500,
+    "dr_right": 2500,
+    "dr_top": 2500,
+    "dr_bottom": 2500,
+    "dr_material": "carbide_composite",
+    "fdr_max": 10000,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital-Scale Tactical Ultra-Scanner; Large Area Jammer; Distortion Scrambler"
+  },
+  "occ_raw": "7100ASV",
+  "loc_raw": "gGs22t",
+  "logistics": {
+    "lwt": 340000.0,
+    "load": 150000.0,
+    "range_miles": null,
+    "cost": "$60B",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 5,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "heavy_force_screen",
+    "capital_ship"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "capital_scale_cannon",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 capital turrets."
+    },
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 8,
+      "arc": "all",
+      "notes": "8 corvette turrets."
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 8,
+      "arc": "all",
+      "notes": "8 plasma flak turrets."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "The primary Imperial fleet carrier. Massive hangar capacity.",
+  "tags": [
+    "empire",
+    "carrier",
+    "capital_ship"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/arcana-pattern-carrier"
+}

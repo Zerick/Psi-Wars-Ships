@@ -1,0 +1,22 @@
+{
+  "weapon_id": "ramming_prow",
+  "name": "Ramming Prow",
+  "damage": "6d\u00d74 cr",
+  "acc": 0,
+  "range": "collision",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "NA",
+  "ewt": "0",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "ram",
+  "damage_type": "cr",
+  "armor_divisor": null,
+  "notes": "Requires collision range. Facing: F.",
+  "tags": [
+    "ram",
+    "melee"
+  ],
+  "version": "1.0.0"
+}

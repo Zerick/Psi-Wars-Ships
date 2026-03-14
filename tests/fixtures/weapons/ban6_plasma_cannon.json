@@ -1,0 +1,23 @@
+{
+  "weapon_id": "ban6_plasma_cannon",
+  "name": "BAN-6 Plasma Cannon",
+  "damage": "5d\u00d720(2) burn ex",
+  "acc": 6,
+  "range": "2 mi/10 mi",
+  "rof": "1/3",
+  "rcl": 3,
+  "shots": "15/3E",
+  "ewt": "1200",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "plasma",
+  "damage_type": "burn_ex",
+  "armor_divisor": "(2)",
+  "notes": "Lighter B00-M variant. Same overheating rules: risks overheating after 3 shots.",
+  "tags": [
+    "redjack",
+    "plasma",
+    "fighter_scale"
+  ],
+  "version": "1.0.0"
+}

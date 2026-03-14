@@ -1,0 +1,92 @@
+{
+  "template_id": "regal_pattern_cruiser_v1",
+  "version": "1.0.0",
+  "name": "Regal-Pattern Cruiser",
+  "faction_origin": "empire",
+  "sm": 11,
+  "ship_class": "cruiser",
+  "attributes": {
+    "st_hp": 3500,
+    "ht": "13",
+    "hnd": -1,
+    "sr": 6
+  },
+  "mobility": {
+    "accel": 6,
+    "top_speed": 110,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 2500,
+    "dr_rear": 2500,
+    "dr_left": 2500,
+    "dr_right": 2500,
+    "dr_top": 2500,
+    "dr_bottom": 2500,
+    "dr_material": "carbide_composite",
+    "fdr_max": 4000,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital-Scale Ultra-Scanner; Targeting +5; Area Jammer; Scrambler; FTL Comm 300pc"
+  },
+  "occ_raw": "450ASV",
+  "loc_raw": "Gs17t",
+  "logistics": {
+    "lwt": 40000.0,
+    "load": 6000.0,
+    "range_miles": null,
+    "cost": "$10B",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 5,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [
+    "double_dr_vs_plasma",
+    "vtol"
+  ],
+  "modes": {},
+  "weapons": [
+    {
+      "weapon_ref": "capital_scale_cannon",
+      "mount": "turret",
+      "linked_count": 4,
+      "arc": "all",
+      "notes": "4 capital-scale cannon turrets (Total ROF 8)."
+    },
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 corvette-scale turrets (Total ROF 18)."
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 6,
+      "arc": "all",
+      "notes": "6 plasma flak turrets."
+    }
+  ],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "The standard Maradonian heavy cruiser. Backbone of the Imperial fleet.",
+  "tags": [
+    "empire",
+    "cruiser"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/regal-pattern-cruiser"
+}

@@ -1,0 +1,23 @@
+{
+  "weapon_id": "min3r_mining_laser",
+  "name": "MIN-3R Mining Laser",
+  "damage": "5d\u00d715(10) cut inc",
+  "acc": 12,
+  "range": "500/3 mi",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "25/5E",
+  "ewt": "4000",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "mining_laser",
+  "damage_type": "cut_inc",
+  "armor_divisor": "(10)",
+  "notes": "Designed for asteroid mining. Effective against slow, armored targets.",
+  "tags": [
+    "redjack",
+    "mining",
+    "laser"
+  ],
+  "version": "1.0.0"
+}
