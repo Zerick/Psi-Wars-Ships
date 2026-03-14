@@ -1,0 +1,9 @@
+[project]
+name = "psi-wars-combat-simulator"
+version = "0.1.0"
+description = "GURPS Psi-Wars Space Combat Simulator"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "tests_m1"]
+pythonpath = ["."]
