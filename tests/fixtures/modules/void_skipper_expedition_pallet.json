@@ -1,0 +1,15 @@
+{
+  "module_id": "void_skipper_expedition_pallet",
+  "name": "Expedition Pallet",
+  "slot_type": "cargo",
+  "weight_class": "light",
+  "weight_lbs": 100.0,
+  "cost": "$10,000",
+  "stat_effects": null,
+  "weapon_ref": null,
+  "grants_traits": [],
+  "fdr_provided": null,
+  "notes": "2.5 tons of open cargo space with mag-locks.",
+  "tags": ["arc", "cargo"],
+  "version": "1.0.0"
+}

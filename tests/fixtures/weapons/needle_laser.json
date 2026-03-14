@@ -1,0 +1,19 @@
+{
+  "weapon_id": "needle_laser",
+  "name": "Needle Laser",
+  "damage": "2d burn",
+  "acc": 15,
+  "range": "2 mi/5 mi",
+  "rof": "2",
+  "rcl": 1,
+  "shots": "NA",
+  "ewt": "500",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "Point-Defense weapon: +3 to intercept missiles/torpedoes. With Psiberface, the Needle Lasers are slaved to the pilot's autonomic nervous system — the ship may take one automatic Wait (Point Defense) action per turn without counting as the pilot's action and without multitasking penalties. Pilot still rolls Gunner (aided by +5 targeting computer and Soul of the Machine). Linked pair fires at ROF 4.",
+  "tags": ["spectre", "prototype", "point_defense", "psionic"],
+  "version": "1.0.0"
+}

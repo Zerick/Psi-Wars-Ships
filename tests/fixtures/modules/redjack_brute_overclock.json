@@ -1,0 +1,19 @@
+{
+  "module_id": "redjack_brute_overclock",
+  "name": "Redjack 'Brute' Overclock Engine",
+  "slot_type": "engine",
+  "weight_class": "heavy",
+  "weight_lbs": 4000.0,
+  "cost": "$8,000,000",
+  "stat_effects": {
+    "accel": 50,
+    "top_speed": 1100,
+    "hnd": 5
+  },
+  "weapon_ref": null,
+  "grants_traits": ["high_g_maneuvers_penalty"],
+  "fdr_provided": null,
+  "notes": "Move 50/1100, Handling drops to +5. Warning: High-G maneuvers apply -4 to pilot rolls. Chase of +22.",
+  "tags": ["redjack", "engine", "overclock"],
+  "version": "1.0.0"
+}

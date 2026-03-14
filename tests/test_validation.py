@@ -16,9 +16,10 @@ import pytest
 def _ht_is_valid(ht_value: str) -> bool:
     """
     Test whether a given HT string matches the expected pattern:
-    one or more digits, optionally followed by a single letter suffix.
+    one or more digits (starting with non-zero), optionally followed
+    by a recognized suffix: 'f' (fragile) or 'x' (explosive).
     """
-    pattern = r"^[1-9]\d*[a-z]?$"
+    pattern = r"^[1-9]\d*[fx]?$"
     return bool(re.match(pattern, ht_value))
 
 

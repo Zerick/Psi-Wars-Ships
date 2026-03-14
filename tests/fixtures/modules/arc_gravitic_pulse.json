@@ -1,0 +1,19 @@
+{
+  "module_id": "arc_gravitic_pulse",
+  "name": "ARC Gravitic Pulse Engine",
+  "slot_type": "engine",
+  "weight_class": "light",
+  "weight_lbs": 3000.0,
+  "cost": "$15,000,000",
+  "stat_effects": {
+    "accel": 35,
+    "top_speed": 950,
+    "hnd": 6
+  },
+  "weapon_ref": null,
+  "grants_traits": [],
+  "fdr_provided": null,
+  "notes": "Default engine. Move 35/950, Handling +6. Chase of +22.",
+  "tags": ["arc", "engine", "gravitic", "prototype"],
+  "version": "1.0.0"
+}

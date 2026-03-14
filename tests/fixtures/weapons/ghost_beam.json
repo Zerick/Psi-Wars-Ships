@@ -1,0 +1,19 @@
+{
+  "weapon_id": "ghost_beam",
+  "name": "Ghost Beam",
+  "damage": "4d tox",
+  "acc": 18,
+  "range": "22000",
+  "rof": "1",
+  "rcl": 1,
+  "shots": "NA",
+  "ewt": "800",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "tox",
+  "armor_divisor": null,
+  "notes": "Ignores ship hull DR entirely. Blocked by force screens. Targets the pilot directly with toxic damage. Requires psionic 'tuning' via the Psiberface to operate — non-Orphean pilots cannot fire this weapon. Relic-class weapon technology.",
+  "tags": ["spectre", "prototype", "relic", "psionic", "anti_personnel"],
+  "version": "1.0.0"
+}

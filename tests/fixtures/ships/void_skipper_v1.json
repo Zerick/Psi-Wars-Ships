@@ -1,0 +1,113 @@
+{
+  "template_id": "void_skipper_v1",
+  "version": "1.0.0",
+  "name": "Void-Skipper Long-Range Stealth Courier",
+  "faction_origin": "arc",
+  "sm": 5,
+  "ship_class": "courier",
+
+  "attributes": {
+    "st_hp": 100,
+    "ht": "12",
+    "hnd": 6,
+    "sr": 3
+  },
+
+  "mobility": {
+    "accel": 35,
+    "top_speed": 950,
+    "stall_speed": 65
+  },
+
+  "afterburner": null,
+
+  "defense": {
+    "dr_front": 10,
+    "dr_rear": 10,
+    "dr_left": 10,
+    "dr_right": 10,
+    "dr_top": 10,
+    "dr_bottom": 10,
+    "dr_material": "ablative_stealth_coating",
+    "fdr_max": 150,
+    "force_screen_type": "standard"
+  },
+
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -6,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Medium Tactical Ultra-Scanner. Base ECM -6 from Ghost-Shell (default module). With co-pilot running Silent (Move 10/300), ECM increases to -10. Flight computer can be mind-linked: pilot with high Psychic ability gains +1 Handling (to +7) and Chase up to +23."
+  },
+
+  "occ_raw": "2ASV+4SV",
+  "loc_raw": "g2Wi3rR",
+
+  "logistics": {
+    "lwt": 30.0,
+    "load": 4.5,
+    "range_miles": 30000,
+    "cost": "$45M",
+    "hyperdrive_rating": 4,
+    "jump_capacity": 4,
+    "endurance": "Void-Skipper Jump Drive with rapid-cycle capacitors",
+    "signature_cost": 10
+  },
+
+  "traits": [
+    "prototype",
+    "stealth_coating",
+    "psychic_link_capable",
+    "no_pressurized_interior",
+    "vacc_suit_required"
+  ],
+
+  "modes": {
+    "Silent Running": {
+      "accel": 10,
+      "top_speed": 300
+    },
+    "Psychic Link": {
+      "hnd": 7
+    }
+  },
+
+  "weapons": [],
+
+  "module_slots": [
+    {
+      "slot_id": "accessory",
+      "slot_type": "accessory",
+      "weight_class": "any",
+      "max_weight": 2000.0,
+      "notes": "Accessory slot. Default: Ghost-Shell Stealth-Field Generator. Alternatives: Extra Fuel Cell, ELINT Sensor Suite. Swap in hangar, approx 1 hour."
+    },
+    {
+      "slot_id": "cargo_utility",
+      "slot_type": "cargo",
+      "weight_class": "any",
+      "max_weight": 3000.0,
+      "notes": "Cargo/Utility slot. Default: Pneumatic Vehicle Rack (2 grav-bikes or 1 SM+2 rover). Alternatives: Passenger Coffins (4 pods), Expedition Pallet (2.5 tons cargo)."
+    },
+    {
+      "slot_id": "engine",
+      "slot_type": "engine",
+      "weight_class": "any",
+      "max_weight": 5000.0,
+      "notes": "Engine slot. Default: ARC Gravitic Pulse (Move 35/950, Hnd +6, Chase +22). Alternative: Redjack Brute Overclock (Move 50/1100, Hnd +5, -4 High-G penalty, Chase +22)."
+    }
+  ],
+
+  "craft_complement": [],
+
+  "description": "The Void-Skipper looks like a jagged, obsidian needle. The tandem cockpit sits forward like a dragonfly's head, with the rest of the ship consisting of the massive Jump Drive and the modular belly rack. Designed as a prototype by ARC with custom Redjack overhaul, it is classified as a Long-Range Stealth Courier and Prototype Infiltrator. The cockpit houses a Pilot and a Systems Op/Co-Pilot in a cramped, lean-back configuration. No pressurized interior; pilots must wear vacc suits. At $45M it is nearly 14 times the cost of a Drifter, reflecting its prototype status and the unique Rating 4 drive.",
+  "tags": ["arc", "redjack", "prototype", "courier", "stealth", "modular"],
+  "source_url": null
+}

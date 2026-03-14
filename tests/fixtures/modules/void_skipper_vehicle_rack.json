@@ -1,0 +1,15 @@
+{
+  "module_id": "void_skipper_vehicle_rack",
+  "name": "Pneumatic Vehicle Rack",
+  "slot_type": "cargo",
+  "weight_class": "light",
+  "weight_lbs": 200.0,
+  "cost": "$50,000",
+  "stat_effects": null,
+  "weapon_ref": null,
+  "grants_traits": [],
+  "fdr_provided": null,
+  "notes": "Can house 2 Grav-Bikes or 1 small SM+2 Rover (unpressurized).",
+  "tags": ["arc", "cargo", "vehicle_storage"],
+  "version": "1.0.0"
+}

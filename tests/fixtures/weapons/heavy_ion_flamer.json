@@ -1,0 +1,19 @@
+{
+  "weapon_id": "heavy_ion_flamer",
+  "name": "Heavy Ion Flamer",
+  "damage": "12d burn",
+  "acc": 6,
+  "range": "500/3 mi",
+  "rof": "6",
+  "rcl": 1,
+  "shots": "NA",
+  "ewt": "1200",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "plasma",
+  "damage_type": "burn",
+  "armor_divisor": null,
+  "notes": "Surge effect. Melts shields: force screen disabled for 2 rounds after hit (various rolls can reduce to 1 round). Wide-angle mode: +4 to hit but armor divisor becomes (0.5), effectively doubling armor. Linked pair fires at ROF 12 (+3 to hit).",
+  "tags": ["spectre", "prototype", "surge", "shield_breaker"],
+  "version": "1.0.0"
+}

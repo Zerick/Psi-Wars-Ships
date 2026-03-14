@@ -1,0 +1,15 @@
+{
+  "module_id": "ghost_shell_stealth",
+  "name": "ARC 'Ghost-Shell' Stealth-Field Generator",
+  "slot_type": "accessory",
+  "weight_class": "light",
+  "weight_lbs": 500.0,
+  "cost": "$5,000,000",
+  "stat_effects": null,
+  "weapon_ref": null,
+  "grants_traits": ["active_stealth", "ghost_shell"],
+  "fdr_provided": null,
+  "notes": "Active emission-masking system. -6 penalty to all scans. If co-pilot runs 'Silent' (Move reduced to 10/300), increases to -10. Requires active co-pilot engagement. Multiples do not stack.",
+  "tags": ["arc", "stealth", "accessory", "prototype"],
+  "version": "1.0.0"
+}

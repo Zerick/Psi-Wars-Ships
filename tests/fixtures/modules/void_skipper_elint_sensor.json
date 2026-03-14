@@ -1,0 +1,15 @@
+{
+  "module_id": "void_skipper_elint_sensor",
+  "name": "High-Fidelity ELINT Sensor Suite",
+  "slot_type": "accessory",
+  "weight_class": "light",
+  "weight_lbs": 400.0,
+  "cost": "$2,000,000",
+  "stat_effects": null,
+  "weapon_ref": null,
+  "grants_traits": ["elint_suite"],
+  "fdr_provided": null,
+  "notes": "+5 to Electronic Ops (Sensors). Multiples do not stack.",
+  "tags": ["arc", "sensor", "accessory", "elint"],
+  "version": "1.0.0"
+}

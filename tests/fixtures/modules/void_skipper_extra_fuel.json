@@ -1,0 +1,15 @@
+{
+  "module_id": "void_skipper_extra_fuel",
+  "name": "Extra Fuel Cell",
+  "slot_type": "accessory",
+  "weight_class": "light",
+  "weight_lbs": 800.0,
+  "cost": "$500,000",
+  "stat_effects": null,
+  "weapon_ref": null,
+  "grants_traits": [],
+  "fdr_provided": null,
+  "notes": "Adds 10,000 miles to range and +2 Shunts (total 6).",
+  "tags": ["arc", "fuel", "accessory"],
+  "version": "1.0.0"
+}
