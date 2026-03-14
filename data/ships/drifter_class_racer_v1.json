@@ -1,0 +1,91 @@
+{
+  "template_id": "drifter_class_racer_v1",
+  "version": "1.0.0",
+  "name": "Drifter Class Racer",
+  "faction_origin": "redjack",
+  "sm": 4,
+  "ship_class": "racer",
+  "attributes": {
+    "st_hp": 80,
+    "ht": "12",
+    "hnd": 4,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 25,
+    "top_speed": 750,
+    "stall_speed": 80
+  },
+  "afterburner": {
+    "accel": 40,
+    "top_speed": 850,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": null,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 0,
+    "dr_rear": 0,
+    "dr_left": 0,
+    "dr_right": 0,
+    "dr_top": 0,
+    "dr_bottom": 0,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": null,
+    "targeting_bonus": 5,
+    "ecm_rating": 0,
+    "night_vision": 9,
+    "comm_range": null,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "NEEDS MANUAL EXTRACTION"
+  },
+  "occ_raw": "NEEDS MANUAL EXTRACTION",
+  "loc_raw": "NEEDS MANUAL EXTRACTION",
+  "logistics": {
+    "lwt": 6.5,
+    "load": 2.5,
+    "range_miles": null,
+    "cost": "NEEDS MANUAL EXTRACTION",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "",
+  "tags": [
+    "redjack",
+    "racer"
+  ],
+  "source_url": null,
+  "_extraction_notes": {
+    "remaining_raw": "1S+1rx 15\u2020 \u2014 12,000 $3.5M g2Wi3rR 55*",
+    "needs_manual_review": [
+      "electronics",
+      "occ_raw",
+      "loc_raw",
+      "cost",
+      "range",
+      "weapons",
+      "modules",
+      "traits",
+      "modes",
+      "description",
+      "dr_material",
+      "dr_directional_details"
+    ]
+  }
+}

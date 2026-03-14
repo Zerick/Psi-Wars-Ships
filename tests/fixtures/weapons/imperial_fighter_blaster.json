@@ -1,0 +1,19 @@
+{
+  "weapon_id": "imperial_fighter_blaster",
+  "name": "Imperial Fighter Blaster",
+  "damage": "6d×5(5) burn",
+  "acc": 9,
+  "range": "2700/8000",
+  "rof": "3",
+  "rcl": 2,
+  "shots": "200/Fp",
+  "ewt": "1000",
+  "st_requirement": "75M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "Standard Imperial fighter weapon. When linked (x2), double ROF to 6 (+1 to hit) in Action vehicular combat.",
+  "tags": ["imperial", "fighter_scale", "beam"],
+  "version": "1.0.0"
+}

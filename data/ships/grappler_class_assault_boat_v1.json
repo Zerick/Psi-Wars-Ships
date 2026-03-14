@@ -1,0 +1,91 @@
+{
+  "template_id": "grappler_class_assault_boat_v1",
+  "version": "1.0.0",
+  "name": "Grappler Class Assault Boat",
+  "faction_origin": "redjack",
+  "sm": 5,
+  "ship_class": "striker",
+  "attributes": {
+    "st_hp": 120,
+    "ht": "12",
+    "hnd": 1,
+    "sr": 4
+  },
+  "mobility": {
+    "accel": 6,
+    "top_speed": 350,
+    "stall_speed": 120
+  },
+  "afterburner": {
+    "accel": 10,
+    "top_speed": 425,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": null,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 0,
+    "dr_rear": 0,
+    "dr_left": 0,
+    "dr_right": 0,
+    "dr_top": 0,
+    "dr_bottom": 0,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": null,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": null,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "NEEDS MANUAL EXTRACTION"
+  },
+  "occ_raw": "NEEDS MANUAL EXTRACTION",
+  "loc_raw": "NEEDS MANUAL EXTRACTION",
+  "logistics": {
+    "lwt": 19.3,
+    "load": 6.9,
+    "range_miles": null,
+    "cost": "NEEDS MANUAL EXTRACTION",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "",
+  "tags": [
+    "redjack",
+    "striker"
+  ],
+  "source_url": null,
+  "_extraction_notes": {
+    "remaining_raw": "1SV+6SV 100/50\u2020 \u2014 17,000 $4.5M g2Wi3rR 0 +",
+    "needs_manual_review": [
+      "electronics",
+      "occ_raw",
+      "loc_raw",
+      "cost",
+      "range",
+      "weapons",
+      "modules",
+      "traits",
+      "modes",
+      "description",
+      "dr_material",
+      "dr_directional_details"
+    ]
+  }
+}

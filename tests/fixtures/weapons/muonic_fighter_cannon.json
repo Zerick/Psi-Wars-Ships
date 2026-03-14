@@ -1,0 +1,19 @@
+{
+  "weapon_id": "muonic_fighter_cannon",
+  "name": "Fighter-Scale Muonic Cannon",
+  "damage": "3d×5(10) burn",
+  "acc": 9,
+  "range": "1 mi/3 mi",
+  "rof": "8",
+  "rcl": 2,
+  "shots": "200",
+  "ewt": "1200",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(10)",
+  "notes": "Trader-tech muonic weapon. Excellent penetration.",
+  "tags": ["trader", "fighter_scale", "beam"],
+  "version": "1.0.0"
+}

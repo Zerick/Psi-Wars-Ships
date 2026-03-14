@@ -1,0 +1,26 @@
+{
+  "template_id": "invalid_ship",
+  "version": "1.0.0",
+  "name": "Broken Ship",
+  "faction_origin": "test",
+  "sm": 4,
+  "ship_class": "fighter",
+
+  "attributes": {
+    "st_hp": -50,
+    "ht": "12z",
+    "hnd": 2,
+    "sr": 3
+  },
+
+  "mobility": {
+    "accel": 10,
+    "top_speed": 400
+  },
+
+  "defense": {
+    "dr_front": 15,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  }
+}

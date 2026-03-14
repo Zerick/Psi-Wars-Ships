@@ -1,0 +1,131 @@
+{
+  "template_id": "wildcat_v1",
+  "version": "1.0.0",
+  "name": "Wildcat Class Fighter",
+  "faction_origin": "redjack",
+  "sm": 5,
+  "ship_class": "fighter",
+
+  "attributes": {
+    "st_hp": 120,
+    "ht": "13",
+    "hnd": 2,
+    "sr": 4
+  },
+
+  "mobility": {
+    "accel": 10,
+    "top_speed": 400,
+    "stall_speed": 60
+  },
+
+  "afterburner": {
+    "accel": 15,
+    "top_speed": 500,
+    "hnd_mod": 1,
+    "fuel_multiplier": 4.0,
+    "range_override": 5000,
+    "is_high_g": false
+  },
+
+  "defense": {
+    "dr_front": 50,
+    "dr_rear": 25,
+    "dr_left": 25,
+    "dr_right": 25,
+    "dr_top": 25,
+    "dr_bottom": 25,
+    "dr_material": "carbide_composite",
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+
+  "electronics": {
+    "ultrascanner_range": 30,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 1000,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": true,
+    "has_tactical_esm": true,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "Medium Tactical Ultra-Scanner; Distortion Jammer; Decoy Launcher"
+  },
+
+  "occ_raw": "1ASV+1rx",
+  "loc_raw": "g2Wi3rR",
+
+  "logistics": {
+    "lwt": 18.0,
+    "load": 5.0,
+    "range_miles": 20000,
+    "cost": "$4M",
+    "hyperdrive_rating": 1,
+    "jump_capacity": 2,
+    "endurance": "24 hours at full speed",
+    "signature_cost": 5
+  },
+
+  "traits": [
+    "double_dr_vs_plasma",
+    "double_dr_vs_shaped_charge",
+    "ejection_seat"
+  ],
+
+  "modes": {
+    "Heavy Module Loaded": {
+      "hnd": 0,
+      "accel": 9,
+      "top_speed": 400,
+      "stall_speed": 75
+    }
+  },
+
+  "weapons": [],
+
+  "module_slots": [
+    {
+      "slot_id": "main_weapon",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 2000.0,
+      "notes": "Central nose-mounted, rated for one-ton cannon. 30 min swap with tools, 1 hr without."
+    },
+    {
+      "slot_id": "wing_left",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 1200.0,
+      "notes": "Left wing weapon mount, rated for 1200 lbs."
+    },
+    {
+      "slot_id": "wing_right",
+      "slot_type": "weapon",
+      "weight_class": "any",
+      "max_weight": 1200.0,
+      "notes": "Right wing weapon mount, rated for 1200 lbs."
+    },
+    {
+      "slot_id": "accessory",
+      "slot_type": "accessory",
+      "weight_class": "any",
+      "max_weight": 4000.0,
+      "notes": "Central accessory module. Heavy modules trigger stat penalties."
+    },
+    {
+      "slot_id": "armor",
+      "slot_type": "armor",
+      "weight_class": "any",
+      "max_weight": 2500.0,
+      "notes": "Armor overlay module. Heavy modules trigger stat penalties. 1 hr swap with tools."
+    }
+  ],
+
+  "craft_complement": [],
+
+  "description": "The Wildcat is not an especially beautiful craft. Stripped of its modules, it looks more like a fighter frame with naked attachment struts.",
+  "tags": ["redjack", "starfighter", "modular"],
+  "source_url": "https://psi-wars.wikidot.com/wildcat-class-fighter"
+}

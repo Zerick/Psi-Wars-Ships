@@ -1,0 +1,15 @@
+{
+  "module_id": "silverback_force_screen",
+  "name": "Redjack AM49 'Silverback' Force Screen Module",
+  "slot_type": "accessory",
+  "weight_class": "heavy",
+  "weight_lbs": 4000.0,
+  "cost": "$400,000",
+  "stat_effects": null,
+  "weapon_ref": null,
+  "grants_traits": ["force_screen"],
+  "fdr_provided": 300,
+  "notes": "Contains two F-cells; force screen lasts 12 minutes continuous use. Provides 300 ablative, hardened DR. Recharges in 12 hours off hyperium reactor.",
+  "tags": ["redjack", "accessory", "heavy", "force_screen"],
+  "version": "1.0.0"
+}

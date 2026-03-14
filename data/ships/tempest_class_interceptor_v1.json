@@ -1,0 +1,91 @@
+{
+  "template_id": "tempest_class_interceptor_v1",
+  "version": "1.0.0",
+  "name": "Tempest Class Interceptor",
+  "faction_origin": "empire",
+  "sm": 4,
+  "ship_class": "interceptor",
+  "attributes": {
+    "st_hp": 85,
+    "ht": "11f",
+    "hnd": 5,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 25,
+    "top_speed": 800,
+    "stall_speed": 0
+  },
+  "afterburner": {
+    "accel": 35,
+    "top_speed": 1000,
+    "hnd_mod": 0,
+    "fuel_multiplier": 4.0,
+    "range_override": null,
+    "is_high_g": false
+  },
+  "defense": {
+    "dr_front": 0,
+    "dr_rear": 0,
+    "dr_left": 0,
+    "dr_right": 0,
+    "dr_top": 0,
+    "dr_bottom": 0,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": null,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": null,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "NEEDS MANUAL EXTRACTION"
+  },
+  "occ_raw": "NEEDS MANUAL EXTRACTION",
+  "loc_raw": "NEEDS MANUAL EXTRACTION",
+  "logistics": {
+    "lwt": 5.5,
+    "load": 0.7,
+    "range_miles": null,
+    "cost": "NEEDS MANUAL EXTRACTION",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "",
+  "tags": [
+    "empire",
+    "interceptor"
+  ],
+  "source_url": null,
+  "_extraction_notes": {
+    "remaining_raw": "1S 10\u2020 100 20,000/1 shunt $10M g3rR2Wi 40 +2",
+    "needs_manual_review": [
+      "electronics",
+      "occ_raw",
+      "loc_raw",
+      "cost",
+      "range",
+      "weapons",
+      "modules",
+      "traits",
+      "modes",
+      "description",
+      "dr_material",
+      "dr_directional_details"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "weapon_id": "capital_scale_cannon",
+  "name": "Capital-Scale Cannon",
+  "damage": "6d×75(5) burn",
+  "acc": 9,
+  "range": "60 mi/180 mi",
+  "rof": "2",
+  "rcl": 2,
+  "shots": "NA",
+  "ewt": "500t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "Standard capital-ship battery weapon. Reactor powered, unlimited shots.",
+  "tags": ["capital_scale", "beam", "imperial"],
+  "version": "1.0.0"
+}

@@ -1,0 +1,19 @@
+{
+  "weapon_id": "super_heavy_cannon",
+  "name": "Super-Heavy Cannon",
+  "damage": "6d×120(5) burn",
+  "acc": 9,
+  "range": "170 mi/500 mi",
+  "rof": "3",
+  "rcl": 2,
+  "shots": "NA",
+  "ewt": "5000t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "beam",
+  "damage_type": "burn",
+  "armor_divisor": "(5)",
+  "notes": "Largest standard naval weapon. Reactor powered.",
+  "tags": ["capital_scale", "beam", "imperial", "super_heavy"],
+  "version": "1.0.0"
+}

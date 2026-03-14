@@ -1,0 +1,22 @@
+{
+  "module_id": "tank_armor",
+  "name": "Redjack 'Tank' Armor Module",
+  "slot_type": "armor",
+  "weight_class": "heavy",
+  "weight_lbs": 2500.0,
+  "cost": "$300,000",
+  "stat_effects": {
+    "dr_front": 110,
+    "dr_rear": 55,
+    "dr_left": 55,
+    "dr_right": 55,
+    "dr_top": 55,
+    "dr_bottom": 55
+  },
+  "weapon_ref": null,
+  "grants_traits": ["triple_dr_vs_plasma", "triple_dr_vs_shaped_charge"],
+  "fdr_provided": null,
+  "notes": "Integrates EMA armor onto heavy carbide plates. Triple DR against plasma, plasma warheads, or shaped charges. Replaces composite armor trait.",
+  "tags": ["redjack", "armor", "heavy"],
+  "version": "1.0.0"
+}

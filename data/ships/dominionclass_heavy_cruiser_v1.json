@@ -1,0 +1,84 @@
+{
+  "template_id": "dominionclass_heavy_cruiser_v1",
+  "version": "1.0.0",
+  "name": "Imperator-Class Dreadnought as",
+  "faction_origin": "empire",
+  "sm": 12,
+  "ship_class": "dreadnought",
+  "attributes": {
+    "st_hp": 5000,
+    "ht": "12",
+    "hnd": -2,
+    "sr": 6
+  },
+  "mobility": {
+    "accel": 5,
+    "top_speed": 100,
+    "stall_speed": 5000
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 0,
+    "dr_rear": 0,
+    "dr_left": 0,
+    "dr_right": 0,
+    "dr_top": 0,
+    "dr_bottom": 0,
+    "dr_material": null,
+    "fdr_max": 5000,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": null,
+    "targeting_bonus": 5,
+    "ecm_rating": 0,
+    "night_vision": 9,
+    "comm_range": null,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "NEEDS MANUAL EXTRACTION"
+  },
+  "occ_raw": "NEEDS MANUAL EXTRACTION",
+  "loc_raw": "NEEDS MANUAL EXTRACTION",
+  "logistics": {
+    "lwt": 150000.0,
+    "load": 13000.0,
+    "range_miles": null,
+    "cost": "NEEDS MANUAL EXTRACTION",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "",
+  "tags": [
+    "empire",
+    "dreadnought"
+  ],
+  "source_url": null,
+  "_extraction_notes": {
+    "remaining_raw": "1200ASV 3000* 5,000 5 shunts $30B gGs20t 0",
+    "needs_manual_review": [
+      "electronics",
+      "occ_raw",
+      "loc_raw",
+      "cost",
+      "range",
+      "weapons",
+      "modules",
+      "traits",
+      "modes",
+      "description",
+      "dr_material",
+      "dr_directional_details"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "weapon_id": "plasma_flak_turret",
+  "name": "Plasma Flak Turret",
+  "damage": "6d×10 burn ex",
+  "acc": 0,
+  "range": "2000/6000",
+  "rof": "20",
+  "rcl": 1,
+  "shots": "NA",
+  "ewt": "100t",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "flak",
+  "damage_type": "burn_ex",
+  "armor_divisor": null,
+  "notes": "Suppression fire out to Extreme range. Extreme: hit on 1+SM. Long or closer: hit on 5+SM. Targets in range count as rough terrain (-2 handling).",
+  "tags": ["capital_scale", "flak", "plasma"],
+  "version": "1.0.0"
+}

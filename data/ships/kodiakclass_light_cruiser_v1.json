@@ -1,0 +1,84 @@
+{
+  "template_id": "kodiakclass_light_cruiser_v1",
+  "version": "1.0.0",
+  "name": "Kodiak-Class Light Cruiser",
+  "faction_origin": "redjack",
+  "sm": 11,
+  "ship_class": "cruiser",
+  "attributes": {
+    "st_hp": 3000,
+    "ht": "14",
+    "hnd": 0,
+    "sr": 6
+  },
+  "mobility": {
+    "accel": 10,
+    "top_speed": 150,
+    "stall_speed": 3000
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 0,
+    "dr_rear": 0,
+    "dr_left": 0,
+    "dr_right": 0,
+    "dr_top": 0,
+    "dr_bottom": 0,
+    "dr_material": null,
+    "fdr_max": 2000,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": null,
+    "targeting_bonus": 5,
+    "ecm_rating": 0,
+    "night_vision": 9,
+    "comm_range": null,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "NEEDS MANUAL EXTRACTION"
+  },
+  "occ_raw": "NEEDS MANUAL EXTRACTION",
+  "loc_raw": "NEEDS MANUAL EXTRACTION",
+  "logistics": {
+    "lwt": 27000.0,
+    "load": 3750.0,
+    "range_miles": null,
+    "cost": "NEEDS MANUAL EXTRACTION",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "",
+  "tags": [
+    "redjack",
+    "cruiser"
+  ],
+  "source_url": null,
+  "_extraction_notes": {
+    "remaining_raw": "200 ASV 2000* 2000 7 shunts,",
+    "needs_manual_review": [
+      "electronics",
+      "occ_raw",
+      "loc_raw",
+      "cost",
+      "range",
+      "weapons",
+      "modules",
+      "traits",
+      "modes",
+      "description",
+      "dr_material",
+      "dr_directional_details"
+    ]
+  }
+}

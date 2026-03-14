@@ -1,0 +1,19 @@
+{
+  "weapon_id": "particle_cannon_stinger",
+  "name": "Particle Cannon (Stinger)",
+  "damage": "6d×15(15) burn",
+  "acc": 9,
+  "range": "1 mi/3 mi",
+  "rof": "1/3",
+  "rcl": 2,
+  "shots": "15",
+  "ewt": "1400",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "particle",
+  "damage_type": "burn",
+  "armor_divisor": "(15)",
+  "notes": "Slow recharge (1 shot per 3 turns). Reserved for anti-corvette use.",
+  "tags": ["trader", "fighter_scale", "particle", "anti_corvette"],
+  "version": "1.0.0"
+}

@@ -1,0 +1,84 @@
+{
+  "template_id": "maulerclass_battlecarrier_v1",
+  "version": "1.0.0",
+  "name": "Maulerclass BattleCarrier",
+  "faction_origin": "rath",
+  "sm": 12,
+  "ship_class": "battleship",
+  "attributes": {
+    "st_hp": 5000,
+    "ht": "9f",
+    "hnd": -4,
+    "sr": 5
+  },
+  "mobility": {
+    "accel": 2,
+    "top_speed": 50,
+    "stall_speed": 5000
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 0,
+    "dr_rear": 0,
+    "dr_left": 0,
+    "dr_right": 0,
+    "dr_top": 0,
+    "dr_bottom": 0,
+    "dr_material": null,
+    "fdr_max": 0,
+    "force_screen_type": "none"
+  },
+  "electronics": {
+    "ultrascanner_range": null,
+    "targeting_bonus": 5,
+    "ecm_rating": 0,
+    "night_vision": 9,
+    "comm_range": null,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "NEEDS MANUAL EXTRACTION"
+  },
+  "occ_raw": "NEEDS MANUAL EXTRACTION",
+  "loc_raw": "NEEDS MANUAL EXTRACTION",
+  "logistics": {
+    "lwt": 110000.0,
+    "load": 30000.0,
+    "range_miles": null,
+    "cost": "NEEDS MANUAL EXTRACTION",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "",
+  "tags": [
+    "rath",
+    "battleship"
+  ],
+  "source_url": null,
+  "_extraction_notes": {
+    "remaining_raw": "1200ASV 6000/2500* \u2014 NA (Rating 1, 7",
+    "needs_manual_review": [
+      "electronics",
+      "occ_raw",
+      "loc_raw",
+      "cost",
+      "range",
+      "weapons",
+      "modules",
+      "traits",
+      "modes",
+      "description",
+      "dr_material",
+      "dr_directional_details"
+    ]
+  }
+}

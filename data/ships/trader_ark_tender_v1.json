@@ -1,0 +1,84 @@
+{
+  "template_id": "trader_ark_tender_v1",
+  "version": "1.0.0",
+  "name": "Trader Ark Tender",
+  "faction_origin": "trader",
+  "sm": 4,
+  "ship_class": "carrier",
+  "attributes": {
+    "st_hp": 15000,
+    "ht": "10",
+    "hnd": 0,
+    "sr": 3
+  },
+  "mobility": {
+    "accel": 0,
+    "top_speed": 0,
+    "stall_speed": 0
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 0,
+    "dr_rear": 0,
+    "dr_left": 0,
+    "dr_right": 0,
+    "dr_top": 0,
+    "dr_bottom": 0,
+    "dr_material": null,
+    "fdr_max": 20000,
+    "force_screen_type": "standard"
+  },
+  "electronics": {
+    "ultrascanner_range": null,
+    "targeting_bonus": 5,
+    "ecm_rating": 0,
+    "night_vision": 9,
+    "comm_range": null,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "NEEDS MANUAL EXTRACTION"
+  },
+  "occ_raw": "NEEDS MANUAL EXTRACTION",
+  "loc_raw": "NEEDS MANUAL EXTRACTION",
+  "logistics": {
+    "lwt": 0,
+    "load": 0,
+    "range_miles": null,
+    "cost": "NEEDS MANUAL EXTRACTION",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "",
+  "tags": [
+    "trader",
+    "carrier"
+  ],
+  "source_url": null,
+  "_extraction_notes": {
+    "remaining_raw": "* -4/5* 13\u2020 1/150 3,000,000 900,000 +15 10,000ASV* 10,000\u2021* 20,000* NA (Rating 1)",
+    "needs_manual_review": [
+      "electronics",
+      "occ_raw",
+      "loc_raw",
+      "cost",
+      "range",
+      "weapons",
+      "modules",
+      "traits",
+      "modes",
+      "description",
+      "dr_material",
+      "dr_directional_details"
+    ]
+  }
+}

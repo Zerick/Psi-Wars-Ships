@@ -1,0 +1,84 @@
+{
+  "template_id": "executionerclass_artillery_cruiser_v1",
+  "version": "1.0.0",
+  "name": "Executioner-Class Artillery Cruiser as",
+  "faction_origin": "empire",
+  "sm": 13,
+  "ship_class": "cruiser",
+  "attributes": {
+    "st_hp": 7000,
+    "ht": "12",
+    "hnd": -5,
+    "sr": 6
+  },
+  "mobility": {
+    "accel": 1,
+    "top_speed": 50,
+    "stall_speed": 7000
+  },
+  "afterburner": null,
+  "defense": {
+    "dr_front": 4000,
+    "dr_rear": 4000,
+    "dr_left": 4000,
+    "dr_right": 4000,
+    "dr_top": 4000,
+    "dr_bottom": 4000,
+    "dr_material": null,
+    "fdr_max": 7500,
+    "force_screen_type": "heavy"
+  },
+  "electronics": {
+    "ultrascanner_range": null,
+    "targeting_bonus": 5,
+    "ecm_rating": 0,
+    "night_vision": 9,
+    "comm_range": null,
+    "ftl_comm_range": null,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": false,
+    "has_neural_interface": false,
+    "sensor_notes": "NEEDS MANUAL EXTRACTION"
+  },
+  "occ_raw": "NEEDS MANUAL EXTRACTION",
+  "loc_raw": "NEEDS MANUAL EXTRACTION",
+  "logistics": {
+    "lwt": 370000.0,
+    "load": 20000.0,
+    "range_miles": null,
+    "cost": "NEEDS MANUAL EXTRACTION",
+    "hyperdrive_rating": null,
+    "jump_capacity": null,
+    "endurance": null,
+    "signature_cost": null
+  },
+  "traits": [],
+  "modes": {},
+  "weapons": [],
+  "module_slots": [],
+  "craft_complement": [],
+  "description": "",
+  "tags": [
+    "empire",
+    "cruiser"
+  ],
+  "source_url": null,
+  "_extraction_notes": {
+    "remaining_raw": "2000ASV 4000/2500* 7,500 3 shunts $80B gGs4t 0",
+    "needs_manual_review": [
+      "electronics",
+      "occ_raw",
+      "loc_raw",
+      "cost",
+      "range",
+      "weapons",
+      "modules",
+      "traits",
+      "modes",
+      "description",
+      "dr_material",
+      "dr_directional_details"
+    ]
+  }
+}

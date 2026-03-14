@@ -1,0 +1,15 @@
+{
+  "module_id": "boom_cannon_module",
+  "name": "B00-M Heavy Plasma Cannon Module",
+  "slot_type": "weapon",
+  "weight_class": "heavy",
+  "weight_lbs": 2000.0,
+  "cost": "$700,000",
+  "stat_effects": null,
+  "weapon_ref": "boom_heavy_plasma_cannon",
+  "grants_traits": [],
+  "fdr_provided": null,
+  "notes": "Most commonly used main weapon module for Wildcat. 30 min swap with tools.",
+  "tags": ["redjack", "weapon", "plasma", "heavy"],
+  "version": "1.0.0"
+}

@@ -4,6 +4,9 @@ __pycache__/
 *.pyo
 *.pyd
 
+venv/
+*.db
+
 # Virtual environment
 backend/venv/
 

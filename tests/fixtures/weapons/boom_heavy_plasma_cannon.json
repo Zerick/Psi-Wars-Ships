@@ -1,0 +1,19 @@
+{
+  "weapon_id": "boom_heavy_plasma_cannon",
+  "name": "NOV-4 Heavy Plasma Cannon (B00-M)",
+  "damage": "6d×30(2) burn ex",
+  "acc": 6,
+  "range": "4 mi/12 mi",
+  "rof": "1/3",
+  "rcl": 3,
+  "shots": "15/2F",
+  "ewt": "4000",
+  "st_requirement": "M",
+  "bulk": "-10",
+  "weapon_type": "plasma",
+  "damage_type": "burn_ex",
+  "armor_divisor": "(2)",
+  "notes": "Fires once per 3 turns. Risks overheating after 3 shots without 10+ seconds between. Full minute cooldown. Can aim at spot near target for +4 to hit but loses armor divisor.",
+  "tags": ["redjack", "fighter_scale", "plasma", "heavy"],
+  "version": "1.0.0"
+}

@@ -1,0 +1,110 @@
+{
+  "template_id": "sword_battleship_v1",
+  "version": "1.0.0",
+  "name": "Sword-Pattern Battleship",
+  "faction_origin": "empire",
+  "sm": 13,
+  "ship_class": "battleship",
+
+  "attributes": {
+    "st_hp": 7000,
+    "ht": "13",
+    "hnd": -4,
+    "sr": 6
+  },
+
+  "mobility": {
+    "accel": 3,
+    "top_speed": 90,
+    "stall_speed": 0
+  },
+
+  "afterburner": null,
+
+  "defense": {
+    "dr_front": 5000,
+    "dr_rear": 2500,
+    "dr_left": 2500,
+    "dr_right": 2500,
+    "dr_top": 2500,
+    "dr_bottom": 2500,
+    "dr_material": "carbide_composite",
+    "fdr_max": 10000,
+    "force_screen_type": "heavy"
+  },
+
+  "electronics": {
+    "ultrascanner_range": 4000,
+    "targeting_bonus": 5,
+    "ecm_rating": -4,
+    "night_vision": 9,
+    "comm_range": 10000,
+    "ftl_comm_range": 300,
+    "has_decoy_launcher": false,
+    "has_tactical_esm": false,
+    "has_distortion_scrambler": true,
+    "has_neural_interface": false,
+    "sensor_notes": "Capital-Scale Tactical Ultra-Scanner; Targeting Macroframe; Large Area Jammer -4 within 25 mi; Distortion Scrambler 25 mi range; Very Large FTL Comm Array 300 parsec"
+  },
+
+  "occ_raw": "2000ASV",
+  "loc_raw": "gGs21t",
+
+  "logistics": {
+    "lwt": 360000.0,
+    "load": 23000.0,
+    "range_miles": null,
+    "cost": "$110B",
+    "hyperdrive_rating": 2,
+    "jump_capacity": 5,
+    "endurance": "50-year fusion reactor",
+    "signature_cost": 30
+  },
+
+  "traits": [
+    "double_dr_vs_plasma",
+    "double_dr_vs_shaped_charge",
+    "capital_ship",
+    "heavy_force_screen"
+  ],
+
+  "modes": {},
+
+  "weapons": [
+    {
+      "weapon_ref": "super_heavy_cannon",
+      "mount": "turret",
+      "linked_count": 3,
+      "arc": "all",
+      "notes": "3 Super-heavy Turrets (Total RoF 9)"
+    },
+    {
+      "weapon_ref": "capital_scale_cannon",
+      "mount": "turret",
+      "linked_count": 10,
+      "arc": "all",
+      "notes": "10 Capital Turrets (Total RoF 20)"
+    },
+    {
+      "weapon_ref": "plasma_flak_turret",
+      "mount": "turret",
+      "linked_count": 8,
+      "arc": "all",
+      "notes": "8 mounted Plasma Flak Turrets (F/L/R/T)"
+    }
+  ],
+
+  "module_slots": [],
+
+  "craft_complement": [
+    {
+      "template_ref": "prestige_shuttle_v1",
+      "count": 5,
+      "notes": "5 Prestige-Class (or variant) Shuttles"
+    }
+  ],
+
+  "description": "The Sword-Pattern Battleship is a mainstay of the Imperial fleet, a vast wedge-shaped warship bristling with weapon batteries.",
+  "tags": ["empire", "capital_ship", "battleship"],
+  "source_url": "https://psi-wars.wikidot.com/sword-pattern-battleship"
+}
