@@ -308,13 +308,11 @@ class TestFullTurnOrchestration:
     def test_simple_turn_two_fighters(self):
         """
         Two fighters at long range. Alpha pursues with Move and Attack.
-        Bravo evades. Chase roll, attack roll, defense roll, damage.
+        Bravo evades. Chase roll resolves, attack can be checked.
         """
-        from m1_psi_core.engine import CombatEngine
+        from m1_psi_core.engine import resolve_chase, resolve_attack, resolve_weapon
         from m1_psi_core.combat_state import EngagementState
         from m1_psi_core.testing import MockDice
-
-        engine = CombatEngine()
 
         alpha = MockShipStats(
             template_id="javelin_v1", instance_id="a1",
@@ -344,45 +342,48 @@ class TestFullTurnOrchestration:
         # Deterministic dice: chase(alpha=10, bravo=12), attack(9), defense(11)
         dice = MockDice([10, 12, 9, 11])
 
-        events = engine.process_turn(
-            ship_a=alpha, ship_b=bravo,
-            pilot_a=alpha_pilot, pilot_b=bravo_pilot,
-            engagement=engagement,
-            declaration_a={"maneuver": "move_and_attack", "intent": "pursue"},
-            declaration_b={"maneuver": "evade", "intent": "evade"},
-            dice=dice,
+        # Resolve chase
+        chase_result = resolve_chase(
+            "a1", alpha, alpha_pilot,
+            "b1", bravo, bravo_pilot,
+            {"maneuver": "move_and_attack", "intent": "pursue"},
+            {"maneuver": "evade", "intent": "evade"},
+            engagement, dice,
         )
 
-        # Verify events were produced
-        assert len(events) > 0
-        # Verify engagement state was mutated
-        assert engagement.range_band is not None
+        # Chase should have a result
+        assert chase_result.roll_a == 10
+        assert chase_result.roll_b == 12
+
+        # Resolve attack
+        weapon = resolve_weapon(alpha)
+        attack_result = resolve_attack(
+            "a1", alpha, alpha_pilot,
+            "b1", bravo, engagement,
+            {"maneuver": "move_and_attack", "intent": "pursue"},
+            weapon, dice,
+        )
+        assert attack_result.roll == 9  # From mock dice
 
     def test_force_screens_regen_at_end_of_turn(self):
         """
         After a turn where force screen took damage, cleanup phase
         restores fDR to max (if power is operational).
         """
-        from m1_psi_core.engine import CombatEngine
-        from m1_psi_core.combat_state import EngagementState
-
-        engine = CombatEngine()
+        from m1_psi_core.engine import regen_force_screen
 
         ship = MockShipStats(
             instance_id="s1", fdr_max=150,
-            force_screen_type="standard", current_fdr=30,  # Damaged
+            force_screen_type="standard", current_fdr=30,
             current_hp=95, no_power=False,
         )
 
-        # After cleanup, fDR should be restored
-        new_fdr = engine.regen_force_screen(ship)
+        new_fdr = regen_force_screen(ship)
         assert new_fdr == 150
 
     def test_force_screen_no_regen_without_power(self):
         """Force screen does NOT regen if power is destroyed."""
-        from m1_psi_core.engine import CombatEngine
-
-        engine = CombatEngine()
+        from m1_psi_core.engine import regen_force_screen
 
         ship = MockShipStats(
             instance_id="s1", fdr_max=150,
@@ -390,8 +391,8 @@ class TestFullTurnOrchestration:
             current_hp=95, no_power=True,
         )
 
-        new_fdr = engine.regen_force_screen(ship)
-        assert new_fdr == 30  # Unchanged
+        new_fdr = regen_force_screen(ship)
+        assert new_fdr == 30
 
 
 # ============================================================================

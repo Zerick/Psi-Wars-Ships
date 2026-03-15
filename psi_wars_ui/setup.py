@@ -1,9 +1,17 @@
 """
-Game setup flow for the terminal UI.
+Game setup flow for the Psi-Wars terminal UI.
 
-Walks the player through ship selection, faction assignment,
-pilot configuration, and engagement creation. Returns a fully
-configured GameSession ready to play.
+Ship catalog is sorted by SM (smallest first), with category headers
+displayed as non-selectable visual separators.
+
+IMPORTANT: Category headers are NOT numbered menu items. Only actual
+ships get numbers. The menu_choice_with_headers() function handles
+this by building a mapping from display position to catalog index.
+
+Modification guide:
+    - To change sort order: modify load_ship_catalog()
+    - To change category grouping: modify _sm_category()
+    - To add setup steps: add to run_setup()
 """
 from __future__ import annotations
 
@@ -12,20 +20,15 @@ from pathlib import Path
 
 from m1_psi_core.session import GameSession
 from m1_psi_core.testing import MockShipStats, MockPilot
-from psi_wars_ui.display import (
-    Color, bold, dim, colorize, clear_screen, colored_faction,
-)
-from psi_wars_ui.input_handler import (
-    menu_choice, yes_no, get_text, get_number, pause,
-)
+from psi_wars_ui.display import Color, bold, dim, colorize, clear_screen, colored_faction
+from psi_wars_ui.input_handler import yes_no, get_text, get_number, pause, get_input
 
-
-# ---------------------------------------------------------------------------
-# Ship catalog loading
-# ---------------------------------------------------------------------------
 
 def load_ship_catalog(fixtures_dir: Path) -> list[dict]:
-    """Load all valid ship JSONs from the fixtures directory."""
+    """
+    Load all valid ship JSONs, sorted by SM (smallest first),
+    then alphabetically within each SM group.
+    """
     ships = []
     ships_dir = fixtures_dir / "ships"
     if not ships_dir.exists():
@@ -40,20 +43,21 @@ def load_ship_catalog(fixtures_dir: Path) -> list[dict]:
         except (json.JSONDecodeError, KeyError):
             continue
 
+    # Sort by SM first, then by name within each SM
+    ships.sort(key=lambda s: (s.get("sm", 99), s.get("name", "")))
     return ships
 
 
 def ship_to_mock_stats(data: dict) -> MockShipStats:
-    """Convert a ship JSON dict into a MockShipStats for the session."""
+    """Convert a ship JSON dict into a MockShipStats object."""
     attrs = data.get("attributes", {})
     mobility = data.get("mobility", {})
     defense = data.get("defense", {})
     electronics = data.get("electronics", {})
-    logistics = data.get("logistics", {})
 
     return MockShipStats(
         template_id=data.get("template_id", "unknown"),
-        instance_id="",  # Will be set during registration
+        instance_id="",
         display_name=data.get("name", "Unknown Ship"),
         faction=data.get("faction_origin", "unknown"),
         st_hp=attrs.get("st_hp", 80),
@@ -84,136 +88,165 @@ def ship_to_mock_stats(data: dict) -> MockShipStats:
     )
 
 
-# ---------------------------------------------------------------------------
-# Setup flow
-# ---------------------------------------------------------------------------
+def _sm_category(sm: int) -> str:
+    """Get a human-readable category label for an SM value."""
+    if sm <= 5:
+        return "FIGHTERS & SMALL CRAFT"
+    elif sm <= 8:
+        return "CORVETTES"
+    elif sm <= 10:
+        return "FRIGATES & LIGHT CRUISERS"
+    elif sm <= 12:
+        return "CRUISERS"
+    else:
+        return "CAPITAL SHIPS & SUPER-CAPITALS"
+
+
+def _ship_menu_with_headers(catalog: list[dict]) -> int:
+    """
+    Display a ship selection menu with non-selectable category headers.
+
+    Category headers are printed as plain text (no number).
+    Only actual ships get numbered entries.
+
+    Returns the catalog index of the selected ship.
+    """
+    # Build display: interleave headers with numbered ship entries
+    # number_to_index maps menu number (1-based) -> catalog index
+    number_to_index: dict[int, int] = {}
+    current_num = 1
+    last_category = ""
+
+    print(f"\n {bold('Ships')}")
+
+    for cat_idx, ship in enumerate(catalog):
+        sm = ship.get("sm", 99)
+        category = _sm_category(sm)
+
+        # Print category header if it changed
+        if category != last_category:
+            print(f"   {dim(f'── {category} (SM {sm}+) ──')}")
+            last_category = category
+
+        # Print numbered ship entry
+        name = ship.get("name", "?")
+        hp = ship.get("attributes", {}).get("st_hp", "?")
+        cls = ship.get("ship_class", "?")
+        fdr = ship.get("defense", {}).get("fdr_max", 0)
+        fdr_str = f"fDR:{fdr}" if fdr > 0 else ""
+
+        print(f"   {Color.BRIGHT_CYAN}{current_num:3d}{Color.RESET}. "
+              f"{name} (SM {sm}, HP {hp}, {cls}) {fdr_str}")
+
+        number_to_index[current_num] = cat_idx
+        current_num += 1
+
+    # Get input
+    max_num = current_num - 1
+    while True:
+        raw = get_input(f" Ship # [1-{max_num}]: ")
+        try:
+            choice = int(raw)
+            if choice in number_to_index:
+                return number_to_index[choice]
+        except ValueError:
+            pass
+        print(colorize(f"  Invalid. Enter 1-{max_num}.", Color.RED))
+
 
 def run_setup(fixtures_dir: Path) -> GameSession:
-    """
-    Run the complete game setup flow.
-
-    Returns a configured GameSession ready to play.
-    """
+    """Run the complete game setup flow."""
     clear_screen()
     print(f"\n {bold('═══ PSI-WARS COMBAT SIMULATOR — SETUP ═══')}\n")
 
     session = GameSession()
-
-    # Load ship catalog
     catalog = load_ship_catalog(fixtures_dir)
+
     if not catalog:
         print(colorize(" ERROR: No ship data found!", Color.RED))
-        print(f" Expected ship JSONs in: {fixtures_dir / 'ships'}")
         raise SystemExit(1)
 
     print(f" {len(catalog)} ships available.\n")
 
-    # --- Faction setup ---
+    # Factions
     print(bold(" FACTION SETUP"))
-    print(dim(" Setting up a 2-faction battle.\n"))
+    faction1 = get_text("Faction 1 name", default="Empire").lower()
+    faction2 = get_text("Faction 2 name", default="Trader").lower()
+    session.add_faction(faction1, color=_pick_color(faction1))
+    session.add_faction(faction2, color=_pick_color(faction2))
+    session.set_relationship(faction1, faction2, "enemy")
+    print(f"\n {colored_faction(faction1)} vs {colored_faction(faction2)}"
+          f" — {colorize('ENEMIES', Color.RED)}\n")
 
-    faction1_name = get_text("Faction 1 name", default="Empire")
-    faction1_color = _pick_faction_color(faction1_name)
-    session.add_faction(faction1_name.lower(), color=faction1_color)
+    # Ship selection
+    from psi_wars_ui.input_handler import menu_choice_simple
 
-    faction2_name = get_text("Faction 2 name", default="Trader")
-    faction2_color = _pick_faction_color(faction2_name)
-    session.add_faction(faction2_name.lower(), color=faction2_color)
+    ships_config = []
+    for faction in [faction1, faction2]:
+        print(f"\n {bold(f'SELECT SHIP FOR {faction.upper()}')}")
+        cat_idx = _ship_menu_with_headers(catalog)
+        ship_data = catalog[cat_idx]
 
-    session.set_relationship(faction1_name.lower(), faction2_name.lower(), "enemy")
-    print(f"\n {colored_faction(faction1_name.lower())} vs "
-          f"{colored_faction(faction2_name.lower())} — {colorize('ENEMIES', Color.RED)}\n")
+        print(f"\n Selected: {bold(ship_data.get('name', '?'))}")
+        display_name = get_text("Display name", default=ship_data.get("name", "Ship"))
 
-    # --- Ship selection ---
-    ships_data = []  # [(ship_json, faction, control, display_name, pilot)]
-
-    for faction_idx, (faction_name, faction_lower) in enumerate([
-        (faction1_name, faction1_name.lower()),
-        (faction2_name, faction2_name.lower()),
-    ]):
-        print(f"\n {bold(f'SELECT SHIP FOR {faction_name.upper()}')}")
-
-        # Build menu organized by class
-        ship_options = []
-        for s in catalog:
-            cls = s.get("ship_class", "?")
-            name = s.get("name", "Unknown")
-            sm = s.get("sm", "?")
-            hp = s.get("attributes", {}).get("st_hp", "?")
-            ship_options.append(f"{name} (SM {sm}, HP {hp}, {cls})")
-
-        choice = menu_choice("Ships", ship_options, allow_cancel=False)
-        if choice is None:
-            choice = 0
-
-        ship_data = catalog[choice]
-        display_name = get_text("Display name", default=ship_data["name"])
-
-        # Control mode
-        control_options = ["Human player", "NPC (AI controlled)"]
-        ctrl_choice = menu_choice("Control mode", control_options, allow_cancel=False)
+        ctrl_choice = menu_choice_simple(
+            "Control mode",
+            ["Human player", "NPC (AI controlled)"],
+        )
         control = "human" if ctrl_choice == 0 else "npc"
 
-        # Pilot skills
-        print(f"\n {bold('Pilot Configuration')}")
-        if yes_no("Use default pilot skills?", default=True):
-            pilot = MockPilot(name=f"{display_name} Pilot")
-        else:
-            p_name = get_text("Pilot name", default=f"{display_name} Pilot")
-            p_skill = get_number("Piloting skill", 8, 20, default=14)
-            g_skill = get_number("Gunnery skill", 8, 20, default=14)
-            speed = get_number("Basic Speed (x10)", 40, 80, default=60) / 10.0
-            is_ace = yes_no("Ace Pilot?", default=False)
-            pilot = MockPilot(
-                name=p_name,
-                piloting_skill=p_skill,
-                gunnery_skill=g_skill,
-                basic_speed=speed,
-                is_ace_pilot=is_ace,
-            )
+        pilot = _configure_pilot(display_name)
+        ships_config.append((ship_data, faction, control, display_name, pilot))
 
-        ships_data.append((ship_data, faction_lower, control, display_name, pilot))
-
-    # --- Register ships ---
-    for i, (ship_data, faction, control, display_name, pilot) in enumerate(ships_data):
+    # Register
+    for i, (ship_data, faction, control, display_name, pilot) in enumerate(ships_config):
         ship_id = f"ship_{i + 1}"
         stats = ship_to_mock_stats(ship_data)
         stats.instance_id = ship_id
         stats.display_name = display_name
         session.register_ship(ship_id, stats, pilot, faction, control)
 
-    # --- Engagement setup ---
+    # Engagement
     print(f"\n {bold('ENGAGEMENT SETUP')}")
-
     range_options = ["Close", "Short", "Medium", "Long", "Extreme", "Distant"]
     range_values = ["close", "short", "medium", "long", "extreme", "distant"]
-    range_choice = menu_choice(
-        "Starting range band", range_options, allow_cancel=False,
-    )
-    starting_range = range_values[range_choice if range_choice is not None else 3]
+    range_choice = menu_choice_simple("Starting range band", range_options)
+    if range_choice is None:
+        range_choice = 3
+    starting_range = range_values[range_choice]
 
-    # Create engagement between the two ships
     all_ids = session.get_all_ship_ids()
     if len(all_ids) >= 2:
         session.create_engagement(all_ids[0], all_ids[1], range_band=starting_range)
 
-    print(f"\n {bold('Setup complete!')} Starting combat...\n")
+    print(f"\n {bold('Setup complete!')}\n")
     pause()
-
     return session
 
 
-def _pick_faction_color(faction_name: str) -> str:
-    """Pick a color name based on faction name."""
-    name_lower = faction_name.lower()
-    color_map = {
-        "empire": "red",
-        "imperial": "red",
-        "trader": "blue",
-        "redjack": "yellow",
-        "rath": "green",
-        "maradonian": "magenta",
-        "arc": "cyan",
-        "rebel": "green",
+def _configure_pilot(ship_name: str) -> MockPilot:
+    """Configure a pilot (default or custom skills)."""
+    print(f"\n {bold('Pilot Configuration')}")
+    if yes_no("Use default pilot skills?", default=True):
+        return MockPilot(name=f"{ship_name} Pilot")
+
+    p_name = get_text("Pilot name", default=f"{ship_name} Pilot")
+    p_skill = get_number("Piloting skill", 6, 30, default=14)
+    g_skill = get_number("Gunnery skill", 6, 30, default=14)
+    speed = get_number("Basic Speed (x10)", 40, 100, default=60) / 10.0
+    is_ace = yes_no("Ace Pilot?", default=False)
+
+    return MockPilot(
+        name=p_name, piloting_skill=p_skill, gunnery_skill=g_skill,
+        basic_speed=speed, is_ace_pilot=is_ace,
+    )
+
+
+def _pick_color(name: str) -> str:
+    colors = {
+        "empire": "red", "imperial": "red", "trader": "blue",
+        "redjack": "yellow", "rath": "green", "maradonian": "magenta",
+        "arc": "cyan", "rebel": "green",
     }
-    return color_map.get(name_lower, "white")
+    return colors.get(name, "white")
