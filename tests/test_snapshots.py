@@ -17,7 +17,7 @@ class TestSessionSnapshot:
         from m3_data_vault.db.session import get_session
         from m3_data_vault.db.tables import ShipInstanceRow, SystemStatusRow
         from m3_data_vault.dal.ingestion import ingest_template, ingest_weapon, ingest_module
-        from conftest import WEAPONS_DIR, MODULES_DIR, SHIPS_DIR
+        from tests.paths import WEAPONS_DIR, MODULES_DIR, SHIPS_DIR
 
         session_id = "snapshot_test_session"
 

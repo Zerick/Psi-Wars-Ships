@@ -56,7 +56,7 @@ class TestWeaponCatalog:
     def test_all_fixture_weapons_valid(self):
         """T-37b: Every non-invalid weapon fixture passes validation."""
         from m3_data_vault.models.weapon import WeaponDefinition
-        from conftest import WEAPONS_DIR
+        from tests.paths import WEAPONS_DIR
 
         for weapon_file in WEAPONS_DIR.glob("*.json"):
             if "invalid" in weapon_file.stem:

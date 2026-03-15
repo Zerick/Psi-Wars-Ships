@@ -9,7 +9,7 @@ correctly.
 Each scenario uses MockDice for fully deterministic outcomes.
 """
 import pytest
-from conftest import MockDice, MockShipStats, MockPilot, MockWeapon
+from m1_psi_core.testing import MockDice, MockShipStats, MockPilot, MockWeapon
 
 
 class TestJavelinVsHornet:
@@ -111,7 +111,7 @@ class TestSpectreSpecialRules:
     def test_spectre_all_chase_high_g(self):
         """Spectre: all chase rolls count as High-G maneuvers."""
         # This is a trait check — the trait "all_chase_high_g" is on the Spectre
-        from conftest import MockShipStats
+        from m1_psi_core.testing import MockShipStats
         spectre = MockShipStats(
             template_id="spectre_v1", st_hp=80, hnd=6, accel=25, top_speed=800,
             traits=["all_chase_high_g", "psionic_interface"],

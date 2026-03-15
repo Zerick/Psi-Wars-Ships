@@ -308,7 +308,7 @@ class TestCinematicInjury:
 
     def test_mook_flag_toggleable(self):
         """Any ship can be marked as mook or not at any time."""
-        from conftest import MockShipStats
+        from m1_psi_core.testing import MockShipStats
         ship = MockShipStats(is_mook=False)
         assert ship.is_mook is False
         ship.is_mook = True

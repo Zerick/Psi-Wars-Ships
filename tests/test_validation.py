@@ -155,7 +155,7 @@ class TestIngestionToDatabase:
         """T-06: Modifying a JSON file and re-ingesting updates the record."""
         from m3_data_vault.dal.ingestion import ingest_weapon, ingest_template
         from m3_data_vault.db.tables import ShipTemplateRow
-        from conftest import SHIPS_DIR
+        from tests.paths import SHIPS_DIR
 
         ingest_weapon(db_session, imperial_blaster_path)
 

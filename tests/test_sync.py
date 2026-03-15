@@ -40,7 +40,7 @@ class TestHashSync:
     def test_hash_sync_skips_unchanged(self, db_session, tmp_path):
         """T-28: Syncing unchanged files reports 0 updated."""
         from m3_data_vault.dal.ingestion import sync_all_weapons, sync_all_templates
-        from conftest import WEAPONS_DIR, SHIPS_DIR
+        from tests.paths import WEAPONS_DIR, SHIPS_DIR
 
         weapons_dir = tmp_path / "weapons"
         weapons_dir.mkdir()

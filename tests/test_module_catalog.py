@@ -45,7 +45,7 @@ class TestModuleCatalog:
         from m3_data_vault.dal.ingestion import ingest_weapon, ingest_module
         from m3_data_vault.db.tables import ModuleCatalogRow, WeaponCatalogRow
         from m3_data_vault.models.module import ModuleDefinition
-        from conftest import WEAPONS_DIR
+        from tests.paths import WEAPONS_DIR
 
         ingest_weapon(db_session, WEAPONS_DIR / "boom_heavy_plasma_cannon.json")
         ingest_module(db_session, boom_cannon_module_path)
@@ -66,7 +66,7 @@ class TestModuleCatalog:
     def test_all_fixture_modules_valid(self):
         """T-40b: Every non-invalid module fixture passes validation."""
         from m3_data_vault.models.module import ModuleDefinition
-        from conftest import MODULES_DIR
+        from tests.paths import MODULES_DIR
 
         for module_file in MODULES_DIR.glob("*.json"):
             if "invalid" in module_file.stem:
