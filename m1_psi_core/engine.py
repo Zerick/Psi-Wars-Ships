@@ -605,6 +605,14 @@ def resolve_chase(
     if m_b:
         skill_b += m_b.chase_modifier
 
+    # Apply emergency power chase bonuses
+    ep_a = decl_a.get("emergency_power")
+    ep_b = decl_b.get("emergency_power")
+    if ep_a == "all_power_to_engines":
+        skill_a += 2
+    if ep_b == "all_power_to_engines":
+        skill_b += 2
+
     # Roll
     roll_a = dice.roll_3d6()
     roll_b = dice.roll_3d6()
@@ -762,14 +770,16 @@ def resolve_attack(
 
     # Accuracy: matched speed grants full accuracy on any maneuver
     if is_matched:
-        acc = apply_accuracy(weapon.acc, "full")
+        acc = apply_accuracy(weapon.acc, "full_accuracy")
     else:
         acc = apply_accuracy(weapon.acc, perm)
 
     rof_bonus = get_rof_bonus(weapon.rof)
 
-    a_class = classify_ship(getattr(attacker, "sm", 4), 15)
-    t_class = classify_ship(getattr(target, "sm", 4), 15)
+    a_class = classify_ship(getattr(attacker, "sm", 4), 15,
+                            getattr(attacker, "ship_class", ""))
+    t_class = classify_ship(getattr(target, "sm", 4), 15,
+                            getattr(target, "ship_class", ""))
     rel_size = get_relative_size_penalty(a_class, t_class)
 
     deceptive_pen = -2 * deceptive_levels
@@ -820,6 +830,7 @@ def resolve_defense(
     attacker_id: str = "",
     offer_high_g: bool = True,
     player_chose_high_g: Optional[bool] = None,
+    emergency_dodge_bonus: int = 0,
 ) -> DefenseResult:
     """
     Resolve a defense roll with ALL modifiers.
@@ -877,6 +888,7 @@ def resolve_defense(
     offered = high_g_avail and offer_high_g
 
     # Determine if High-G should be attempted
+    # Emergency evasive always counts as High-G
     attempt_high_g = False
     if high_g_avail:
         if player_chose_high_g is True:
@@ -884,6 +896,9 @@ def resolve_defense(
         elif player_chose_high_g is None:
             # NPC default: attempt if available
             attempt_high_g = True
+    if emergency_dodge_bonus > 0:
+        # Emergency Evasive always counts as High-G
+        attempt_high_g = True
 
     if attempt_high_g:
         dm.high_g_bonus = HIGH_G_DODGE_BONUS
@@ -912,7 +927,7 @@ def resolve_defense(
     effective = (base + dm.evade_bonus + dm.advantage_escaping_bonus
                  + dm.ace_stunt_bonus + dm.precision_aim_awareness
                  + dm.tactical_defense + dm.high_g_bonus + dm.deceptive_penalty
-                 + dm.controls_penalty)
+                 + dm.controls_penalty + emergency_dodge_bonus)
     dm.effective_dodge = effective
 
     # Roll
@@ -942,6 +957,7 @@ def resolve_damage(
     weapon: WeaponInfo,
     dice: DiceRoller,
     facing: str = "front",
+    extra_damage_per_die: int = 0,
 ) -> DamageResult:
     """
     Resolve the complete damage pipeline.
@@ -955,6 +971,9 @@ def resolve_damage(
     6. Subsystem damage (on major+ wounds)
     7. Destruction check (lethal wound or HP <= 0)
     8. Mook removal check
+
+    Args:
+        extra_damage_per_die: Emergency Firepower bonus (+1 per die).
 
     Returns all state changes as values — does NOT mutate the target.
     """
@@ -975,9 +994,13 @@ def resolve_damage(
 
     dice_total = dice.roll_nd6(parsed.dice)
     raw_damage = dice_total * parsed.multiplier + parsed.adds
+    # Emergency Firepower: +1 damage per die rolled
+    if extra_damage_per_die > 0:
+        raw_damage += parsed.dice * extra_damage_per_die
     ad = weapon.armor_divisor if weapon.armor_divisor else 1.0
 
-    steps.append(DamageStep("Raw damage", f"{parsed.dice}d6={dice_total} × {parsed.multiplier} = {raw_damage}"))
+    ep_note = f" +{parsed.dice * extra_damage_per_die} EP" if extra_damage_per_die > 0 else ""
+    steps.append(DamageStep("Raw damage", f"{parsed.dice}d6={dice_total} × {parsed.multiplier} = {raw_damage}{ep_note}"))
 
     # Step 2: Force screen
     has_screen = getattr(target, "fdr_max", 0) > 0

@@ -4,23 +4,19 @@
   "name": "Hornet-Class Interceptor",
   "faction_origin": "trader",
   "sm": 4,
-  "ship_class": "interceptor",
-
+  "ship_class": "fighter",
   "attributes": {
     "st_hp": 95,
     "ht": "13",
     "hnd": 6,
     "sr": 3
   },
-
   "mobility": {
     "accel": 15,
     "top_speed": 500,
     "stall_speed": 0
   },
-
   "afterburner": null,
-
   "defense": {
     "dr_front": 10,
     "dr_rear": 10,
@@ -32,7 +28,6 @@
     "fdr_max": 150,
     "force_screen_type": "standard"
   },
-
   "electronics": {
     "ultrascanner_range": 30,
     "targeting_bonus": 5,
@@ -46,10 +41,8 @@
     "has_neural_interface": true,
     "sensor_notes": "Medium Tactical Ultra-Scanner; Hyperspectral Distributed Sensors +3 notice; Tactical Computers +2 Tactics for drones; Neural Interface required"
   },
-
   "occ_raw": "1SV",
   "loc_raw": "2Wi4RL",
-
   "logistics": {
     "lwt": 6.9,
     "load": 0.4,
@@ -60,14 +53,12 @@
     "endurance": "24 hours energy bank",
     "signature_cost": 5
   },
-
   "traits": [
     "responsive_structure",
     "vtol",
     "neural_interface_required",
     "trader_tech_penalty"
   ],
-
   "modes": {
     "High Maneuverability": {
       "hnd": 7,
@@ -75,7 +66,6 @@
       "top_speed": 250
     }
   },
-
   "weapons": [
     {
       "weapon_ref": "muonic_fighter_cannon",
@@ -92,12 +82,13 @@
       "notes": "Underslung particle cannon 'stinger'. ROF 1/3, reserved for corvettes."
     }
   ],
-
   "module_slots": [],
-
   "craft_complement": [],
-
   "description": "Like most Trader starships, the Hornet has an insectile look. The cockpit has no windows; hyperspectral sensors feed directly into the pilot's neural interface.",
-  "tags": ["trader", "starfighter", "interceptor"],
+  "tags": [
+    "trader",
+    "starfighter",
+    "interceptor"
+  ],
   "source_url": "https://psi-wars.wikidot.com/hornet-class-interceptor"
 }

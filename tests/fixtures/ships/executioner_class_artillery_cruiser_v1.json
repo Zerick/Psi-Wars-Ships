@@ -4,7 +4,7 @@
   "name": "Executioner-Class Artillery Cruiser",
   "faction_origin": "empire",
   "sm": 13,
-  "ship_class": "cruiser",
+  "ship_class": "capital",
   "attributes": {
     "st_hp": 7000,
     "ht": "12",

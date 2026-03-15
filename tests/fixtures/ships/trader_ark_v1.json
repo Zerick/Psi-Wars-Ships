@@ -4,7 +4,7 @@
   "name": "Trader Ark",
   "faction_origin": "trader",
   "sm": 16,
-  "ship_class": "carrier",
+  "ship_class": "capital",
   "attributes": {
     "st_hp": 25000,
     "ht": "13",

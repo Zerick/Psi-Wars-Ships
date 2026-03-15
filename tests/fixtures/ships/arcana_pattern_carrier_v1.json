@@ -4,7 +4,7 @@
   "name": "Arcana-Pattern Carrier",
   "faction_origin": "empire",
   "sm": 13,
-  "ship_class": "carrier",
+  "ship_class": "capital",
   "attributes": {
     "st_hp": 6000,
     "ht": "13",

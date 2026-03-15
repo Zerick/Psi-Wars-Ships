@@ -4,7 +4,7 @@
   "name": "Regal-Pattern Cruiser",
   "faction_origin": "empire",
   "sm": 11,
-  "ship_class": "cruiser",
+  "ship_class": "capital",
   "attributes": {
     "st_hp": 3500,
     "ht": "13",

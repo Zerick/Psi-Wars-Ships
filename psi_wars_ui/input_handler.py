@@ -264,6 +264,27 @@ def show_ship_inspection(ship_stats, pilot=None) -> None:
               f"Speed: {getattr(pilot, 'basic_speed', '?')}")
         if getattr(pilot, "is_ace_pilot", False):
             print(f"   {colorize('★ ACE PILOT', Color.BRIGHT_YELLOW)}")
+        luck_level = getattr(pilot, "luck_level", "none")
+        if luck_level != "none":
+            luck_names = {"luck": "Luck (1/hr)", "extraordinary": "Extraordinary Luck (1/30min)",
+                          "ridiculous": "Ridiculous Luck (1/10min)"}
+            print(f"   {colorize(f'★ {luck_names.get(luck_level, luck_level)}', Color.BRIGHT_CYAN)}")
+
+    # Weapons section
+    weapons_data = getattr(s, "weapons", [])
+    if weapons_data:
+        print(f"\n   {bold('WEAPONS')}")
+        from m1_psi_core.engine import resolve_all_weapons
+        try:
+            weapons = resolve_all_weapons(s)
+            for w in weapons:
+                mount_tag = f"[{w.mount}]"
+                range_tag = f" Range: {w.range_str}" if w.range_str else ""
+                print(f"   • {w.name} — {w.damage_str}  Acc {w.acc}  RoF {w.rof}  {mount_tag}{range_tag}")
+        except Exception:
+            for w in weapons_data:
+                if isinstance(w, dict):
+                    print(f"   • {w.get('weapon_ref', '?')} [{w.get('mount', '?')}]")
 
     traits = getattr(s, "traits", [])
     if traits:

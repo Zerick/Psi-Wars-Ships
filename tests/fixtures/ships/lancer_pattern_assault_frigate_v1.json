@@ -4,7 +4,7 @@
   "name": "Lancer-Pattern Assault Frigate",
   "faction_origin": "empire",
   "sm": 9,
-  "ship_class": "frigate",
+  "ship_class": "corvette",
   "attributes": {
     "st_hp": 700,
     "ht": "12",

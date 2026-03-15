@@ -4,7 +4,7 @@
   "name": "Trader Ark Tender",
   "faction_origin": "trader",
   "sm": 15,
-  "ship_class": "battleship",
+  "ship_class": "capital",
   "attributes": {
     "st_hp": 15000,
     "ht": "13",

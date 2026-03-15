@@ -52,6 +52,7 @@ class MockShipStats:
     no_power: bool = False
 
     sm: int = 4
+    ship_class: str = "fighter"  # "fighter", "corvette", "capital"
     has_tactical_esm: bool = True
     has_decoy_launcher: bool = True
     has_g_chair: bool = False

@@ -4,7 +4,7 @@
   "name": "Vespa-Class Interceptor",
   "faction_origin": "trader",
   "sm": 4,
-  "ship_class": "interceptor",
+  "ship_class": "fighter",
   "attributes": {
     "st_hp": 95,
     "ht": "12",

@@ -4,7 +4,7 @@
   "name": "Prestige-Pattern Diplomatic Shuttle",
   "faction_origin": "empire",
   "sm": 7,
-  "ship_class": "shuttle",
+  "ship_class": "corvette",
   "attributes": {
     "st_hp": 200,
     "ht": "13",

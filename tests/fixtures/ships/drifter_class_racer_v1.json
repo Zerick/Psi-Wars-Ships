@@ -4,7 +4,7 @@
   "name": "Drifter Class Racer",
   "faction_origin": "redjack",
   "sm": 4,
-  "ship_class": "racer",
+  "ship_class": "fighter",
   "attributes": {
     "st_hp": 80,
     "ht": "12",

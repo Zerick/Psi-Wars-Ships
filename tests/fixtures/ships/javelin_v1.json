@@ -5,20 +5,17 @@
   "faction_origin": "empire",
   "sm": 4,
   "ship_class": "fighter",
-
   "attributes": {
     "st_hp": 80,
     "ht": "9f",
     "hnd": 4,
     "sr": 3
   },
-
   "mobility": {
     "accel": 20,
     "top_speed": 600,
     "stall_speed": 35
   },
-
   "afterburner": {
     "accel": 30,
     "top_speed": 750,
@@ -27,7 +24,6 @@
     "range_override": 3750,
     "is_high_g": false
   },
-
   "defense": {
     "dr_front": 15,
     "dr_rear": 15,
@@ -39,7 +35,6 @@
     "fdr_max": 0,
     "force_screen_type": "none"
   },
-
   "electronics": {
     "ultrascanner_range": 30,
     "targeting_bonus": 5,
@@ -53,10 +48,8 @@
     "has_neural_interface": false,
     "sensor_notes": "Medium Tactical Ultra-Scanner; Distortion Jammer; Decoy Launcher"
   },
-
   "occ_raw": "1S",
   "loc_raw": "g3rR2Wi",
-
   "logistics": {
     "lwt": 4.6,
     "load": 0.4,
@@ -67,14 +60,11 @@
     "endurance": "12 hours at top speed",
     "signature_cost": 5
   },
-
   "traits": [
     "unshielded_hyperium",
     "ejection_seat"
   ],
-
   "modes": {},
-
   "weapons": [
     {
       "weapon_ref": "imperial_fighter_blaster",
@@ -84,12 +74,13 @@
       "notes": "Two linked fighter blasters. Double ROF (to 6, +1 to hit) in Action vehicular combat."
     }
   ],
-
   "module_slots": [],
-
   "craft_complement": [],
-
   "description": "The Javelin sits low to the ground on three skids. A standard Imperial fighter relying on speed and maneuverability rather than armor or shields.",
-  "tags": ["empire", "starfighter", "vehicle"],
+  "tags": [
+    "empire",
+    "starfighter",
+    "vehicle"
+  ],
   "source_url": "https://psi-wars.wikidot.com/javelin-class-fighter"
 }

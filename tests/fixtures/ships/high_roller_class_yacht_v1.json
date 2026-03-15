@@ -4,7 +4,7 @@
   "name": "High Roller-Class Yacht",
   "faction_origin": "empire",
   "sm": 6,
-  "ship_class": "yacht",
+  "ship_class": "corvette",
   "attributes": {
     "st_hp": 175,
     "ht": "11f",

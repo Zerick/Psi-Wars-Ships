@@ -46,6 +46,7 @@ from psi_wars_ui.renderer import ScreenBuffer
 from psi_wars_ui.input_handler import (
     menu_choice, yes_no, pass_to_player,
     show_help, show_ship_inspection, pause_with_buffer, get_input,
+    get_number,
     HOTKEY_HELP, HOTKEY_INSPECT, HOTKEY_QUIT,
 )
 
@@ -121,6 +122,7 @@ class GameLoop:
 
             if self.session.check_combat_end():
                 self.buf.combat_log.add("═══ COMBAT OVER ═══", "turn")
+                self._show_combat_summary()
                 self._refresh()
                 if not yes_no("Continue?", default=False):
                     break
@@ -129,6 +131,9 @@ class GameLoop:
             declarations = self._declaration_phase()
             if not self._running:
                 break
+
+            # Apply immediate emergency power effects
+            self._apply_immediate_emergency_power(declarations)
 
             self._chase_phase(declarations)
             self.buf.set_status(self.session)
@@ -177,6 +182,21 @@ class GameLoop:
 
             if ctrl == "npc":
                 decl = self.session.get_npc_declaration(sid)
+                # NPC emergency power decision
+                from m1_psi_core.npc_ai import assess_situation, decide_emergency_power
+                engs = self.session.get_engagements_for_ship(sid)
+                if engs:
+                    eng = engs[0]
+                    oid = eng.ship_b_id if eng.ship_a_id == sid else eng.ship_a_id
+                    opp = self.session.get_ship(oid)
+                    sit = assess_situation(sid, ship, eng, opp)
+                    ep_reserves = getattr(ship, "emergency_power_reserves", 0)
+                    ep_choice = decide_emergency_power(sit, ep_reserves)
+                    if ep_choice:
+                        decl["emergency_power"] = ep_choice
+                        self.buf.combat_log.add(
+                            f"    → Emergency power: {ep_choice}", "npc_reasoning")
+
                 declarations[sid] = decl
                 self.buf.combat_log.add(
                     f"  {name} [NPC]: {decl['maneuver']} / {decl['intent']}",
@@ -246,7 +266,31 @@ class GameLoop:
                 intent = "pursue" if (ic is not None and ic == 0) else "evade"
 
             self.buf.combat_log.add(f"  {name} [YOU]: {m_def.name} / {intent}", "info")
-            return {"maneuver": chosen, "intent": intent}
+
+            # Emergency power option (if ship has reserves or is willing to redline)
+            ep_choice = None
+            ep_skill = None
+            ep_reserves = getattr(ship, "emergency_power_reserves", 0)
+            ship_ht_val = _parse_ht(getattr(ship, "ht", 12))
+            if ep_reserves > 0 or ship_ht_val > 0:
+                from m1_psi_core.emergency_power import get_available_options
+                ep_options = get_available_options()
+                if ep_options:
+                    ep_labels = ["No emergency power"]
+                    cost_str = f"({ep_reserves} reserves)" if ep_reserves > 0 else colorize("(costs 1 HT!)", Color.RED)
+                    for opt_key, opt_desc in ep_options:
+                        ep_labels.append(f"{opt_desc} {cost_str}")
+                    ec = menu_choice("Emergency Power?", ep_labels, self.buf, allow_cancel=False)
+                    if ec is not None and ec > 0:
+                        ep_choice = ep_options[ec - 1][0]
+                        # Let player enter their skill target number
+                        ep_skill = get_number("Skill target number (Mechanic/Electrician/Armoury)",
+                                              3, 30, default=12)
+                        self.buf.combat_log.add(
+                            f"    → Emergency power: {ep_options[ec - 1][1]} (skill {ep_skill})", "info")
+
+            return {"maneuver": chosen, "intent": intent,
+                    "emergency_power": ep_choice, "ep_skill": ep_skill}
 
     # ===================================================================
     # Phase 2: Chase
@@ -393,15 +437,29 @@ class GameLoop:
             all_weapons = resolve_all_weapons(ship, self._fixtures_dir)
 
             # Human: choose weapon if multiple available
+            # NPC: pick the smartest weapon for the situation
             if ctrl == "human" and len(all_weapons) > 1:
                 weapon = self._choose_weapon(sid, all_weapons, eng)
+            elif ctrl != "human" and len(all_weapons) > 1:
+                from m1_psi_core.npc_ai import select_best_weapon
+                from m1_psi_core.engine import get_attacker_facing
+                npc_facing = get_attacker_facing(
+                    decl.get("maneuver", "move"), decl.get("intent", "pursue"))
+                npc_has_stall = getattr(ship, "stall_speed", 0) > 0
+                npc_won = self._chase_winners.get(sid, True)
+                best_idx = select_best_weapon(
+                    all_weapons, eng.range_band, npc_facing,
+                    npc_has_stall, npc_won)
+                weapon = all_weapons[best_idx]
             else:
-                weapon = all_weapons[0]  # NPC/single weapon: use first
+                weapon = all_weapons[0]
+
+            # Visual separator between attack sequences
+            if not first_attack:
+                self.buf.combat_log.add("  ─ ─ ─", "info")
 
             # Check weapon range
             if weapon.range_str and not is_weapon_in_range(weapon.range_str, eng.range_band):
-                if not first_attack:
-                    self.buf.combat_log.add("", "info")
                 first_attack = False
                 name = getattr(ship, "display_name", sid)
                 self.buf.combat_log.add(
@@ -413,8 +471,6 @@ class GameLoop:
             has_stall = getattr(ship, "stall_speed", 0) > 0
             won_chase = self._chase_winners.get(sid, True)
             if not check_stall_attack_restriction(has_stall, won_chase, weapon.mount):
-                if not first_attack:
-                    self.buf.combat_log.add("", "info")
                 first_attack = False
                 name = getattr(ship, "display_name", sid)
                 self.buf.combat_log.add(
@@ -443,10 +499,7 @@ class GameLoop:
             if not atk.can_attack:
                 continue
 
-            if not first_attack:
-                self.buf.combat_log.add("", "info")
             first_attack = False
-
             self._log_attack(atk)
 
             # LUCK: Human attacker missed — offer reroll
@@ -524,11 +577,16 @@ class GameLoop:
 
                 deceptive_def_penalty = -deceptive if deceptive > 0 else 0
 
+                # Emergency evasive dodge bonus for defender
+                t_decl_ep = decls.get(tid, {}).get("emergency_power")
+                ep_dodge = 2 if t_decl_ep == "emergency_evasive" else 0
+
                 defense = resolve_defense(
                     tid, target, tpilot, t_maneuver,
                     decl.get("maneuver", "move"), eng, self.dice,
                     deceptive_penalty=deceptive_def_penalty,
                     player_chose_high_g=high_g_choice,
+                    emergency_dodge_bonus=ep_dodge,
                 )
                 self._log_defense(defense)
 
@@ -559,7 +617,13 @@ class GameLoop:
                     f"    → Targeting {target_facing} facing (advantage)", "attack")
 
             # Damage
-            dmg = resolve_damage(tid, target, weapon, self.dice, facing=target_facing)
+            # Emergency firepower damage bonus for attacker
+            atk_ep = decl.get("emergency_power")
+            ep_dmg_bonus = 1 if atk_ep == "emergency_firepower" else 0
+
+            dmg = resolve_damage(tid, target, weapon, self.dice,
+                                 facing=target_facing,
+                                 extra_damage_per_die=ep_dmg_bonus)
             self._log_damage(dmg)
 
             # Flesh wound option (human only)
@@ -577,6 +641,109 @@ class GameLoop:
 
             # Apply state changes
             self._apply_damage(tid, target, dmg)
+
+    def _apply_immediate_emergency_power(self, decls: dict[str, dict]) -> None:
+        """
+        Resolve emergency power attempts with skill rolls.
+
+        RAW flow:
+        1. Pay cost (1 reserve or 1 HT if redlining)
+        2. Roll skill check
+        3. Success: effect applies
+        4. Failure: cost paid, no effect
+        5. Critical failure: cost paid + system disabled
+        """
+        from m1_psi_core.emergency_power import (
+            resolve_emergency_power, get_required_skill,
+        )
+        from m1_psi_core.subsystems import disable_system
+
+        for sid, decl in decls.items():
+            ep = decl.get("emergency_power")
+            if not ep:
+                continue
+
+            ship = self.session.get_ship(sid)
+            pilot = self.session.get_pilot(sid)
+            if not ship:
+                continue
+
+            name = getattr(ship, "display_name", sid)
+
+            # Determine skill level — use player-provided target if available
+            ep_skill_from_decl = decl.get("ep_skill")
+            if ep_skill_from_decl is not None:
+                skill_val = ep_skill_from_decl
+            else:
+                # NPC fallback: use mechanic skill from pilot
+                skill_val = getattr(pilot, "mechanic_skill", 12)
+
+            # Get reserves and HT
+            reserves = getattr(ship, "emergency_power_reserves", 0)
+            ship_ht = _parse_ht(getattr(ship, "ht", 12))
+
+            # Roll the skill check
+            roll = self.dice.roll_3d6()
+            ep_times = getattr(ship, "_ep_usage_count", {})
+            if not isinstance(ep_times, dict):
+                ep_times = {}
+            times_used = ep_times.get(ep, 0)
+
+            result = resolve_emergency_power(
+                ep, skill_val, reserves, ship_ht, roll,
+                times_used_this_option=times_used,
+            )
+
+            # Pay the cost regardless of success
+            if result.cost_type == "reserves" and reserves > 0:
+                ship.emergency_power_reserves = reserves - 1
+                cost_str = f"(reserves: {reserves}→{reserves-1})"
+            elif result.cost_type == "redline":
+                # Permanently reduce ship HT
+                new_ht = ship_ht - 1
+                ship.ht = str(new_ht)
+                cost_str = colorize(f"(REDLINE! HT: {ship_ht}→{new_ht})", Color.RED)
+            else:
+                cost_str = ""
+
+            # Track usage count
+            ep_times[ep] = times_used + 1
+            ship._ep_usage_count = ep_times
+
+            if result.critical_failure:
+                self.buf.combat_log.add(
+                    f"  {name}: EP roll {roll} vs {result.skill_target} — "
+                    f"{colorize('CRITICAL FAILURE!', Color.BRIGHT_RED)} {cost_str}",
+                    "system_damage")
+                if result.crit_fail_effect and result.crit_fail_effect.disables_system:
+                    disable_system(ship, result.crit_fail_effect.disables_system)
+                    self.buf.combat_log.add(
+                        f"    {colorize(f'{result.crit_fail_effect.disables_system} DISABLED!', Color.RED)}",
+                        "system_damage")
+                # Clear the EP choice so it doesn't apply
+                decl["emergency_power"] = None
+
+            elif not result.success:
+                self.buf.combat_log.add(
+                    f"  {name}: EP roll {roll} vs {result.skill_target} — "
+                    f"{colorize('FAILED', Color.YELLOW)} {cost_str}",
+                    "info")
+                # Clear the EP choice so it doesn't apply
+                decl["emergency_power"] = None
+
+            else:
+                self.buf.combat_log.add(
+                    f"  {name}: EP roll {roll} vs {result.skill_target} — "
+                    f"SUCCESS {cost_str}",
+                    "info")
+
+                # Apply immediate effects
+                if ep == "emergency_screen_recharge":
+                    fdr_max = getattr(ship, "fdr_max", 0)
+                    if fdr_max > 0:
+                        ship.current_fdr = fdr_max
+                        self.buf.combat_log.add(
+                            f"    fDR restored to {fdr_max}!", "force_screen")
 
     def _choose_weapon(self, sid: str, weapons: list[WeaponInfo], eng) -> WeaponInfo:
         """Let human player choose which weapon to fire."""
@@ -647,8 +814,10 @@ class GameLoop:
         lock = get_sensor_lock_bonus(True, getattr(attacker, "targeting_bonus", 5))
         acc = apply_accuracy(weapon.acc, atk_perm)
         rof = get_rof_bonus(weapon.rof)
-        ac = classify_ship(getattr(attacker, "sm", 4), 15)
-        tc = classify_ship(getattr(target, "sm", 4), 15)
+        ac = classify_ship(getattr(attacker, "sm", 4), 15,
+                           getattr(attacker, "ship_class", ""))
+        tc = classify_ship(getattr(target, "sm", 4), 15,
+                           getattr(target, "ship_class", ""))
         rel = get_relative_size_penalty(ac, tc)
 
         eff_base = base + rng + sm + lock + acc + rof + rel
@@ -821,6 +990,61 @@ class GameLoop:
                 self.buf.combat_log.add(f"    {colorize(step.value, Color.BLUE)}", "damage")
             else:
                 self.buf.combat_log.add(f"    {step.label}: {step.value}", "damage")
+
+    # ===================================================================
+    # Combat Summary
+    # ===================================================================
+
+    def _show_combat_summary(self) -> None:
+        """Display end-of-combat summary with winner, damage, and turns."""
+        survivors = []
+        destroyed = []
+
+        for sid in self.session.get_all_ship_ids():
+            ship = self.session.get_ship(sid)
+            if not ship:
+                continue
+            name = getattr(ship, "display_name", sid)
+            faction = self.session.get_faction_for_ship(sid) or "?"
+            ctrl = self.session.get_control_mode(sid) or "?"
+
+            if getattr(ship, "is_destroyed", False):
+                destroyed.append((name, faction, ctrl))
+            else:
+                hp_pct = getattr(ship, "current_hp", 0) / max(getattr(ship, "st_hp", 1), 1)
+                wound = getattr(ship, "wound_level", "none")
+                fdr_cur = getattr(ship, "current_fdr", 0)
+                fdr_max = getattr(ship, "fdr_max", 0)
+                survivors.append((name, faction, ctrl, hp_pct, wound, fdr_cur, fdr_max))
+
+        self.buf.combat_log.add("", "info")
+        self.buf.combat_log.add(
+            colorize("  ════════════ COMBAT RESULTS ════════════", Color.BRIGHT_YELLOW + Color.BOLD),
+            "turn")
+        self.buf.combat_log.add(
+            f"  Turns elapsed: {self.session.current_turn}", "info")
+
+        if survivors:
+            self.buf.combat_log.add("", "info")
+            for name, faction, ctrl, hp_pct, wound, fdr_cur, fdr_max in survivors:
+                tag = "[YOU]" if ctrl == "human" else "[NPC]"
+                hp_str = f"{int(hp_pct * 100)}% HP"
+                wound_str = f" [{wound.upper()}]" if wound != "none" else ""
+                fdr_str = f" fDR:{fdr_cur}/{fdr_max}" if fdr_max > 0 else ""
+                status = colorize("SURVIVED", Color.BRIGHT_GREEN)
+                self.buf.combat_log.add(
+                    f"  {status} {tag} {name} — {hp_str}{wound_str}{fdr_str}", "info")
+
+        if destroyed:
+            for name, faction, ctrl in destroyed:
+                tag = "[YOU]" if ctrl == "human" else "[NPC]"
+                status = colorize("DESTROYED", Color.BRIGHT_RED + Color.BOLD)
+                self.buf.combat_log.add(
+                    f"  {status} {tag} {name}", "info")
+
+        self.buf.combat_log.add(
+            colorize("  ════════════════════════════════════════", Color.BRIGHT_YELLOW + Color.BOLD),
+            "turn")
 
     # ===================================================================
     # Phase 5: Cleanup

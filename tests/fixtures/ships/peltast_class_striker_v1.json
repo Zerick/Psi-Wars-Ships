@@ -4,7 +4,7 @@
   "name": "Peltast Class Striker",
   "faction_origin": "empire",
   "sm": 4,
-  "ship_class": "striker",
+  "ship_class": "fighter",
   "attributes": {
     "st_hp": 85,
     "ht": "10f",

@@ -4,23 +4,19 @@
   "name": "Aegis-7 'Spectre' Psionic Interceptor",
   "faction_origin": "maradonian",
   "sm": 4,
-  "ship_class": "interceptor",
-
+  "ship_class": "fighter",
   "attributes": {
     "st_hp": 80,
     "ht": "12",
     "hnd": 6,
     "sr": 3
   },
-
   "mobility": {
     "accel": 25,
     "top_speed": 800,
     "stall_speed": 0
   },
-
   "afterburner": null,
-
   "defense": {
     "dr_front": 10,
     "dr_rear": 10,
@@ -32,7 +28,6 @@
     "fdr_max": 200,
     "force_screen_type": "standard"
   },
-
   "electronics": {
     "ultrascanner_range": 30,
     "targeting_bonus": 5,
@@ -46,10 +41,8 @@
     "has_neural_interface": true,
     "sensor_notes": "Medium Tactical Ultra-Scanner: 30-mile scan, 3-mile imaging; 360. Hyperspectral Distributed Sensors: +9 nightvision, +3 to notice details, x8 magnification. Distortion Jammer: -4 ECM penalty to enemy missiles, +2 to jam missiles. Adaptive Signature: Nanopolymer hull grants -2 penalty to all enemy detection/lock rolls. Tactical ESM: +1 dodge missiles. Decoy Launcher: +1 dodge missiles."
   },
-
   "occ_raw": "1SV",
   "loc_raw": "2Wi4RL",
-
   "logistics": {
     "lwt": 5.5,
     "load": 0.5,
@@ -60,7 +53,6 @@
     "endurance": "Trader Drive Rating 2.5 (45 LY/hr; 4 hour recharge between jumps; -4 Navigation (Hyperspace))",
     "signature_cost": 10
   },
-
   "traits": [
     "prototype",
     "psionic_interface",
@@ -79,7 +71,6 @@
     "needle_laser_autonomic",
     "psi_drain_per_turn"
   ],
-
   "modes": {
     "Atmospheric": {
       "accel": 25,
@@ -89,7 +80,6 @@
       "hnd": 5
     }
   },
-
   "weapons": [
     {
       "weapon_ref": "heavy_ion_flamer",
@@ -113,12 +103,16 @@
       "notes": "Center-mounted. Ignores hull DR, blocked by shields, targets pilot directly with toxic damage. Requires Orphean Psiberface to fire."
     }
   ],
-
   "module_slots": [],
-
   "craft_complement": [],
-
-  "description": "The Spectre is a matte-black, needle-shaped interceptor that looks like a predatory insect made of shadow. Its four retractable landing legs (4RL) allow it to perch tall like the Hornet. The central fuselage houses the pilot's Bio-Feedback Cradle (counts as high-G seat, +3 HT vs High-G) and the high-precision Ghost Beam aperture. Inside, the pilot experiences 'One with the Machine' — no screens, almost no interface; the pilot feels the ship's sensors as their own sight and the Surge of the Flamer Cannons as a rush of heat in their own limbs. The Spectre utilizes a 'Melt and Ghost' tactical loop: the winglet-mounted Flamer Cannons strip shields, allowing the center-mounted Ghost Beam to target the pilot directly. The Aegis-7 is the product of a clandestine partnership between House Mistral and the Klikaklak Guildfleet — a Maradonian heart beating inside a cold, alien, Trader-built ribcage.",
-  "tags": ["maradonian", "trader", "prototype", "interceptor", "psionic", "orphean"],
+  "description": "The Spectre is a matte-black, needle-shaped interceptor that looks like a predatory insect made of shadow. Its four retractable landing legs (4RL) allow it to perch tall like the Hornet. The central fuselage houses the pilot's Bio-Feedback Cradle (counts as high-G seat, +3 HT vs High-G) and the high-precision Ghost Beam aperture. Inside, the pilot experiences 'One with the Machine' \u2014 no screens, almost no interface; the pilot feels the ship's sensors as their own sight and the Surge of the Flamer Cannons as a rush of heat in their own limbs. The Spectre utilizes a 'Melt and Ghost' tactical loop: the winglet-mounted Flamer Cannons strip shields, allowing the center-mounted Ghost Beam to target the pilot directly. The Aegis-7 is the product of a clandestine partnership between House Mistral and the Klikaklak Guildfleet \u2014 a Maradonian heart beating inside a cold, alien, Trader-built ribcage.",
+  "tags": [
+    "maradonian",
+    "trader",
+    "prototype",
+    "interceptor",
+    "psionic",
+    "orphean"
+  ],
   "source_url": null
 }

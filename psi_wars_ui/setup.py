@@ -82,6 +82,7 @@ def ship_to_mock_stats(data: dict) -> MockShipStats:
         ultrascanner_range=electronics.get("ultrascanner_range"),
         current_hp=attrs.get("st_hp", 80),
         sm=data.get("sm", 4),
+        ship_class=data.get("ship_class", ""),
         has_tactical_esm=electronics.get("has_tactical_esm", False),
         has_decoy_launcher=electronics.get("has_decoy_launcher", False),
         traits=data.get("traits", []),
@@ -89,13 +90,25 @@ def ship_to_mock_stats(data: dict) -> MockShipStats:
 
 
 def _sm_category(sm: int) -> str:
-    """Get a human-readable category label for an SM value."""
+    """
+    Get a human-readable category label for an SM value.
+
+    Based on Psi-Wars RAW:
+    - SM 4-5: Fighters (standard fighters, interceptors)
+    - SM 6: Strikers & Small Craft (big fighters, assault boats, shuttles)
+    - SM 7-8: Corvettes (patrol craft, light escorts)
+    - SM 9-10: Frigates & Heavy Corvettes
+    - SM 11-12: Cruisers
+    - SM 13+: Capital Ships & Super-Capitals
+    """
     if sm <= 5:
-        return "FIGHTERS & SMALL CRAFT"
+        return "FIGHTERS"
+    elif sm == 6:
+        return "STRIKERS & SMALL CRAFT"
     elif sm <= 8:
         return "CORVETTES"
     elif sm <= 10:
-        return "FRIGATES & LIGHT CRUISERS"
+        return "FRIGATES & HEAVY CORVETTES"
     elif sm <= 12:
         return "CRUISERS"
     else:

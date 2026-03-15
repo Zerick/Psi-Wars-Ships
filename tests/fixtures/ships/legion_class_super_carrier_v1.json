@@ -4,7 +4,7 @@
   "name": "Legion-Class Super Carrier",
   "faction_origin": "empire",
   "sm": 14,
-  "ship_class": "carrier",
+  "ship_class": "capital",
   "attributes": {
     "st_hp": 8000,
     "ht": "12",

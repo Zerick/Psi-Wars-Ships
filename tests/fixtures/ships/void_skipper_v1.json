@@ -3,24 +3,20 @@
   "version": "1.0.0",
   "name": "Void-Skipper Long-Range Stealth Courier",
   "faction_origin": "arc",
-  "sm": 5,
-  "ship_class": "courier",
-
+  "sm": 6,
+  "ship_class": "corvette",
   "attributes": {
     "st_hp": 100,
     "ht": "12",
     "hnd": 6,
     "sr": 3
   },
-
   "mobility": {
     "accel": 35,
     "top_speed": 950,
     "stall_speed": 65
   },
-
   "afterburner": null,
-
   "defense": {
     "dr_front": 10,
     "dr_rear": 10,
@@ -32,7 +28,6 @@
     "fdr_max": 150,
     "force_screen_type": "standard"
   },
-
   "electronics": {
     "ultrascanner_range": 30,
     "targeting_bonus": 5,
@@ -46,10 +41,8 @@
     "has_neural_interface": false,
     "sensor_notes": "Medium Tactical Ultra-Scanner. Base ECM -6 from Ghost-Shell (default module). With co-pilot running Silent (Move 10/300), ECM increases to -10. Flight computer can be mind-linked: pilot with high Psychic ability gains +1 Handling (to +7) and Chase up to +23."
   },
-
   "occ_raw": "2ASV+4SV",
   "loc_raw": "g2Wi3rR",
-
   "logistics": {
     "lwt": 30.0,
     "load": 4.5,
@@ -60,7 +53,6 @@
     "endurance": "Void-Skipper Jump Drive with rapid-cycle capacitors",
     "signature_cost": 10
   },
-
   "traits": [
     "prototype",
     "stealth_coating",
@@ -68,7 +60,6 @@
     "no_pressurized_interior",
     "vacc_suit_required"
   ],
-
   "modes": {
     "Silent Running": {
       "accel": 10,
@@ -78,9 +69,7 @@
       "hnd": 7
     }
   },
-
   "weapons": [],
-
   "module_slots": [
     {
       "slot_id": "accessory",
@@ -104,10 +93,15 @@
       "notes": "Engine slot. Default: ARC Gravitic Pulse (Move 35/950, Hnd +6, Chase +22). Alternative: Redjack Brute Overclock (Move 50/1100, Hnd +5, -4 High-G penalty, Chase +22)."
     }
   ],
-
   "craft_complement": [],
-
   "description": "The Void-Skipper looks like a jagged, obsidian needle. The tandem cockpit sits forward like a dragonfly's head, with the rest of the ship consisting of the massive Jump Drive and the modular belly rack. Designed as a prototype by ARC with custom Redjack overhaul, it is classified as a Long-Range Stealth Courier and Prototype Infiltrator. The cockpit houses a Pilot and a Systems Op/Co-Pilot in a cramped, lean-back configuration. No pressurized interior; pilots must wear vacc suits. At $45M it is nearly 14 times the cost of a Drifter, reflecting its prototype status and the unique Rating 4 drive.",
-  "tags": ["arc", "redjack", "prototype", "courier", "stealth", "modular"],
+  "tags": [
+    "arc",
+    "redjack",
+    "prototype",
+    "courier",
+    "stealth",
+    "modular"
+  ],
   "source_url": null
 }

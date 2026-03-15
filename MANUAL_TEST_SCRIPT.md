@@ -1,5 +1,5 @@
 # Terminal UI Manual Test Script
-## GURPS Psi-Wars Combat Simulator v0.7 — Visual Inspection Checklist
+## GURPS Psi-Wars Combat Simulator v0.19 — Visual Inspection Checklist
 
 **Tester:** _______________
 **Date:** _______________
@@ -15,14 +15,29 @@ Run the game with: `python -m psi_wars_ui`
 For each test, follow the steps, observe the result, and mark PASS or FAIL.
 Add notes for anything unexpected, even on passing tests.
 
-### Known Limitations (v0.7)
-- Weapons use actual ship weapon data from JSON fixtures, but weapon range
-  is not enforced (weapons fire at any range band)
-- Subsystem damage is logged but does not yet affect gameplay (disabled
-  propulsion doesn't reduce speed, etc.)
-- Each ship fires one weapon per turn (no weapon selection menu yet)
-- AI High-G dodge is always attempted when available (no risk assessment)
-- Ship catalog is sorted by SM; the Spectre appears as #1 ("Aegis-7...")
+### What's New in v0.19
+- Real weapon data from JSON (48 weapons across 40 ships)
+- Multiple weapon selection for human players
+- NPC smart weapon selection (picks best for situation)
+- Deceptive attacks (shows effective skill at each level, only on attack maneuvers)
+- Luck advantage with real-time cooldown (configurable: Luck/Extraordinary/Ridiculous)
+- Lucky Break separate from Luck (Ace Pilots get 1 free per chase)
+- Impulse/Flesh Wound (reduce any wound to minor)
+- Wound accumulation (repeated wounds escalate via HT roll)
+- Crippling/mortal HT rolls to remain operational
+- Subsystem cascade mechanic
+- Force screen hardened 1 DR, plasma AD negation, heavy screen rules
+- Matched Speed full accuracy on Move and Attack
+- Speed penalty in range calculation
+- Facing enforcement (fixed weapons need correct facing, advantage targets rear)
+- Stall speed chase attack restriction
+- Weapon range enforcement (mile notation supported)
+- Visual separator between attack sequences
+- Subsystem status in status bar (↓prop, ✘weap)
+- Emergency power menu for human players
+- Combat end summary screen
+- Ship inspection shows weapons with ranges and Luck level
+- Smarter NPC High-G decisions
 
 ---
 

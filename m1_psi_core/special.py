@@ -152,16 +152,23 @@ def configure_force_screen(
 # Ship classification
 # ---------------------------------------------------------------------------
 
-def classify_ship(sm: int, chase_bonus: int) -> str:
+def classify_ship(sm: int, chase_bonus: int, ship_class: str = "") -> str:
     """
     Classify a ship as fighter, corvette, or capital.
 
-    Fighter: SM 4-7 or chase +16 or better.
-    Corvette: SM 7-10 or chase +11 to +15.
-    Capital: SM 10+ or chase +10 or worse.
+    If ship_class is provided (from JSON data), use it directly.
+    Otherwise fall back to SM/chase-based heuristic:
+        Fighter: SM 4-7 or chase +16 or better.
+        Corvette: SM 7-10 or chase +11 to +15.
+        Capital: SM 10+ or chase +10 or worse.
 
-    SM takes priority, then chase bonus as tiebreaker.
+    This matters for relative size penalties (-5/-10 to hit)
+    and piloting skill specialization.
     """
+    # Prefer explicit classification from ship data
+    if ship_class in ("fighter", "corvette", "capital"):
+        return ship_class
+
     # SM-based classification
     if sm <= 7:
         if sm >= 4:

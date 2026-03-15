@@ -4,7 +4,7 @@
   "name": "Kodiak-Class Light Cruiser",
   "faction_origin": "redjack",
   "sm": 11,
-  "ship_class": "cruiser",
+  "ship_class": "capital",
   "attributes": {
     "st_hp": 3000,
     "ht": "14",

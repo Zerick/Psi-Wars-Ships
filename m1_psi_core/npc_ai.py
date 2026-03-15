@@ -530,3 +530,70 @@ def should_attempt_high_g(
 
     # Low FP, minor threat: conserve energy
     return False
+
+
+# ---------------------------------------------------------------------------
+# NPC Weapon Selection
+# ---------------------------------------------------------------------------
+
+def select_best_weapon(
+    weapons: list,
+    range_band: str,
+    attacker_facing: str,
+    has_stall_speed: bool,
+    won_chase: bool,
+) -> int:
+    """
+    Select the best weapon index for an NPC to fire.
+
+    Priority:
+    1. Weapon must be in range
+    2. Weapon must be able to fire given current facing
+    3. Weapon must pass stall speed restriction
+    4. Among valid weapons, pick highest expected damage
+
+    Args:
+        weapons: List of WeaponInfo objects.
+        range_band: Current engagement range band.
+        attacker_facing: Attacker's current facing ("front", "rear", "any").
+        has_stall_speed: Whether the ship has a stall speed.
+        won_chase: Whether the ship won the chase this turn.
+
+    Returns:
+        Index of the best weapon, or 0 as fallback.
+    """
+    from m1_psi_core.engine import is_weapon_in_range, can_weapon_fire_facing, check_stall_attack_restriction
+
+    best_idx = 0
+    best_score = -1
+
+    for i, w in enumerate(weapons):
+        # Filter: range check
+        if w.range_str and not is_weapon_in_range(w.range_str, range_band):
+            continue
+
+        # Filter: facing check
+        if not can_weapon_fire_facing(w.mount, attacker_facing):
+            continue
+
+        # Filter: stall speed restriction
+        if not check_stall_attack_restriction(has_stall_speed, won_chase, w.mount):
+            continue
+
+        # Score: estimate damage output
+        # Parse the multiplier from damage string for a rough score
+        score = w.rof * 10  # Higher ROF = more hits
+        # Bonus for high accuracy
+        score += w.acc
+        # Bonus for armor divisor (better penetration)
+        if w.armor_divisor and w.armor_divisor > 1:
+            score += w.armor_divisor * 2
+        # Bonus for explosive (area damage)
+        if w.is_explosive:
+            score += 5
+
+        if score > best_score:
+            best_score = score
+            best_idx = i
+
+    return best_idx

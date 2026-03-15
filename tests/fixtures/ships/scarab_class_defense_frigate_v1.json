@@ -4,7 +4,7 @@
   "name": "Scarab-Class Defense Frigate",
   "faction_origin": "trader",
   "sm": 8,
-  "ship_class": "frigate",
+  "ship_class": "corvette",
   "attributes": {
     "st_hp": 400,
     "ht": "13",

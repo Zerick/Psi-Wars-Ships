@@ -4,7 +4,7 @@
   "name": "Raider-Class Assault Carrier",
   "faction_origin": "redjack",
   "sm": 9,
-  "ship_class": "carrier",
+  "ship_class": "corvette",
   "attributes": {
     "st_hp": 800,
     "ht": "14",

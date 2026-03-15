@@ -4,7 +4,7 @@
   "name": "Spire-Class Mobile Fortress",
   "faction_origin": "rath",
   "sm": 11,
-  "ship_class": "battleship",
+  "ship_class": "capital",
   "attributes": {
     "st_hp": 3000,
     "ht": "9f",

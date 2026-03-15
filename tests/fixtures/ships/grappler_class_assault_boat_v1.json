@@ -4,7 +4,7 @@
   "name": "Grappler Class Assault Boat",
   "faction_origin": "redjack",
   "sm": 5,
-  "ship_class": "striker",
+  "ship_class": "fighter",
   "attributes": {
     "st_hp": 120,
     "ht": "12",
