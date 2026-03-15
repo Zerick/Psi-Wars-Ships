@@ -1,0 +1,31 @@
+# /etc/systemd/system/psiwars-web.service
+# =============================================================================
+# Psi-Wars Combat Simulator — Web UI
+# =============================================================================
+# Installation:
+#   sudo cp psiwars-web.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable psiwars-web
+#   sudo systemctl start psiwars-web
+#
+# Useful commands:
+#   sudo systemctl status psiwars-web
+#   sudo systemctl restart psiwars-web
+#   journalctl -u psiwars-web -f
+# =============================================================================
+[Unit]
+Description=Psi-Wars Combat Simulator Web UI
+After=network.target
+
+[Service]
+Type=simple
+User=psiwars
+WorkingDirectory=/home/psiwars/psi-wars/web
+ExecStart=/home/psiwars/psi-wars/web/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8080
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psi-Wars Combat Simulator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --panel: #0d1117;
+    --border: #1a2332;
+    --border-glow: #1e3a5f;
+    --text: #c9d1d9;
+    --text-dim: #6e7681;
+    --accent: #3fb5e5;
+    --accent-dim: rgba(63, 181, 229, 0.15);
+    --warn: #d4a843;
+    --danger: #e05454;
+    --success: #3fb950;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.08) 2px,
+      rgba(0, 0, 0, 0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(63, 181, 229, 0.04) 0%, transparent 70%),
+      linear-gradient(rgba(26, 35, 50, 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26, 35, 50, 0.3) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    pointer-events: none;
+  }
+
+  .main-container {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .title-block {
+    margin-bottom: 3rem;
+  }
+
+  .title-sub {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 3.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(63, 181, 229, 0.3);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .title-suffix {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 1.4rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* Status panel */
+  .status-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent);
+    padding: 1.5rem 2.5rem;
+    display: inline-block;
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .status-panel::before {
+    content: 'SYS STATUS';
+    position: absolute;
+    top: -0.6rem;
+    left: 1rem;
+    background: var(--panel);
+    padding: 0 0.5rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 0.4rem 0;
+    font-size: 0.85rem;
+  }
+
+  .status-label {
+    color: var(--text-dim);
+    min-width: 100px;
+    text-align: right;
+  }
+
+  .status-value {
+    color: var(--text);
+  }
+
+  .status-value.ok { color: var(--success); }
+  .status-value.pending { color: var(--warn); }
+  .status-value.offline { color: var(--danger); }
+
+  .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+  .dot.ok { background: var(--success); box-shadow: 0 0 6px var(--success); }
+  .dot.pending { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+  .dot.offline { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+
+  /* Endpoint list */
+  .endpoints {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 1.2rem 2rem;
+    display: inline-block;
+    text-align: left;
+    font-size: 0.75rem;
+    line-height: 1.8;
+  }
+
+  .endpoints .header {
+    color: var(--text-dim);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    margin-bottom: 0.5rem;
+  }
+
+  .endpoint {
+    color: var(--text-dim);
+  }
+
+  .endpoint .method {
+    display: inline-block;
+    min-width: 3rem;
+    color: var(--accent);
+  }
+
+  .endpoint .path {
+    color: var(--text);
+  }
+
+  .endpoint .tag {
+    color: var(--warn);
+    font-size: 0.65rem;
+    margin-left: 0.5rem;
+  }
+
+  /* Pulse animation on the main dot */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .pulse { animation: pulse 2s ease-in-out infinite; }
+
+  /* Corner brackets decoration */
+  .corner-decor {
+    position: fixed;
+    width: 30px;
+    height: 30px;
+    border-color: var(--border-glow);
+    border-style: solid;
+    opacity: 0.5;
+  }
+  .corner-decor.tl { top: 20px; left: 20px; border-width: 2px 0 0 2px; }
+  .corner-decor.tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
+  .corner-decor.bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
+  .corner-decor.br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; }
+
+  .version-tag {
+    margin-top: 2rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+  <div class="corner-decor tl"></div>
+  <div class="corner-decor tr"></div>
+  <div class="corner-decor bl"></div>
+  <div class="corner-decor br"></div>
+
+  <div class="main-container">
+    <div class="title-block">
+      <div class="title-sub">GURPS · Vehicular Combat</div>
+      <h1>Psi-Wars</h1>
+      <div class="title-suffix">Combat Simulator</div>
+    </div>
+
+    <div class="status-panel">
+      <div class="status-row">
+        <span class="status-label">SERVER</span>
+        <span class="status-value ok"><span class="dot ok pulse"></span>ONLINE</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">API</span>
+        <span class="status-value ok" id="api-status"><span class="dot ok"></span>RESPONDING</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">ENGINE</span>
+        <span class="status-value pending"><span class="dot pending"></span>NOT CONNECTED</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">SHIPS</span>
+        <span class="status-value pending"><span class="dot pending"></span>0 LOADED</span>
+      </div>
+    </div>
+
+    <br>
+
+    <div class="endpoints">
+      <div class="header">REGISTERED ENDPOINTS</div>
+      <div class="endpoint"><span class="method">GET</span> <span class="path">/api/health</span></div>
+      <div class="endpoint"><span class="method">GET</span> <span class="path">/api/catalog/ships</span> <span class="tag">mock</span></div>
+      <div class="endpoint"><span class="method">POST</span> <span class="path">/api/session/create</span> <span class="tag">mock</span></div>
+      <div class="endpoint"><span class="method">POST</span> <span class="path">/api/session/add-ship</span> <span class="tag">mock</span></div>
+      <div class="endpoint"><span class="method">POST</span> <span class="path">/api/turn/begin</span> <span class="tag">mock</span></div>
+      <div class="endpoint"><span class="method">POST</span> <span class="path">/api/turn/decide</span> <span class="tag">mock</span></div>
+      <div class="endpoint"><span class="method">GET</span> <span class="path">/api/docs</span></div>
+    </div>
+
+    <div class="version-tag">v0.1.0 · PHASE 1 · WEB SERVER SKELETON</div>
+  </div>
+
+  <script>
+    // Verify API is actually responding
+    fetch('/api/health')
+      .then(r => r.json())
+      .then(data => {
+        if (data.status !== 'ok') throw new Error('bad status');
+      })
+      .catch(() => {
+        const el = document.getElementById('api-status');
+        el.className = 'status-value offline';
+        el.innerHTML = '<span class="dot offline"></span>ERROR';
+      });
+  </script>
+</body>
+</html>
