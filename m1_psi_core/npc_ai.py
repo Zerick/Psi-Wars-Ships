@@ -261,13 +261,22 @@ class AIPersonality(ABC):
     def check_no_advantage_faster(self, sit: SituationAssessment) -> Optional[AIDecision]:
         """Priority 6: No advantage, faster ship."""
         if not sit.has_advantage and sit.is_faster:
+            # At weapon range: attack while using speed advantage
+            if _is_good_weapon_range(sit.range_band):
+                return self._make("move_and_attack", "pursue",
+                                  reasoning="Faster at weapon range — attacking while maneuvering.")
             return self._make("mobility_pursuit", "pursue",
-                              reasoning="Faster than opponent — using speed to gain advantage.")
+                              reasoning="Faster than opponent — using speed to close distance.")
         return None
 
     def check_no_advantage_slower(self, sit: SituationAssessment) -> Optional[AIDecision]:
         """Priority 7: No advantage, slower or equal ship."""
         if not sit.has_advantage and not sit.is_faster:
+            # At weapon range: attack rather than stunt forever
+            if _is_good_weapon_range(sit.range_band):
+                return self._make("move_and_attack", "pursue",
+                                  reasoning="At weapon range — engaging with Move and Attack.")
+            # Far range: stunt to try for advantage before closing
             return self._make("stunt", "pursue",
                               reasoning="Slower than opponent — attempting a stunt to gain advantage.")
         return None

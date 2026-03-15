@@ -146,6 +146,7 @@ class DefenseModifiers:
     tactical_defense: int = 0
     high_g_bonus: int = 0
     deceptive_penalty: int = 0
+    controls_penalty: int = 0
     effective_dodge: int = 0
 
 
@@ -456,6 +457,19 @@ def resolve_attack(
             can_attack=False, reason_cannot_attack="Ship has no power",
         )
 
+    # Check subsystem damage: destroyed weaponry or destroyed power prevents firing
+    from m1_psi_core.subsystems import can_fire_weapons
+    if not can_fire_weapons(attacker):
+        return AttackResult(
+            attacker_id=attacker_id, attacker_name=a_name,
+            target_id=target_id, target_name=t_name,
+            weapon=weapon, modifiers=AttackModifiers(base_skill=0, range_penalty=0,
+                sm_bonus=0, sensor_lock_bonus=0, accuracy=0, rof_bonus=0,
+                relative_size_penalty=0),
+            roll=0, margin=0, hit=False, critical=False, critical_type=None,
+            can_attack=False, reason_cannot_attack="Weapons or power destroyed",
+        )
+
     # Calculate all modifiers
     base_skill = getattr(pilot, "gunnery_skill", 12)
     range_pen = get_range_penalty(engagement.range_band)
@@ -599,10 +613,16 @@ def resolve_defense(
         hg.ht_succeeded = ht_result.success
         hg.fp_lost = calculate_high_g_fp_loss(ht_target, ht_roll)
 
+    # Controls damage penalty
+    from m1_psi_core.subsystems import get_controls_penalty
+    ctrl_pen = get_controls_penalty(defender)
+    dm.controls_penalty = ctrl_pen
+
     # Calculate effective dodge
     effective = (base + dm.evade_bonus + dm.advantage_escaping_bonus
                  + dm.ace_stunt_bonus + dm.precision_aim_awareness
-                 + dm.tactical_defense + dm.high_g_bonus + dm.deceptive_penalty)
+                 + dm.tactical_defense + dm.high_g_bonus + dm.deceptive_penalty
+                 + dm.controls_penalty)
     dm.effective_dodge = effective
 
     # Roll
@@ -796,9 +816,15 @@ def regen_force_screen(ship) -> int:
     """
     Calculate regenerated fDR for end-of-turn cleanup.
 
-    Returns max fDR if power is operational, current fDR otherwise.
+    Respects subsystem damage:
+    - Destroyed power: no regen (returns current fDR)
+    - Disabled power: regen to half max fDR
+    - Normal: regen to full max fDR
+
     Does NOT mutate the ship.
     """
     if getattr(ship, "no_power", False):
         return getattr(ship, "current_fdr", 0)
-    return getattr(ship, "fdr_max", 0)
+
+    from m1_psi_core.subsystems import get_effective_fdr_max
+    return get_effective_fdr_max(ship)

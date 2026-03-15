@@ -1,294 +1,363 @@
 # Terminal UI Manual Test Script
-## GURPS Psi-Wars Combat Simulator — Visual Inspection Checklist
+## GURPS Psi-Wars Combat Simulator v0.7 — Visual Inspection Checklist
 
 **Tester:** _______________
 **Date:** _______________
-**Terminal:** _______________  (e.g., "xterm 120x40", "raspi console 100x30")
+**Terminal:** _______________ (e.g., "xterm 120x40", "raspi console 100x30")
 **Commit:** _______________
 
 ---
 
 ## Instructions
 
-Run the game with: `python -m psi_wars_ui`  (or whatever the launch command ends up being)
+Run the game with: `python -m psi_wars_ui`
 
 For each test, follow the steps, observe the result, and mark PASS or FAIL.
 Add notes for anything unexpected, even on passing tests.
 
----
-
-## 1. Startup & Setup
-
-### T-UI-01: Game launches without errors
-- [ ] PASS / FAIL
-- Steps: Run the launch command.
-- Expected: Game displays a title screen or goes directly to setup menu. No tracebacks.
-- Notes: _______________
-
-### T-UI-02: Ship selection menu displays all ships
-- [ ] PASS / FAIL
-- Steps: Enter the ship selection flow.
-- Expected: All 40 ships are listed, organized by class. Each shows name, SM, and key stats.
-- Notes: _______________
-
-### T-UI-03: Can select two ships for 1v1
-- [ ] PASS / FAIL
-- Steps: Pick a Javelin for Player 1 and a Hornet for Player 2.
-- Expected: Both ships are confirmed with their names. Prompted for faction assignment.
-- Notes: _______________
-
-### T-UI-04: Faction assignment works
-- [ ] PASS / FAIL
-- Steps: Assign Javelin to "Empire" and Hornet to "Trader". Set them as enemies.
-- Expected: Factions are displayed with colors. Relationship shown as "ENEMY".
-- Notes: _______________
-
-### T-UI-05: Control mode assignment works
-- [ ] PASS / FAIL
-- Steps: Set Javelin to Human, Hornet to NPC.
-- Expected: Control modes displayed. NPC indicator visible next to Hornet.
-- Notes: _______________
-
-### T-UI-06: Can start with both ships as NPC (full auto)
-- [ ] PASS / FAIL
-- Steps: Restart setup. Set both ships to NPC.
-- Expected: Game proceeds without requiring any human input during turns. Combat auto-resolves.
-- Notes: _______________
-
-### T-UI-07: Can start with both ships as Human (hot-seat)
-- [ ] PASS / FAIL
-- Steps: Restart setup. Set both ships to Human.
-- Expected: Game prompts each player in turn for declarations.
-- Notes: _______________
-
-### T-UI-08: Starting range band selection
-- [ ] PASS / FAIL
-- Steps: During setup, choose a starting range band (e.g., "extreme").
-- Expected: Engagement display shows the selected range band.
-- Notes: _______________
+### Known Limitations (v0.7)
+- Weapons use actual ship weapon data from JSON fixtures, but weapon range
+  is not enforced (weapons fire at any range band)
+- Subsystem damage is logged but does not yet affect gameplay (disabled
+  propulsion doesn't reduce speed, etc.)
+- Each ship fires one weapon per turn (no weapon selection menu yet)
+- AI High-G dodge is always attempted when available (no risk assessment)
+- Ship catalog is sorted by SM; the Spectre appears as #1 ("Aegis-7...")
 
 ---
 
-## 2. Display Layout
+## 1. Startup & Setup (8 tests)
 
-### T-UI-09: Ship status table displays correctly
+### T-01: Game launches without errors
 - [ ] PASS / FAIL
-- Steps: Observe the ship status area after setup completes.
-- Expected: Each ship shows: faction (color-coded), display name, template name, HP current/max, fDR or "--", wound level (color-coded), active mode if non-standard.
+- Steps: `python -m psi_wars_ui`
+- Expected: Title screen displays, no tracebacks.
 - Notes: _______________
 
-### T-UI-10: Engagement display shows range and advantage
+### T-02: Ship catalog displays sorted by SM
 - [ ] PASS / FAIL
-- Steps: Observe the engagement area.
-- Expected: Shows both ship names with range band between them. "No advantage" or advantage indicator.
+- Steps: Enter ship selection. Observe the list.
+- Expected: SM 4 fighters at top (Spectre, Drifter, Hornet, Javelin, etc.),
+  SM 5 next, then corvettes, frigates, capitals. Category headers
+  (FIGHTERS, CORVETTES, etc.) shown as non-selectable separators.
 - Notes: _______________
 
-### T-UI-11: Combat log area is visible and empty at start
+### T-03: Ship numbers are correct (no off-by-one)
 - [ ] PASS / FAIL
-- Steps: Observe the combat log area.
-- Expected: Empty or showing "Combat begins" message. Scrollable area is clearly delineated.
+- Steps: Select ship #1.
+- Expected: Confirms "Aegis-7 'Spectre' Psionic Interceptor" (first SM 4 ship).
+  NOT a category header.
 - Notes: _______________
 
-### T-UI-12: Input prompt shows which ship is acting
+### T-04: Can select two ships for 1v1
 - [ ] PASS / FAIL
-- Steps: Observe the input prompt at bottom of screen.
-- Expected: Clearly shows the ship name and "Choose maneuver" or similar. Unambiguous which ship is being controlled.
+- Steps: Pick a Javelin (#5) for faction 1 and a Hornet (#4) for faction 2.
+- Expected: Both confirmed by name. Prompted for display name, control mode, pilot.
 - Notes: _______________
 
-### T-UI-13: Terminal size detection works
+### T-05: Faction assignment and enemy relationship
 - [ ] PASS / FAIL
-- Steps: Resize terminal before launching. Launch game.
-- Expected: Layout adapts to available space. No truncated lines or overlapping sections.
+- Steps: Accept default factions (Empire vs Trader).
+- Expected: Factions color-coded. "ENEMIES" displayed in red.
 - Notes: _______________
 
-### T-UI-14: Colors display correctly
+### T-06: NPC vs NPC game runs automatically
 - [ ] PASS / FAIL
-- Steps: Observe faction colors, wound level colors, combat log event colors.
-- Expected: Factions have distinct colors. Wound levels: none=green, minor=yellow, major=orange, crippling+=red. Combat log events color-coded by type.
+- Steps: Set both ships to NPC. Start combat.
+- Expected: Turns auto-resolve with ~1 second delay. Combat log scrolls.
+  Eventually one ship is destroyed. "COMBAT OVER" announced.
+- Notes: _______________
+
+### T-07: Human vs NPC game prompts correctly
+- [ ] PASS / FAIL
+- Steps: Set one Human, one NPC. Start combat.
+- Expected: Human gets maneuver menu. NPC declares silently.
+  [NPC] and [YOU] indicators visible in status bar.
+- Notes: _______________
+
+### T-08: Human vs Human hot-seat works
+- [ ] PASS / FAIL
+- Steps: Set both to Human. Start combat.
+- Expected: Screen clears between declarations. "Pass to: [name]" prompt.
+  Previous player's choice hidden.
 - Notes: _______________
 
 ---
 
-## 3. Declaration Phase
+## 2. Display Layout (7 tests)
 
-### T-UI-15: Maneuver menu displays all available maneuvers
+### T-09: Status bar always visible at top
 - [ ] PASS / FAIL
-- Steps: When prompted for a maneuver, observe the menu.
-- Expected: Numbered list of all valid maneuvers for this ship. Invalid maneuvers (e.g., Attack for stall-speed ship) are either absent or marked as unavailable.
+- Steps: Play several turns. Observe that ship status and engagement
+  info remain at the top of every screen, including during menus.
+- Expected: Status bar NEVER scrolls off. Always shows turn number,
+  ship HP/fDR/wound, and engagement range/advantage.
 - Notes: _______________
 
-### T-UI-16: Pursue/evade intent selection
+### T-10: Ship status shows correct data
 - [ ] PASS / FAIL
-- Steps: After selecting a maneuver, observe intent prompt.
-- Expected: Asked to choose Pursue or Evade. Default should be sensible for the maneuver (e.g., Evade maneuver defaults to evade intent).
+- Steps: Observe the status bar.
+- Expected: Each ship shows: [FACTION] [YOU/NPC] Name HP:cur/max fDR:cur/max Wound.
+  HP color-coded (green/yellow/red). Wound color-coded.
 - Notes: _______________
 
-### T-UI-17: Screen clears between human player declarations (hot-seat)
+### T-11: Engagement shows range and advantage
 - [ ] PASS / FAIL
-- Steps: In a 2-human game, make Player 1's declaration. Observe what happens before Player 2's prompt.
-- Expected: Screen clears or shows a "Pass to Player 2" message. Player 1's maneuver choice is NOT visible.
+- Steps: Observe engagement line in status bar.
+- Expected: "ShipA ←[LONG]→ ShipB | No advantage" or similar.
+  Range band in cyan. Advantage in yellow. Matched speed in green.
 - Notes: _______________
 
-### T-UI-18: NPC declaration happens silently
+### T-12: Combat log visible between status and menu
 - [ ] PASS / FAIL
-- Steps: In a human-vs-NPC game, observe the NPC's declaration phase.
-- Expected: No prompt for the NPC. NPC's choice is not revealed until resolution. Brief "NPC is deciding..." message or instant skip.
+- Steps: Play a few turns. Observe the area between status bar and menu.
+- Expected: Combat log shows recent events with color coding.
+  Log truncates (oldest messages drop) to fit available space.
 - Notes: _______________
 
----
-
-## 4. Chase Resolution
-
-### T-UI-19: Chase roll displayed with full detail
+### T-13: Terminal size adaptation
 - [ ] PASS / FAIL
-- Steps: Observe the combat log after chase resolution.
-- Expected: Shows both ships' effective chase skills, dice rolls, margins, and the winner. All modifiers broken down.
+- Steps: Use different terminal sizes (try small and large).
+- Expected: Layout adapts. No truncated lines on wide terminals.
+  Small terminals show less combat log but status bar still visible.
 - Notes: _______________
 
-### T-UI-20: Chase outcome choice offered to winner
+### T-14: Colors display correctly
 - [ ] PASS / FAIL
-- Steps: When a human ship wins by 5+, observe the prompt.
-- Expected: Menu offering choices (e.g., "1. Gain Advantage  2. Shift Range 1 Band"). If already advantaged, "Match Speed" offered instead.
+- Steps: Observe various colored elements.
+- Expected: Factions colored. Chase events in cyan. Attacks in yellow.
+  Defense in green. Damage in red. Criticals bold. Wound levels colored.
 - Notes: _______________
 
-### T-UI-21: Range band updates after chase
+### T-15: Destroyed ship marked clearly
 - [ ] PASS / FAIL
-- Steps: After a range shift is chosen/applied, observe the engagement display.
-- Expected: Range band label updates to new value.
-- Notes: _______________
-
-### T-UI-22: Advantage indicator updates after chase
-- [ ] PASS / FAIL
-- Steps: After advantage is gained, observe the engagement display.
-- Expected: Shows which ship has advantage. If matched speed, shows that too.
-- Notes: _______________
-
----
-
-## 5. Attack Resolution
-
-### T-UI-23: Attack roll displayed with full modifier breakdown
-- [ ] PASS / FAIL
-- Steps: Observe the combat log when a ship attacks.
-- Expected: Shows: base Gunner skill, range penalty, SM bonus, sensor lock bonus, accuracy bonus, any deceptive penalty, effective skill, dice roll, HIT or MISS, margin of success/failure. Critical success/failure clearly marked if applicable.
-- Notes: _______________
-
-### T-UI-24: Defense roll displayed with full breakdown
-- [ ] PASS / FAIL
-- Steps: After a hit, observe the dodge resolution in the combat log.
-- Expected: Shows: base dodge (Piloting/2 + Handling), maneuver bonus, other modifiers, effective dodge, dice roll, DODGE or HIT, margin.
-- Notes: _______________
-
-### T-UI-25: Damage displayed with pipeline breakdown
-- [ ] PASS / FAIL
-- Steps: After a successful hit that isn't dodged, observe damage resolution.
-- Expected: Shows: raw damage rolled, force screen absorption (if any), remaining fDR, hull DR, armor divisor application, penetrating damage, wound level determined. Each step visible.
-- Notes: _______________
-
-### T-UI-26: Wound level updates in ship status
-- [ ] PASS / FAIL
-- Steps: After a wound is inflicted, observe the ship status table.
-- Expected: Wound level updates and color changes appropriately.
-- Notes: _______________
-
-### T-UI-27: HP updates after damage
-- [ ] PASS / FAIL
-- Steps: After damage is applied, observe the ship status table.
-- Expected: HP shows new current/max value.
+- Steps: Destroy an enemy ship.
+- Expected: Status bar shows "✘ ShipName" dimmed, "DESTROYED" in bright red.
+  Ship no longer takes turns.
 - Notes: _______________
 
 ---
 
-## 6. Force Screen Behavior
+## 3. Hotkeys (3 tests)
 
-### T-UI-28: Force screen takes ablative damage
+### T-16: Help overlay on H
 - [ ] PASS / FAIL
-- Steps: Attack a ship with a force screen. Observe fDR in status table.
-- Expected: fDR decreases by the damage absorbed. Combat log shows absorption.
+- Steps: At any maneuver menu, type H.
+- Expected: Help overlay with hotkey list, advantage explanation,
+  and formation benefits. Press Enter returns to menu.
 - Notes: _______________
 
-### T-UI-29: Force screen regenerates between turns
+### T-17: Ship inspection on I
 - [ ] PASS / FAIL
-- Steps: After a turn where fDR was reduced, observe the status table at the start of the next turn.
-- Expected: fDR restored to maximum. Combat log notes "Force screens regenerated".
+- Steps: At any maneuver menu, type I.
+- Expected: Detailed ship stats: SM, HP, HT, Hnd, Move, DR, fDR,
+  electronics, pilot skills, traits. Press Enter returns.
 - Notes: _______________
 
----
-
-## 7. Combat End
-
-### T-UI-30: Ship destruction displayed
+### T-18: Quit confirmation on Q
 - [ ] PASS / FAIL
-- Steps: Destroy an enemy ship (may take several turns or use a powerful weapon).
-- Expected: Combat log announces destruction. Ship status shows DESTROYED. Ship is removed from future turn declarations.
-- Notes: _______________
-
-### T-UI-31: Combat end detected and announced
-- [ ] PASS / FAIL
-- Steps: Destroy the last enemy ship.
-- Expected: Game announces combat is over. Shows final status of all ships. Prompts to quit or continue.
-- Notes: _______________
-
-### T-UI-32: NPC-vs-NPC combat runs to completion
-- [ ] PASS / FAIL
-- Steps: Start a game with both ships as NPC. Let it auto-resolve.
-- Expected: Combat runs turn by turn, combat log scrolls, eventually one ship is destroyed or escapes. End detected.
+- Steps: At any maneuver menu, type Q.
+- Expected: "Quit? (Y/n)" prompt. N returns to game. Y exits cleanly.
 - Notes: _______________
 
 ---
 
-## 8. Help & Navigation
+## 4. Chase Resolution (5 tests)
 
-### T-UI-33: Help overlay displays on H key
+### T-19: Chase roll shows full detail
 - [ ] PASS / FAIL
-- Steps: Press H at any prompt.
-- Expected: Overlay appears showing all hotkeys. Press any key to dismiss.
+- Steps: Observe chase log after a turn.
+- Expected: Each ship shows: "ShipName rolled X vs skill Y, margin +/-Z"
+  Then: "→ WinnerName wins by N!"
 - Notes: _______________
 
-### T-UI-34: Ship inspection works on I key
+### T-20: Chase outcome choice offered to human winner
 - [ ] PASS / FAIL
-- Steps: Press I at any prompt, select a ship.
-- Expected: Detailed ship stat block displayed: HP, HT, handling, DR, fDR, weapons, traits, modes. Press any key to return.
+- Steps: Play human ship, win a chase by 5+.
+- Expected: Menu: "1. Gain Advantage" and/or "2. Shift range 1 band closer".
+  If already advantaged: "Match Speed" offered.
 - Notes: _______________
 
-### T-UI-35: Quit with confirmation on Q key
+### T-21: Range updates after chase shift
 - [ ] PASS / FAIL
-- Steps: Press Q at any prompt.
-- Expected: "Are you sure you want to quit? (Y/N)" confirmation. Y exits cleanly, N returns to game.
+- Steps: Choose "Shift range" in chase outcome.
+- Expected: Status bar engagement line shows new range band.
+  Log shows "Range → [NEW BAND]".
+- Notes: _______________
+
+### T-22: Advantage updates after chase
+- [ ] PASS / FAIL
+- Steps: Choose "Gain Advantage" in chase outcome.
+- Expected: Status bar shows "ShipName has ADVANTAGE" in yellow.
+  Log shows "ShipName gains ADVANTAGE!"
+- Notes: _______________
+
+### T-23: Matched speed display
+- [ ] PASS / FAIL
+- Steps: Win chase while already advantaged, choose Match Speed.
+- Expected: Status bar shows "ShipName MATCHED SPEED" in bright green.
 - Notes: _______________
 
 ---
 
-## 9. Edge Cases
+## 5. Attack Resolution (5 tests)
 
-### T-UI-36: Stall-speed ship cannot select Attack maneuver
+### T-24: Attack shows actual weapon name and modifiers
 - [ ] PASS / FAIL
-- Steps: Control a Javelin (stall speed 35). Observe the maneuver menu.
-- Expected: Attack maneuver is either not listed or marked unavailable with explanation.
+- Steps: Observe an attack in the combat log.
+- Expected: "ShipName fires [Actual Weapon Name] at Target"
+  Then modifier breakdown: Gunner(X) Range(+/-Y) SM(+/-Z) Lock(+/-W) Acc(+/-V)
+  ROF bonus shown if applicable. Relative size penalty if applicable.
+  "= EffectiveSkill" at the end.
 - Notes: _______________
 
-### T-UI-37: Very long combat log scrolls properly
+### T-25: Hit/miss with margin displayed
 - [ ] PASS / FAIL
-- Steps: Play several turns. Observe combat log.
-- Expected: New entries appear at bottom. Old entries scroll up. No display corruption.
+- Steps: Observe attack result.
+- Expected: "Rolled X → HIT (margin +Y)" in green, or
+  "Rolled X → MISS (margin -Y)" in red.
 - Notes: _______________
 
-### T-UI-38: Invalid input handled gracefully
+### T-26: Critical hit/miss highlighted
 - [ ] PASS / FAIL
-- Steps: At a menu prompt, type garbage (letters when numbers expected, out-of-range numbers).
-- Expected: Error message displayed. Re-prompts. No crash.
+- Steps: Play until a critical occurs (roll 3-4 or 17-18).
+- Expected: "CRITICAL HIT!" in bold bright green, or
+  "CRITICAL MISS!" in bold bright red.
 - Notes: _______________
 
-### T-UI-39: NPC ship makes reasonable decisions
+### T-27: Defense shows dodge calculation
 - [ ] PASS / FAIL
-- Steps: Play a human ship vs NPC. Observe NPC behavior over 5+ turns.
-- Expected: NPC pursues, attacks when advantaged, evades when damaged, doesn't do anything obviously stupid. AI reasoning shown in combat log.
+- Steps: After a hit, observe the dodge resolution.
+- Expected: "ShipName dodge: Pilot(X)//2+Hnd(+/-Y)" with any bonuses
+  (Evade, HighG, etc.) "= EffectiveDodge"
+  Then "Rolled X → DODGED/FAILS (margin +/-Y)"
 - Notes: _______________
 
-### T-UI-40: Combat with ships of very different sizes works
+### T-28: High-G dodge appears when available
 - [ ] PASS / FAIL
-- Steps: Set up a Javelin (SM 4) vs Sword Battleship (SM 13).
-- Expected: Relative size penalties displayed (-10 for capital vs fighter). Damage largely absorbed by force screen. Game doesn't crash on extreme stat differences.
+- Steps: Play a human ship with accel >= 40 or top_speed >= 400.
+  Get hit by an attack.
+- Expected: "Attempt High-G dodge? (costs FP on failure) (Y/n)" prompt.
+  If yes: dodge shows "+HighG(+1)" modifier.
+  HT roll result shown: "High-G HT roll: X vs Y — OK/FAIL, Z FP lost"
+- Notes: _______________
+
+---
+
+## 6. Damage Resolution (5 tests)
+
+### T-29: Damage pipeline fully displayed
+- [ ] PASS / FAIL
+- Steps: Get a hit that deals damage.
+- Expected: Step-by-step display:
+  "Raw damage: XdY=Z × M = Total"
+  "Force screen: Absorbs N (fDR: X → Y)" (only for shielded ships)
+  "Hull armor: X vs DR Y (eff Z w/ AD W) → N penetrating"
+  "WOUND LEVEL (Xhp = Y% of Z HP)"
+- Notes: _______________
+
+### T-30: Force screen absorption (shielded ship)
+- [ ] PASS / FAIL
+- Steps: Attack a ship with force screen (e.g., Hornet, fDR 150).
+- Expected: "Absorbs N" shown. fDR in status bar decreases.
+  If all absorbed: "Blocked by force screen" message.
+- Notes: _______________
+
+### T-31: No shield messages for unshielded ships
+- [ ] PASS / FAIL
+- Steps: Attack an unshielded ship (e.g., Javelin).
+- Expected: No "force screen" or "past shield" messages.
+  Damage goes directly to "Raw → DR → penetrating".
+- Notes: _______________
+
+### T-32: HP and wound update after damage
+- [ ] PASS / FAIL
+- Steps: Deal penetrating damage.
+- Expected: Status bar HP decreases. Wound level updates and
+  color changes (green → yellow → red as severity increases).
+- Notes: _______________
+
+### T-33: Subsystem damage on major+ wound
+- [ ] PASS / FAIL
+- Steps: Deal enough damage for a major or crippling wound.
+- Expected: "Subsystem: [system_name] disabled/destroyed! (roll X)"
+- Notes: _______________
+
+---
+
+## 7. Force Screen Behavior (2 tests)
+
+### T-34: Force screen regenerates between turns
+- [ ] PASS / FAIL
+- Steps: Deal damage to a shielded ship's fDR. Observe next turn.
+- Expected: fDR in status bar returns to max at turn end.
+  (Note: regen happens silently in cleanup phase)
+- Notes: _______________
+
+### T-35: Force screen shows in status bar
+- [ ] PASS / FAIL
+- Steps: Observe fDR display for shielded vs unshielded ships.
+- Expected: Shielded ship: "fDR:150/150" in blue. After damage: lower
+  number, color changes to yellow/red as it depletes.
+  Unshielded ship: "fDR:--" in dim.
+- Notes: _______________
+
+---
+
+## 8. Combat End (2 tests)
+
+### T-36: Ship destruction ends combat
+- [ ] PASS / FAIL
+- Steps: Destroy the enemy ship (may take several turns).
+- Expected: "✘ ShipName DESTROYED!" in combat log.
+  "COMBAT OVER" announced. Prompted to continue or quit.
+- Notes: _______________
+
+### T-37: NPC vs NPC reaches conclusion
+- [ ] PASS / FAIL
+- Steps: Run an all-NPC combat. Wait for it to finish.
+- Expected: Combat eventually ends with one ship destroyed.
+  Does not run forever. (If it takes >50 turns, note that.)
+- Notes: _______________
+
+---
+
+## 9. Edge Cases (5 tests)
+
+### T-38: Stall-speed ship restrictions
+- [ ] PASS / FAIL
+- Steps: Pick a Javelin (stall speed 35). Observe maneuver menu.
+- Expected: "Attack" maneuver shown as unavailable with explanation.
+  Ship uses Move and Attack or other valid maneuvers.
+- Notes: _______________
+
+### T-39: Invalid input handled gracefully
+- [ ] PASS / FAIL
+- Steps: At menu prompts, enter garbage (letters, out-of-range numbers).
+- Expected: Error message. Re-prompts. No crash.
+- Notes: _______________
+
+### T-40: NPC makes reasonable decisions
+- [ ] PASS / FAIL
+- Steps: Play human vs NPC for 5+ turns. Read NPC reasoning in log.
+- Expected: NPC pursues when healthy, evades when damaged, uses
+  appropriate maneuvers. Reasoning shown: "→ [explanation]"
+- Notes: _______________
+
+### T-41: Capital vs fighter size penalty
+- [ ] PASS / FAIL
+- Steps: Set up Javelin (SM 4) vs Sword Battleship (SM 13).
+- Expected: Battleship's attack shows "RelSize(-10)" modifier.
+  Fighter's attack does not show RelSize penalty.
+  No crashes on extreme stat differences.
+- Notes: _______________
+
+### T-42: Very long combat log doesn't break display
+- [ ] PASS / FAIL
+- Steps: Play 10+ turns. Observe display.
+- Expected: Combat log scrolls correctly. Oldest entries drop off.
+  Status bar remains at top. Menu remains at bottom.
+  No display corruption or overlapping text.
 - Notes: _______________
 
 ---
@@ -298,15 +367,15 @@ Add notes for anything unexpected, even on passing tests.
 | Category | Tests | Passed | Failed |
 |----------|-------|--------|--------|
 | Startup & Setup | 8 | ___ | ___ |
-| Display Layout | 6 | ___ | ___ |
-| Declaration Phase | 4 | ___ | ___ |
-| Chase Resolution | 4 | ___ | ___ |
+| Display Layout | 7 | ___ | ___ |
+| Hotkeys | 3 | ___ | ___ |
+| Chase Resolution | 5 | ___ | ___ |
 | Attack Resolution | 5 | ___ | ___ |
+| Damage Resolution | 5 | ___ | ___ |
 | Force Screen | 2 | ___ | ___ |
-| Combat End | 3 | ___ | ___ |
-| Help & Navigation | 3 | ___ | ___ |
+| Combat End | 2 | ___ | ___ |
 | Edge Cases | 5 | ___ | ___ |
-| **TOTAL** | **40** | ___ | ___ |
+| **TOTAL** | **42** | ___ | ___ |
 
 **Overall Result:** PASS / FAIL
 

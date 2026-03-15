@@ -334,10 +334,15 @@ class GameLoop:
     # ===================================================================
 
     def _attack_damage_phase(self, decls: dict[str, dict]) -> None:
-        """Resolve attacks for all ships that can attack."""
+        """Resolve attacks for all ships that can attack. Each ship attacks once."""
         self.buf.combat_log.add("── Attack ──", "attack")
+        attacked: set[str] = set()  # Track who has already attacked
+        first_attack = True
 
         for sid in self.session.get_all_ship_ids():
+            if sid in attacked:
+                continue
+
             ship = self.session.get_ship(sid)
             pilot = self.session.get_pilot(sid)
             if not ship or getattr(ship, "is_destroyed", False):
@@ -362,8 +367,15 @@ class GameLoop:
             atk = resolve_attack(
                 sid, ship, pilot, tid, target, eng, decl, weapon, self.dice)
 
+            attacked.add(sid)  # Mark as attacked regardless of result
+
             if not atk.can_attack:
                 continue
+
+            # DISPLAY: visual separator between each ship's attack sequence
+            if not first_attack:
+                self.buf.combat_log.add("", "info")
+            first_attack = False
 
             # DISPLAY: log attack
             self._log_attack(atk)
@@ -371,32 +383,36 @@ class GameLoop:
             if not atk.hit:
                 continue
 
-            # PIPELINE: Defense roll
-            t_maneuver = decls.get(tid, {}).get("maneuver", "move")
+            # CRITICAL HIT: defense is skipped entirely (GURPS RAW)
+            if atk.critical and atk.hit:
+                self.buf.combat_log.add(
+                    f"  Critical hit — no defense allowed!", "critical_success")
+            else:
+                # PIPELINE: Defense roll
+                t_maneuver = decls.get(tid, {}).get("maneuver", "move")
 
-            # Determine if we should offer High-G to human
-            ctrl = self.session.get_control_mode(tid)
-            high_g_choice = None  # None = NPC decides
-            if ctrl == "human":
-                from m1_psi_core.defense import is_high_g_available
-                if is_high_g_available(getattr(target, "accel", 0), getattr(target, "top_speed", 0)):
-                    self.buf.set_status(self.session)
-                    self._log_attack(atk)  # Show what hit them
-                    self._refresh()
-                    high_g_choice = yes_no("Attempt High-G dodge? (costs FP on failure)", default=True)
+                # Determine if we should offer High-G to human
+                ctrl = self.session.get_control_mode(tid)
+                high_g_choice = None  # None = NPC decides
+                if ctrl == "human":
+                    from m1_psi_core.defense import is_high_g_available
+                    if is_high_g_available(getattr(target, "accel", 0), getattr(target, "top_speed", 0)):
+                        self.buf.set_status(self.session)
+                        self._refresh()
+                        high_g_choice = yes_no("Attempt High-G dodge? (costs FP on failure)", default=True)
 
-            defense = resolve_defense(
-                tid, target, tpilot, t_maneuver,
-                decl.get("maneuver", "move"), eng, self.dice,
-                deceptive_penalty=0,
-                player_chose_high_g=high_g_choice,
-            )
+                defense = resolve_defense(
+                    tid, target, tpilot, t_maneuver,
+                    decl.get("maneuver", "move"), eng, self.dice,
+                    deceptive_penalty=0,
+                    player_chose_high_g=high_g_choice,
+                )
 
-            # DISPLAY: log defense
-            self._log_defense(defense)
+                # DISPLAY: log defense
+                self._log_defense(defense)
 
-            if defense.success:
-                continue
+                if defense.success:
+                    continue
 
             # PIPELINE: Damage
             dmg = resolve_damage(tid, target, weapon, self.dice)
@@ -415,6 +431,14 @@ class GameLoop:
                     target.wound_level = dmg.new_wound_level
             if dmg.is_destroyed:
                 target.is_destroyed = True
+
+            # APPLY: subsystem damage
+            if dmg.subsystem_hit:
+                from m1_psi_core.subsystems import disable_system, destroy_system
+                if dmg.subsystem_status == "destroyed":
+                    destroy_system(target, dmg.subsystem_hit)
+                elif dmg.subsystem_status == "disabled":
+                    disable_system(target, dmg.subsystem_hit)
 
     def _log_attack(self, a: AttackResult) -> None:
         """Format attack result for combat log."""
@@ -456,6 +480,8 @@ class GameLoop:
             parts.append(f"HighG(+{m.high_g_bonus})")
         if m.deceptive_penalty:
             parts.append(f"Deceptive({m.deceptive_penalty:+d})")
+        if m.controls_penalty:
+            parts.append(f"Controls({m.controls_penalty:+d})")
 
         dtype = "High-G dodge" if d.defense_type == "high_g_dodge" else "dodge"
         self.buf.combat_log.add(

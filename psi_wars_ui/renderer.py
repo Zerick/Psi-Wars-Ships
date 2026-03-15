@@ -37,6 +37,7 @@ Modification guide:
 """
 from __future__ import annotations
 
+import re
 import sys
 from typing import Optional
 
@@ -46,6 +47,27 @@ from psi_wars_ui.display import (
     horizontal_rule, get_terminal_size,
     faction_color, event_color, clear_screen,
 )
+
+# Regex to strip ANSI escape codes for visible-length calculation
+_ANSI_ESCAPE = re.compile(r"\033\[[0-9;]*m")
+
+
+def _visible_len(s: str) -> int:
+    """Calculate the visible length of a string, ignoring ANSI codes."""
+    return len(_ANSI_ESCAPE.sub("", s))
+
+
+def _vpad(s: str, width: int) -> str:
+    """
+    Pad a string to a fixed VISIBLE width (ignoring ANSI escape codes).
+
+    Standard Python f-string padding counts ANSI codes as characters,
+    which misaligns colored columns. This function pads correctly.
+    """
+    visible = _visible_len(s)
+    if visible >= width:
+        return s
+    return s + " " * (width - visible)
 
 
 class CombatLog:
@@ -239,6 +261,14 @@ class ScreenBuffer:
         else:
             fdr_str = dim("fDR:--")
 
+        # Hull DR (show front DR as primary, note if varies)
+        dr_front = getattr(ship, "dr_front", 0)
+        dr_rear = getattr(ship, "dr_rear", 0)
+        if dr_front == dr_rear:
+            dr_str = dim(f"DR:{dr_front}")
+        else:
+            dr_str = dim(f"DR:{dr_front}F/{dr_rear}R")
+
         # Wound
         wound = getattr(ship, "wound_level", "none")
         wound_str = colored_wound(wound)
@@ -248,7 +278,13 @@ class ScreenBuffer:
             name = colorize(f"✘ {name}", Color.DIM)
             wound_str = colorize("DESTROYED", Color.BRIGHT_RED + Color.BOLD)
 
-        return f" {ftag} {ctrl} {name:20s} {hp_str:22s} {fdr_str:22s} {wound_str}"
+        # Pad fields to fixed visible widths (ANSI codes don't count)
+        name_padded = _vpad(name, 28)
+        hp_padded = _vpad(hp_str, 12)
+        dr_padded = _vpad(dr_str, 14)
+        fdr_padded = _vpad(fdr_str, 14)
+
+        return f" {ftag} {ctrl} {name_padded} {hp_padded} {dr_padded} {fdr_padded} {wound_str}"
 
     def _render_engagements(self, session) -> list[str]:
         """Render all active engagements."""
