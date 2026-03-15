@@ -5,20 +5,19 @@
   "faction_origin": "redjack",
   "sm": 5,
   "ship_class": "fighter",
-
   "attributes": {
     "st_hp": 120,
     "ht": "13",
     "hnd": 2,
     "sr": 4
   },
-
   "mobility": {
     "accel": 10,
     "top_speed": 400,
-    "stall_speed": 60
+    "stall_speed": 60,
+    "hnd": 2,
+    "sr": 4
   },
-
   "afterburner": {
     "accel": 15,
     "top_speed": 500,
@@ -27,7 +26,6 @@
     "range_override": 5000,
     "is_high_g": false
   },
-
   "defense": {
     "dr_front": 50,
     "dr_rear": 25,
@@ -39,7 +37,6 @@
     "fdr_max": 0,
     "force_screen_type": "none"
   },
-
   "electronics": {
     "ultrascanner_range": 30,
     "targeting_bonus": 5,
@@ -53,10 +50,8 @@
     "has_neural_interface": false,
     "sensor_notes": "Medium Tactical Ultra-Scanner; Distortion Jammer; Decoy Launcher"
   },
-
   "occ_raw": "1ASV+1rx",
   "loc_raw": "g2Wi3rR",
-
   "logistics": {
     "lwt": 18.0,
     "load": 5.0,
@@ -67,13 +62,11 @@
     "endurance": "24 hours at full speed",
     "signature_cost": 5
   },
-
   "traits": [
     "double_dr_vs_plasma",
     "double_dr_vs_shaped_charge",
     "ejection_seat"
   ],
-
   "modes": {
     "Heavy Module Loaded": {
       "hnd": 0,
@@ -82,9 +75,26 @@
       "stall_speed": 75
     }
   },
-
-  "weapons": [],
-
+  "weapons": [
+    {
+      "weapon_ref": "sp74tr_heavy_plasma_gatling",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front"
+    },
+    {
+      "weapon_ref": "zip3r_blaster_gatling",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front"
+    },
+    {
+      "weapon_ref": "zip3r_blaster_gatling",
+      "mount": "fixed_front",
+      "linked_count": 1,
+      "arc": "front"
+    }
+  ],
   "module_slots": [
     {
       "slot_id": "main_weapon",
@@ -122,10 +132,19 @@
       "notes": "Armor overlay module. Heavy modules trigger stat penalties. 1 hr swap with tools."
     }
   ],
-
   "craft_complement": [],
-
   "description": "The Wildcat is not an especially beautiful craft. Stripped of its modules, it looks more like a fighter frame with naked attachment struts.",
-  "tags": ["redjack", "starfighter", "modular"],
-  "source_url": "https://psi-wars.wikidot.com/wildcat-class-fighter"
+  "tags": [
+    "redjack",
+    "starfighter",
+    "modular"
+  ],
+  "source_url": "https://psi-wars.wikidot.com/wildcat-class-fighter",
+  "dr_front": 50,
+  "dr_rear": 25,
+  "dr_left": 25,
+  "dr_right": 25,
+  "dr_top": 25,
+  "dr_bottom": 25,
+  "notes": "Default loadout: SP74-TR main + 2x ZIP-3R wing. Modular weapon slots. DR doubles vs plasma/shaped charges."
 }

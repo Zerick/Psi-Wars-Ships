@@ -58,7 +58,14 @@
     "vtol"
   ],
   "modes": {},
-  "weapons": [],
+  "weapons": [
+    {
+      "weapon_ref": "corvette_scale_cannon",
+      "mount": "turret",
+      "linked_count": 1,
+      "arc": "all"
+    }
+  ],
   "module_slots": [
     {
       "slot_id": "turret_1",

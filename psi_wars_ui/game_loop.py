@@ -52,6 +52,22 @@ from psi_wars_ui.input_handler import (
 NPC_TURN_DELAY_SECONDS = 1.0
 
 
+def _parse_ht(ht_value) -> int:
+    """
+    Parse an HT value from ship data.
+
+    Handles: int, "12", "9f", "11F", "8x", "14" etc.
+    Strips all non-digit characters and returns the integer.
+    Falls back to 12 on any parse failure.
+    """
+    import re
+    try:
+        digits = re.sub(r"[^0-9]", "", str(ht_value))
+        return int(digits) if digits else 12
+    except (ValueError, TypeError):
+        return 12
+
+
 class GameLoop:
     """UI orchestrator. Zero rules logic — delegates everything to the engine."""
 
@@ -64,8 +80,8 @@ class GameLoop:
         # Track chase winners per turn for stall speed restriction
         self._chase_winners: dict[str, bool] = {}
         # Player resources
-        self._luck_uses: dict[str, int] = {}  # ship_id -> uses remaining
-        self._luck_cooldowns: dict[str, str] = {}  # ship_id -> cooldown description
+        self._luck = None   # LuckTracker — initialized in run()
+        self._lucky_breaks = None  # LuckyBreakTracker — initialized in run()
         self._impulse_points: dict[str, int] = {}  # ship_id -> points remaining
 
     def _refresh(self) -> None:
@@ -88,12 +104,17 @@ class GameLoop:
     def run(self) -> None:
         self.buf.combat_log.add("═══ COMBAT BEGINS ═══", "turn")
 
-        # Initialize luck (1 per ace pilot, 0 otherwise)
+        # Initialize Luck (real-time cooldown) and Lucky Break (per-chase)
+        from m1_psi_core.special import LuckTracker, LuckyBreakTracker
+        self._luck = LuckTracker()
+        self._lucky_breaks = LuckyBreakTracker()
         for sid in self.session.get_all_ship_ids():
             pilot = self.session.get_pilot(sid)
+            luck_level = getattr(pilot, "luck_level", "none")
+            self._luck.register(sid, luck_level)
             is_ace = getattr(pilot, "is_ace_pilot", False)
-            self._luck_uses[sid] = 1 if is_ace else 0
-            self._impulse_points[sid] = 1  # 1 impulse point per ship
+            self._lucky_breaks.register(sid, is_ace)
+            self._impulse_points[sid] = 1
 
         while self._running:
             self.buf.set_status(self.session)
@@ -378,19 +399,7 @@ class GameLoop:
                 weapon = all_weapons[0]  # NPC/single weapon: use first
 
             # Check weapon range
-            weapon_range = getattr(weapon, "damage_str", "")
-            # Get actual range string from weapon data
-            weapons_list = getattr(ship, "weapons", [])
-            range_str = None
-            for w in weapons_list:
-                if isinstance(w, dict):
-                    from m1_psi_core.engine import load_weapon_data
-                    wd = load_weapon_data(w.get("weapon_ref", ""), self._fixtures_dir)
-                    if wd and wd.get("name") == weapon.name:
-                        range_str = wd.get("range")
-                        break
-
-            if range_str and not is_weapon_in_range(range_str, eng.range_band):
+            if weapon.range_str and not is_weapon_in_range(weapon.range_str, eng.range_band):
                 if not first_attack:
                     self.buf.combat_log.add("", "info")
                 first_attack = False
@@ -441,7 +450,7 @@ class GameLoop:
             self._log_attack(atk)
 
             # LUCK: Human attacker missed — offer reroll
-            if not atk.hit and ctrl == "human" and self._luck_uses.get(sid, 0) > 0:
+            if not atk.hit and ctrl == "human" and self._luck.is_available(sid):
                 luck_result = self._offer_luck_reroll(sid, atk.roll, atk.modifiers.effective_skill, "attack")
                 if luck_result is not None:
                     # Rerolled — check if the new roll hits
@@ -461,7 +470,7 @@ class GameLoop:
             # LUCK: Human defender vs opponent critical — force reroll
             if atk.critical and atk.hit:
                 t_ctrl = self.session.get_control_mode(tid)
-                if t_ctrl == "human" and self._luck_uses.get(tid, 0) > 0:
+                if t_ctrl == "human" and self._luck.is_available(tid):
                     luck_result = self._offer_luck_reroll(
                         tid, atk.roll, atk.modifiers.effective_skill,
                         "force_opponent_reroll", pick="worst")
@@ -524,7 +533,7 @@ class GameLoop:
                 self._log_defense(defense)
 
                 # LUCK: Human defender failed dodge — offer reroll
-                if not defense.success and t_ctrl == "human" and self._luck_uses.get(tid, 0) > 0:
+                if not defense.success and t_ctrl == "human" and self._luck.is_available(tid):
                     luck_result = self._offer_luck_reroll(
                         tid, defense.roll, defense.modifiers.effective_dodge, "dodge")
                     if luck_result is not None:
@@ -586,39 +595,27 @@ class GameLoop:
         """
         Offer a Luck reroll to a human player.
 
-        Args:
-            sid: Ship ID of the player using Luck.
-            original_roll: The original dice roll.
-            target_num: The skill/defense number being rolled against.
-            context: Description ("attack", "dodge", "force_opponent_reroll").
-            pick: "best" (take lowest) or "worst" (take highest for forcing opponent).
-
-        Returns:
-            The chosen roll after Luck, or None if Luck was declined.
+        Uses the LuckTracker to check availability and real-time cooldown.
+        Returns the chosen roll after Luck, or None if declined/unavailable.
         """
-        uses = self._luck_uses.get(sid, 0)
-        if uses <= 0:
+        if not self._luck.is_available(sid):
             return None
 
-        # Calculate cooldown info
-        cooldown = self._luck_cooldowns.get(sid, "")
-        cooldown_str = f" (cooldown: {cooldown})" if cooldown else ""
+        level = self._luck.get_level(sid)
+        cooldown_info = {"luck": "1 hour", "extraordinary": "30 min", "ridiculous": "10 min"}
+        cd_str = cooldown_info.get(level, "")
 
         if context == "force_opponent_reroll":
-            prompt = f"Use Luck to force opponent reroll? ({uses} uses left{cooldown_str})"
+            prompt = f"Use Luck to force opponent reroll? (cooldown: {cd_str})"
         elif context == "dodge":
-            prompt = f"Use Luck to reroll dodge? ({uses} uses left{cooldown_str})"
+            prompt = f"Use Luck to reroll dodge? (cooldown: {cd_str})"
         else:
-            prompt = f"Use Luck to reroll attack? ({uses} uses left{cooldown_str})"
+            prompt = f"Use Luck to reroll attack? (cooldown: {cd_str})"
 
         if not yes_no(prompt, default=False):
             return None
 
-        self._luck_uses[sid] -= 1
-
-        # Track cooldown (15min / 30min / 1hr depending on Luck advantage level)
-        # For now, track as "used" — cooldown is per-session
-        self._luck_cooldowns[sid] = "1 hour"
+        self._luck.use(sid)
 
         from m1_psi_core.special import apply_luck_reroll
         r1 = self.dice.roll_3d6()
@@ -627,7 +624,8 @@ class GameLoop:
 
         self.buf.combat_log.add(
             f"    {colorize('LUCK!', Color.BRIGHT_YELLOW)} Original {original_roll}, "
-            f"rerolls [{r1}, {r2}] → chose {luck.chosen_roll}", "info")
+            f"rerolls [{r1}, {r2}] → chose {luck.chosen_roll} "
+            f"(cooldown: {cd_str})", "info")
 
         return luck.chosen_roll
 
@@ -679,7 +677,7 @@ class GameLoop:
 
             # Wound accumulation check
             if new <= cur and cur > 0:
-                ht = int(str(getattr(target, "ht", 12)).replace("f", "").replace("F", ""))
+                ht = _parse_ht(getattr(target, "ht", 12))
                 ht_roll = self.dice.roll_3d6()
                 ht_result = check_success(ht, ht_roll)
                 accum = check_wound_accumulation(
@@ -703,7 +701,7 @@ class GameLoop:
 
         # Crippling/mortal HT roll
         if dmg.wound_level in ("crippling", "mortal") and not dmg.is_destroyed:
-            ht = int(str(getattr(target, "ht", 12)).replace("f", "").replace("F", ""))
+            ht = _parse_ht(getattr(target, "ht", 12))
             ht_roll = self.dice.roll_3d6()
             ht_result = check_success(ht, ht_roll)
             op = check_operational_ht_roll(dmg.wound_level, ht_result.success)

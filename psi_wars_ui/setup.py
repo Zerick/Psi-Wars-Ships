@@ -227,6 +227,8 @@ def run_setup(fixtures_dir: Path) -> GameSession:
 
 def _configure_pilot(ship_name: str) -> MockPilot:
     """Configure a pilot (default or custom skills)."""
+    from psi_wars_ui.input_handler import menu_choice_simple
+
     print(f"\n {bold('Pilot Configuration')}")
     if yes_no("Use default pilot skills?", default=True):
         return MockPilot(name=f"{ship_name} Pilot")
@@ -237,9 +239,19 @@ def _configure_pilot(ship_name: str) -> MockPilot:
     speed = get_number("Basic Speed (x10)", 40, 100, default=60) / 10.0
     is_ace = yes_no("Ace Pilot?", default=False)
 
+    # Luck advantage
+    luck_choice = menu_choice_simple(
+        "Luck advantage",
+        ["None", "Luck (reroll 1/hour, 15pts)",
+         "Extraordinary Luck (1/30min, 30pts)",
+         "Ridiculous Luck (1/10min, 60pts)"],
+    )
+    luck_levels = ["none", "luck", "extraordinary", "ridiculous"]
+    luck_level = luck_levels[luck_choice] if luck_choice is not None else "none"
+
     return MockPilot(
         name=p_name, piloting_skill=p_skill, gunnery_skill=g_skill,
-        basic_speed=speed, is_ace_pilot=is_ace,
+        basic_speed=speed, is_ace_pilot=is_ace, luck_level=luck_level,
     )
 
 

@@ -99,6 +99,14 @@ class MockPilot:
     has_danger_sense: bool = False
     has_soar_like_leaf: bool = False
 
+    # Luck advantage (GURPS B66)
+    # "none", "luck" (1/hr), "extraordinary" (1/30min), "ridiculous" (1/10min)
+    luck_level: str = "none"
+
+    # Current FP tracking
+    current_fp: int = 10
+    max_fp: int = 10
+
 
 class MockDice:
     """A mock dice roller that returns predetermined values."""

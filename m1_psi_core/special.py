@@ -181,8 +181,18 @@ def classify_ship(sm: int, chase_bonus: int) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Luck (reroll mechanic)
+# Luck advantage (GURPS B66) — real-time cooldown tracking
 # ---------------------------------------------------------------------------
+
+import time as _time
+
+# Cooldown in seconds for each Luck level
+LUCK_COOLDOWNS = {
+    "luck": 3600,           # 1 hour
+    "extraordinary": 1800,  # 30 minutes
+    "ridiculous": 600,      # 10 minutes
+}
+
 
 @dataclass
 class LuckRerollResult:
@@ -191,6 +201,80 @@ class LuckRerollResult:
     rerolls: list[int]
     chosen_roll: int
     pick_mode: str  # "best" or "worst"
+
+
+class LuckTracker:
+    """
+    Tracks Luck advantage usage with real-time cooldowns.
+
+    RAW (GURPS B66):
+    - Luck (15 pts): reroll once per hour of real time
+    - Extraordinary Luck (30 pts): once per 30 minutes
+    - Ridiculous Luck (60 pts): once per 10 minutes
+
+    Usage: reroll a bad roll twice, take the best of 3.
+    Or force an attacker to reroll twice, take the worst of 3.
+
+    Cannot share Luck between characters.
+    Cannot save up — must wait the full cooldown between uses.
+    """
+
+    def __init__(self):
+        # ship_id -> luck level ("none", "luck", "extraordinary", "ridiculous")
+        self._levels: dict[str, str] = {}
+        # ship_id -> timestamp of last use (0 = never used)
+        self._last_used: dict[str, float] = {}
+
+    def register(self, ship_id: str, luck_level: str) -> None:
+        """Register a ship's Luck level."""
+        self._levels[ship_id] = luck_level
+        self._last_used[ship_id] = 0.0
+
+    def is_available(self, ship_id: str) -> bool:
+        """Check if Luck is available (off cooldown) for this ship."""
+        level = self._levels.get(ship_id, "none")
+        if level == "none":
+            return False
+
+        cooldown = LUCK_COOLDOWNS.get(level, 3600)
+        last = self._last_used.get(ship_id, 0.0)
+        elapsed = _time.time() - last
+
+        return elapsed >= cooldown
+
+    def use(self, ship_id: str) -> None:
+        """Mark Luck as used (starts the cooldown timer)."""
+        self._last_used[ship_id] = _time.time()
+
+    def get_cooldown_remaining(self, ship_id: str) -> int:
+        """Get seconds remaining on cooldown. 0 = ready."""
+        level = self._levels.get(ship_id, "none")
+        if level == "none":
+            return -1  # No Luck at all
+
+        cooldown = LUCK_COOLDOWNS.get(level, 3600)
+        last = self._last_used.get(ship_id, 0.0)
+        elapsed = _time.time() - last
+        remaining = cooldown - elapsed
+
+        return max(0, int(remaining))
+
+    def get_cooldown_str(self, ship_id: str) -> str:
+        """Human-readable cooldown status."""
+        remaining = self.get_cooldown_remaining(ship_id)
+        if remaining < 0:
+            return "no Luck"
+        if remaining == 0:
+            return "ready"
+        minutes = remaining // 60
+        seconds = remaining % 60
+        if minutes > 0:
+            return f"{minutes}m {seconds}s"
+        return f"{seconds}s"
+
+    def get_level(self, ship_id: str) -> str:
+        """Get the Luck level for a ship."""
+        return self._levels.get(ship_id, "none")
 
 
 def apply_luck_reroll(
@@ -202,16 +286,10 @@ def apply_luck_reroll(
     Apply Luck to a dice roll.
 
     RAW: Roll 2 more times, take the best or worst of all 3.
-    - Defensive Luck (player uses on own roll): pick="best" → lowest roll
-    - Offensive Luck (forced on opponent): pick="worst" → highest roll
+    - Own roll (defensive): pick="best" → lowest roll wins
+    - Opponent's roll (offensive): pick="worst" → highest roll wins
 
-    For attack/defense rolls, LOWER is better (roll under skill).
-    So "best" = min, "worst" = max.
-
-    Args:
-        original_roll: The original 3d6 roll.
-        rerolls: List of 2 additional 3d6 rolls.
-        pick: "best" (lowest) or "worst" (highest).
+    For success rolls (roll-under), lower is better.
     """
     all_rolls = [original_roll] + rerolls
 
@@ -226,6 +304,38 @@ def apply_luck_reroll(
         chosen_roll=chosen,
         pick_mode=pick,
     )
+
+
+# ---------------------------------------------------------------------------
+# Lucky Break (separate from Luck advantage!)
+# ---------------------------------------------------------------------------
+# Lucky Breaks enable maneuvers that require "suitable scenery."
+# They can also:
+#   - Invoke new obstacles/terrain
+#   - Increase wound severity by 2 levels
+#   - Ignore all attacks for 1 round
+# Ace Pilots get 1 free Lucky Break per chase.
+# Others must spend a character point or use Serendipity.
+# These are tracked separately from the Luck advantage.
+
+class LuckyBreakTracker:
+    """Tracks Lucky Break uses per ship."""
+
+    def __init__(self):
+        self._uses: dict[str, int] = {}
+
+    def register(self, ship_id: str, is_ace_pilot: bool) -> None:
+        """Ace pilots get 1 free Lucky Break per chase."""
+        self._uses[ship_id] = 1 if is_ace_pilot else 0
+
+    def available(self, ship_id: str) -> int:
+        return self._uses.get(ship_id, 0)
+
+    def use(self, ship_id: str) -> bool:
+        if self._uses.get(ship_id, 0) > 0:
+            self._uses[ship_id] -= 1
+            return True
+        return False
 
 
 # ---------------------------------------------------------------------------

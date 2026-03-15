@@ -96,6 +96,7 @@ class WeaponInfo:
     mount: str
     linked_count: int
     is_explosive: bool
+    range_str: str = ""     # e.g., "2700/8000" or "4 mi/12 mi"
 
 
 @dataclass
@@ -477,11 +478,27 @@ _RANGE_BAND_MIN_YARDS = {
 }
 
 
+def _parse_range_yards(range_part: str) -> Optional[int]:
+    """Parse a range value to yards. Handles '8000', '25 mi', '10mi', etc."""
+    import re
+    s = str(range_part).strip().lower()
+    # Check for mile notation
+    mi_match = re.match(r"([\d.]+)\s*mi", s)
+    if mi_match:
+        miles = float(mi_match.group(1))
+        return int(miles * 1760)  # 1 mile = 1760 yards
+    # Plain number = yards
+    digits = re.sub(r"[^0-9]", "", s)
+    if digits:
+        return int(digits)
+    return None
+
+
 def is_weapon_in_range(weapon_range_str: Optional[str], range_band: str) -> bool:
     """
     Check if a weapon can reach the current range band.
 
-    Weapon range format: "half_range/max_range" (e.g., "2700/8000").
+    Weapon range format: "half_range/max_range" (e.g., "2700/8000" or "4 mi/12 mi").
     The weapon must be able to reach at least the START of the range band.
 
     Gracefully returns True for missing/unparseable range data.
@@ -491,7 +508,9 @@ def is_weapon_in_range(weapon_range_str: Optional[str], range_band: str) -> bool
 
     try:
         parts = str(weapon_range_str).split("/")
-        max_range = int(parts[-1])
+        max_range = _parse_range_yards(parts[-1])
+        if max_range is None:
+            return True
     except (ValueError, IndexError):
         return True
 
@@ -546,6 +565,7 @@ def resolve_all_weapons(
                     mount=mount,
                     linked_count=linked,
                     is_explosive=parsed.explosive,
+                    range_str=data.get("range", ""),
                 ))
 
     if not resolved:
