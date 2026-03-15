@@ -105,34 +105,82 @@ def is_collision_range(speed: int, range_band: str) -> bool:
     bonus > |range penalty|, you're at collision range.
     """
     range_penalty = abs(get_range_penalty(range_band))
-
-    # Simplified speed-to-penalty mapping for vehicular combat
-    # GURPS Speed/Range table: roughly -1 per doubling of 2 yards
-    # For space combat speeds (hundreds of mph), this approximation works
-    if speed <= 0:
-        speed_penalty = 0
-    elif speed <= 3:
-        speed_penalty = 1
-    elif speed <= 7:
-        speed_penalty = 3
-    elif speed <= 15:
-        speed_penalty = 5
-    elif speed <= 30:
-        speed_penalty = 7
-    elif speed <= 70:
-        speed_penalty = 9
-    elif speed <= 150:
-        speed_penalty = 11
-    elif speed <= 300:
-        speed_penalty = 13
-    elif speed <= 700:
-        speed_penalty = 15
-    elif speed <= 1500:
-        speed_penalty = 17
-    else:
-        speed_penalty = 19
-
+    speed_penalty = speed_to_penalty(speed)
     return speed_penalty > range_penalty
+
+
+def speed_to_penalty(speed: int) -> int:
+    """
+    Convert a speed (yards/second) to the GURPS Speed/Size modifier.
+
+    Based on the GURPS Speed/Range table. Returns the absolute value
+    of the penalty (always positive).
+
+    Speed/Range table (simplified for vehicular combat):
+    0: 0, 1-3: 1, 4-7: 3, 8-15: 5, 16-30: 7, 31-70: 9,
+    71-150: 11, 151-300: 13, 301-700: 15, 701-1500: 17, 1501+: 19
+    """
+    if speed <= 0:
+        return 0
+    elif speed <= 3:
+        return 1
+    elif speed <= 7:
+        return 3
+    elif speed <= 15:
+        return 5
+    elif speed <= 30:
+        return 7
+    elif speed <= 70:
+        return 9
+    elif speed <= 150:
+        return 11
+    elif speed <= 300:
+        return 13
+    elif speed <= 700:
+        return 15
+    elif speed <= 1500:
+        return 17
+    else:
+        return 19
+
+
+def get_effective_range_penalty(
+    range_band: str,
+    own_speed: int = 0,
+    opponent_speed: int = 0,
+) -> int:
+    """
+    Calculate the effective range penalty per RAW.
+
+    RAW: "Always use the highest of the absolute value of your range
+    penalty, your own speed penalty, or your opponent's speed penalty
+    as your range penalty."
+
+    Returns a negative number (penalty).
+    """
+    range_pen = abs(get_range_penalty(range_band))
+    own_speed_pen = speed_to_penalty(own_speed)
+    opp_speed_pen = speed_to_penalty(opponent_speed)
+
+    worst = max(range_pen, own_speed_pen, opp_speed_pen)
+    return -worst
+
+
+def get_matched_speed_range_penalty(range_band: str, stall_speed: int = 0) -> int:
+    """
+    Calculate range penalty when Matched Speed is active.
+
+    RAW: "Use the higher of the absolute value of the range penalty
+    or your Stall Speed as your Range/Speed penalty."
+
+    Stall speed is converted to a speed penalty via the speed/size table.
+    Returns a negative number (penalty).
+    """
+    range_pen = abs(get_range_penalty(range_band))
+    stall_pen = speed_to_penalty(stall_speed)
+
+    worst = max(range_pen, stall_pen)
+    return -worst
 
 
 # ---------------------------------------------------------------------------

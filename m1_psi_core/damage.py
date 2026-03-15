@@ -39,6 +39,39 @@ class ForceScreenResult:
     absorbed: int
     penetrating: int
     remaining_fdr: int
+    hull_ad_negated: bool = False  # True if hull armor should ignore AD
+
+
+# Standard GURPS armor divisor progression for hardened DR
+# Each level of hardened reduces the AD one step down this chain
+_AD_PROGRESSION = [1.0, 2.0, 3.0, 5.0, 10.0, 100.0]
+
+
+def reduce_armor_divisor_hardened(armor_divisor: float, hardened_level: int = 1) -> float:
+    """
+    Reduce an armor divisor by the hardened level.
+
+    Hardened 1: AD goes down one step on the progression.
+    AD progression: (100) → (10) → (5) → (3) → (2) → (1)
+    So AD(5) with hardened 1 becomes AD(3).
+    AD(2) with hardened 1 becomes AD(1) — no divisor.
+    """
+    if armor_divisor <= 1.0:
+        return 1.0
+
+    # Find current position in the progression
+    for i, val in enumerate(_AD_PROGRESSION):
+        if armor_divisor <= val:
+            # Step down by hardened_level positions
+            new_idx = max(0, i - hardened_level)
+            return _AD_PROGRESSION[new_idx]
+
+    # Off the top of the scale, step down
+    return _AD_PROGRESSION[max(0, len(_AD_PROGRESSION) - 1 - hardened_level)]
+
+
+# Damage types where standard force screens negate ALL armor divisors
+_PLASMA_DAMAGE_TYPES = {"burn", "burn_ex", "plasma", "plasma_lance", "shaped_charge"}
 
 
 def apply_force_screen(
@@ -52,35 +85,53 @@ def apply_force_screen(
     Apply force screen damage absorption.
 
     Force screens are hardened 1 and ablative.
-    - Standard screens: ignore armor divisors vs plasma/shaped charge.
-    - Heavy screens: ignore ALL armor divisors.
+
+    RAW rules:
+    - Hardened 1: armor divisors reduced one step against the screen.
+    - Against plasma/plasma lance/shaped charge: force screens ignore ALL
+      armor divisors AND eliminate the AD for armor underneath the screen
+      (as long as the screen had some DR remaining).
+    - Heavy force screens: ignore ALL armor divisors from ALL attacks.
     - Every point absorbed reduces fDR by 1.
+    - If force screen has any DR remaining when hit, hull armor AD is
+      also negated for that attack.
     """
     if current_fdr <= 0 or force_screen_type == "none":
         return ForceScreenResult(
             absorbed=0, penetrating=incoming_damage,
             remaining_fdr=current_fdr,
+            hull_ad_negated=False,
         )
 
-    # Determine if screen ignores the armor divisor
-    # Standard: ignores AD vs plasma, plasma lance, shaped charge
-    # Heavy: ignores ALL AD
-    effective_fdr = current_fdr
+    # Determine if this screen negates the armor divisor entirely
+    ad = armor_divisor if armor_divisor else 1.0
+    is_plasma = damage_type.lower() in _PLASMA_DAMAGE_TYPES
+    is_heavy = force_screen_type == "heavy"
 
-    # The force screen's DR is NOT reduced by armor divisors in these cases:
-    # - Heavy screens always ignore AD
-    # - Standard screens ignore AD vs plasma/burn/burn_ex damage types
-    # (In all cases, the screen itself uses its full fDR value)
-    # This is already the case since we compare damage vs fDR directly
+    if is_heavy or is_plasma:
+        # Screen ignores ALL armor divisors — use full fDR
+        effective_fdr = current_fdr
+        hull_ad_negated = True  # Hull armor also ignores AD for this hit
+    else:
+        # Hardened 1: reduce AD one step, then apply to screen fDR
+        reduced_ad = reduce_armor_divisor_hardened(ad, hardened_level=1)
+        if reduced_ad > 1.0:
+            effective_fdr = int(current_fdr / reduced_ad)
+        else:
+            effective_fdr = current_fdr
+        hull_ad_negated = False
 
+    # Ablative absorption
     absorbed = min(incoming_damage, effective_fdr)
     penetrating = incoming_damage - absorbed
-    remaining_fdr = effective_fdr - absorbed
+    # fDR reduction is always 1:1 with damage absorbed (ablative)
+    remaining_fdr = current_fdr - absorbed
 
     return ForceScreenResult(
         absorbed=absorbed,
         penetrating=penetrating,
-        remaining_fdr=remaining_fdr,
+        remaining_fdr=max(0, remaining_fdr),
+        hull_ad_negated=hull_ad_negated,
     )
 
 

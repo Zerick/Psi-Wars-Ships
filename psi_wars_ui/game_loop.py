@@ -414,10 +414,24 @@ class GameLoop:
                 if defense.success:
                     continue
 
-            # PIPELINE: Damage
-            dmg = resolve_damage(tid, target, weapon, self.dice)
+            # Determine which facing of target gets hit
+            from m1_psi_core.engine import get_target_facing_hit
+            attacker_has_adv = eng.advantage == sid
+            t_decl = decls.get(tid, {})
+            target_facing_hit = get_target_facing_hit(
+                attacker_has_advantage=attacker_has_adv,
+                target_maneuver=t_decl.get("maneuver", "move"),
+                target_intent=t_decl.get("intent", "pursue"),
+                # NPC defaults to rear when advantaged; human could choose later
+            )
 
-            # DISPLAY: log damage
+            # PIPELINE: Damage (with correct facing)
+            dmg = resolve_damage(tid, target, weapon, self.dice, facing=target_facing_hit)
+
+            # DISPLAY: log facing and damage
+            if attacker_has_adv:
+                self.buf.combat_log.add(
+                    f"    → Targeting {target_facing_hit} facing (advantage)", "attack")
             self._log_damage(dmg)
 
             # APPLY: state changes from damage

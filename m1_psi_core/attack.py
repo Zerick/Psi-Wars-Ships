@@ -119,14 +119,17 @@ def get_sensor_lock_bonus(has_lock: bool, targeting_bonus: int = 0) -> int:
     """
     Get the sensor lock bonus.
 
-    Base: +3 with sensor lock.
-    With targeting computer: +5 (uses the targeting_bonus value).
+    RAW: +3 with basic sensor lock. With targeting computer, use
+    the ship's targeting_bonus value (typically +4 for obsolete
+    computers, +5 for standard).
+
+    If no targeting computer (targeting_bonus=0), base +3 applies.
     """
     if not has_lock:
         return 0
-    if targeting_bonus >= 5:
-        return 5
-    return 3
+    if targeting_bonus > 0:
+        return targeting_bonus
+    return 3  # Base sensor lock without targeting computer
 
 
 # ---------------------------------------------------------------------------

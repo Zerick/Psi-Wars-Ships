@@ -320,8 +320,117 @@ def resolve_weapon(ship_stats, fixtures_dir: Optional[Path] = None) -> Optional[
 
 
 # ============================================================================
-# Chase Resolution
+# Facing Helpers
 # ============================================================================
+
+def can_weapon_fire_facing(mount: str, ship_facing: str) -> bool:
+    """
+    Check if a weapon mount can fire given the ship's current facing.
+
+    Fixed front weapons require front or "any" facing.
+    Fixed rear weapons require rear or "any" facing.
+    Turret weapons fire at any facing.
+
+    Args:
+        mount: Weapon mount type ("fixed_front", "fixed_rear", "turret", etc.)
+        ship_facing: Ship's facing toward opponent ("front", "rear", "any")
+    """
+    if "turret" in mount:
+        return True
+    if mount == "fixed_front":
+        return ship_facing in ("front", "any")
+    if mount == "fixed_rear":
+        return ship_facing in ("rear", "any")
+    # Unknown mount types default to allowing fire
+    return True
+
+
+def get_attacker_facing(maneuver: str, intent: str) -> str:
+    """
+    Determine the attacker's facing from their maneuver and intent.
+
+    RAW:
+    - Maneuvers with facing "front" (Attack, Move and Attack, etc.) = front
+    - Maneuvers with facing "rear" (Evade, Mobility Escape) = rear
+    - Maneuvers with facing "any" (Stunt, Stunt Escape, Hide, Stop) = any
+    - Move maneuver: pursue=front, evade=rear (RAW: "You must note if
+      you are pursuing or escaping")
+    """
+    # Move is special: facing depends on intent
+    if maneuver == "move":
+        return "front" if intent == "pursue" else "rear"
+
+    m = MANEUVER_CATALOG.get(maneuver)
+    if m is None:
+        return "front"
+
+    if m.facing == "front":
+        return "front"
+    elif m.facing == "rear":
+        return "rear"
+    elif m.facing in ("any", "any_opponent_choice"):
+        return "any"
+    else:
+        return "front" if intent == "pursue" else "rear"
+
+
+def get_target_facing_hit(
+    attacker_has_advantage: bool,
+    target_maneuver: str,
+    target_intent: str,
+    attacker_choice: Optional[str] = None,
+) -> str:
+    """
+    Determine which facing of the target gets hit.
+
+    RAW:
+    - Non-advantaged: hit the facing the target declared
+      (target pursuing = their front faces you, target evading = their rear)
+    - Advantaged: attacker chooses which facing to attack
+      (defaults to "rear" for maximum damage if no explicit choice)
+
+    Args:
+        attacker_has_advantage: Whether the attacker has advantage.
+        target_maneuver: Target's declared maneuver.
+        target_intent: Target's declared intent.
+        attacker_choice: Explicit facing choice (for advantaged attackers).
+    """
+    if attacker_has_advantage:
+        if attacker_choice:
+            return attacker_choice
+        # Default: attack the rear (weakest armor on most ships)
+        return "rear"
+
+    # Non-advantaged: hit the facing target is presenting
+    # Target pursuing = their front faces us
+    # Target evading = their rear faces us
+    target_facing = get_attacker_facing(target_maneuver, target_intent)
+    if target_facing == "front":
+        return "front"
+    elif target_facing == "rear":
+        return "rear"
+    else:
+        return "front"  # "any" defaults to front
+
+
+def get_dr_for_facing(ship, facing: str) -> int:
+    """
+    Get the hull DR value for a specific facing.
+
+    Args:
+        ship: Ship stats object with dr_front, dr_rear, etc.
+        facing: "front", "rear", "left", "right", "top", "bottom"
+    """
+    dr_map = {
+        "front": "dr_front",
+        "rear": "dr_rear",
+        "left": "dr_left",
+        "right": "dr_right",
+        "top": "dr_top",
+        "bottom": "dr_bottom",
+    }
+    attr = dr_map.get(facing, "dr_front")
+    return getattr(ship, attr, getattr(ship, "dr_front", 10))
 
 def resolve_chase(
     ship_a_id: str, ship_a, pilot_a,
@@ -470,12 +579,47 @@ def resolve_attack(
             can_attack=False, reason_cannot_attack="Weapons or power destroyed",
         )
 
+    # Check weapon facing: fixed weapons must have correct facing to fire
+    attacker_facing = get_attacker_facing(maneuver, declaration.get("intent", "pursue"))
+    if not can_weapon_fire_facing(weapon.mount, attacker_facing):
+        return AttackResult(
+            attacker_id=attacker_id, attacker_name=a_name,
+            target_id=target_id, target_name=t_name,
+            weapon=weapon, modifiers=AttackModifiers(base_skill=0, range_penalty=0,
+                sm_bonus=0, sensor_lock_bonus=0, accuracy=0, rof_bonus=0,
+                relative_size_penalty=0),
+            roll=0, margin=0, hit=False, critical=False, critical_type=None,
+            can_attack=False,
+            reason_cannot_attack=f"Fixed weapon cannot fire while facing {attacker_facing}",
+        )
+
     # Calculate all modifiers
     base_skill = getattr(pilot, "gunnery_skill", 12)
-    range_pen = get_range_penalty(engagement.range_band)
+
+    # Range penalty: use effective range with speed penalties
+    own_speed = getattr(attacker, "top_speed", 0)
+    opp_speed = getattr(target, "top_speed", 0)
+    is_matched = engagement.matched_speed and engagement.advantage == attacker_id
+
+    if is_matched:
+        # Matched Speed: use max(|range|, stall_speed_penalty)
+        from m1_psi_core.combat_state import get_matched_speed_range_penalty
+        stall = getattr(attacker, "stall_speed", 0)
+        range_pen = get_matched_speed_range_penalty(engagement.range_band, stall)
+    else:
+        # Normal: use max(|range|, own_speed, opponent_speed)
+        from m1_psi_core.combat_state import get_effective_range_penalty
+        range_pen = get_effective_range_penalty(engagement.range_band, own_speed, opp_speed)
+
     sm_bonus = get_sm_bonus(getattr(target, "sm", 4))
     sensor_lock = get_sensor_lock_bonus(True, getattr(attacker, "targeting_bonus", 5))
-    acc = apply_accuracy(weapon.acc, perm)
+
+    # Accuracy: matched speed grants full accuracy on any maneuver
+    if is_matched:
+        acc = apply_accuracy(weapon.acc, "full")
+    else:
+        acc = apply_accuracy(weapon.acc, perm)
+
     rof_bonus = get_rof_bonus(weapon.rof)
 
     a_class = classify_ship(getattr(attacker, "sm", 4), 15)
@@ -721,15 +865,12 @@ def resolve_damage(
             steps=steps,
         )
 
-    # Step 3: Hull armor
-    dr_map = {
-        "front": "dr_front", "rear": "dr_rear",
-        "left": "dr_left", "right": "dr_right",
-        "top": "dr_top", "bottom": "dr_bottom",
-    }
-    dr_attr = dr_map.get(facing, "dr_front")
-    hull_dr = getattr(target, dr_attr, 10)
-    effective_dr = apply_armor_divisor(hull_dr, ad)
+    # Step 3: Hull armor (uses facing to select correct DR)
+    hull_dr = get_dr_for_facing(target, facing)
+
+    # If force screen negated AD (plasma/heavy screen), hull ignores AD too
+    hull_ad = 1.0 if screen.hull_ad_negated else ad
+    effective_dr = apply_armor_divisor(hull_dr, hull_ad)
     penetrating = max(0, screen.penetrating - effective_dr)
 
     steps.append(DamageStep("Hull armor",
