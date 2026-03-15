@@ -485,3 +485,48 @@ def decide_emergency_power(
         return "all_power_to_engines"
 
     return None
+
+
+# ---------------------------------------------------------------------------
+# High-G dodge decision making
+# ---------------------------------------------------------------------------
+
+def should_attempt_high_g(
+    current_fp: int,
+    max_fp: int,
+    wound_level: str,
+    attacker_margin: int,
+) -> bool:
+    """
+    Decide whether an NPC should attempt a High-G dodge.
+
+    Weighs FP cost risk against threat level:
+    - Healthy with FP: always attempt (the +1 dodge is worth it)
+    - Low FP: skip unless desperate
+    - Badly wounded: always attempt (survival matters more than FP)
+
+    Args:
+        current_fp: Current fatigue points.
+        max_fp: Maximum fatigue points.
+        wound_level: Current wound level.
+        attacker_margin: Attacker's margin of success (higher = scarier).
+    """
+    from m1_psi_core.damage import WOUND_SEVERITY
+
+    wound_sev = WOUND_SEVERITY.get(wound_level, 0)
+    fp_ratio = current_fp / max(max_fp, 1)
+
+    # Desperate: badly wounded, always try
+    if wound_sev >= WOUND_SEVERITY.get("crippling", 4):
+        return True
+
+    # High threat: big attack margin, worth the risk
+    if attacker_margin >= 5 and current_fp >= 2:
+        return True
+
+    # Healthy with FP to spare: attempt
+    if fp_ratio > 0.3:
+        return True
+
+    # Low FP, minor threat: conserve energy
+    return False

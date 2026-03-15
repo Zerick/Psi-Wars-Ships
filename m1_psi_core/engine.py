@@ -432,6 +432,132 @@ def get_dr_for_facing(ship, facing: str) -> int:
     attr = dr_map.get(facing, "dr_front")
     return getattr(ship, attr, getattr(ship, "dr_front", 10))
 
+
+# ============================================================================
+# Stall Speed Chase Attack Restriction
+# ============================================================================
+
+def check_stall_attack_restriction(
+    has_stall_speed: bool,
+    won_chase: bool,
+    weapon_mount: str,
+) -> bool:
+    """
+    Check if a ship with stall speed can fire after a chase roll.
+
+    RAW: "A pursuing craft with a stall speed must succeed by 0 or more
+    to attack with fixed weapons."
+
+    Turret weapons are not restricted.
+
+    Returns True if the ship can fire, False if blocked.
+    """
+    if not has_stall_speed:
+        return True
+    if "turret" in weapon_mount:
+        return True
+    return won_chase
+
+
+# ============================================================================
+# Weapon Range Enforcement
+# ============================================================================
+
+# Minimum distance (yards) for each range band (the LOW end / start)
+_RANGE_BAND_MIN_YARDS = {
+    "close": 0,
+    "short": 6,
+    "medium": 21,
+    "long": 101,
+    "extreme": 501,
+    "distant": 2001,
+    "beyond_visual": 10001,
+    "remote": 50001,
+    "beyond_remote": 200001,
+}
+
+
+def is_weapon_in_range(weapon_range_str: Optional[str], range_band: str) -> bool:
+    """
+    Check if a weapon can reach the current range band.
+
+    Weapon range format: "half_range/max_range" (e.g., "2700/8000").
+    The weapon must be able to reach at least the START of the range band.
+
+    Gracefully returns True for missing/unparseable range data.
+    """
+    if not weapon_range_str:
+        return True
+
+    try:
+        parts = str(weapon_range_str).split("/")
+        max_range = int(parts[-1])
+    except (ValueError, IndexError):
+        return True
+
+    band_min = _RANGE_BAND_MIN_YARDS.get(range_band, 0)
+    return max_range >= band_min
+
+
+# ============================================================================
+# Multiple Weapons Resolution
+# ============================================================================
+
+def resolve_all_weapons(
+    ship_stats,
+    fixtures_dir: Optional[Path] = None,
+) -> list[WeaponInfo]:
+    """
+    Resolve ALL weapons available on a ship.
+
+    Returns a list of WeaponInfo objects, one per weapon mount.
+    Falls back to a single default weapon if no weapon data found.
+    """
+    weapons_list = getattr(ship_stats, "weapons", [])
+    resolved = []
+
+    for w in weapons_list:
+        if isinstance(w, dict):
+            ref = w.get("weapon_ref", "")
+            mount = w.get("mount", "fixed_front")
+            linked = w.get("linked_count", 1)
+        else:
+            ref = getattr(w, "weapon_id", "")
+            mount = getattr(w, "mount", "fixed_front")
+            linked = getattr(w, "linked_count", 1)
+
+        if ref:
+            data = load_weapon_data(ref, fixtures_dir)
+            if data:
+                parsed = parse_damage_string(data.get("damage", "6d×5(5) burn"))
+                rof_str = data.get("rof", "3")
+                try:
+                    rof = int(rof_str.split("/")[0]) * linked
+                except (ValueError, IndexError):
+                    rof = 3
+
+                resolved.append(WeaponInfo(
+                    name=data.get("name", ref),
+                    damage_str=data.get("damage", "6d×5(5) burn"),
+                    acc=data.get("acc", 9),
+                    rof=rof,
+                    weapon_type=data.get("weapon_type", "beam"),
+                    armor_divisor=parsed.armor_divisor,
+                    mount=mount,
+                    linked_count=linked,
+                    is_explosive=parsed.explosive,
+                ))
+
+    if not resolved:
+        resolved.append(WeaponInfo(
+            name="Fighter Blaster", damage_str="6d×5(5) burn",
+            acc=9, rof=3, weapon_type="beam", armor_divisor=5.0,
+            mount="fixed_front", linked_count=1, is_explosive=False,
+        ))
+
+    return resolved
+
+
 def resolve_chase(
     ship_a_id: str, ship_a, pilot_a,
     ship_b_id: str, ship_b, pilot_b,

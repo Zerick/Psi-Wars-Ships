@@ -273,18 +273,33 @@ class ScreenBuffer:
         wound = getattr(ship, "wound_level", "none")
         wound_str = colored_wound(wound)
 
+        # Subsystem damage summary
+        from m1_psi_core.subsystems import get_disabled, get_destroyed
+        disabled = get_disabled(ship)
+        destroyed = get_destroyed(ship)
+        sys_parts = []
+        for s in sorted(destroyed):
+            sys_parts.append(colorize(f"✘{s[:4]}", Color.RED))
+        for s in sorted(disabled):
+            sys_parts.append(colorize(f"↓{s[:4]}", Color.YELLOW))
+        sys_str = " ".join(sys_parts) if sys_parts else ""
+
         # Destroyed override
         if getattr(ship, "is_destroyed", False):
             name = colorize(f"✘ {name}", Color.DIM)
             wound_str = colorize("DESTROYED", Color.BRIGHT_RED + Color.BOLD)
+            sys_str = ""
 
         # Pad fields to fixed visible widths (ANSI codes don't count)
-        name_padded = _vpad(name, 28)
-        hp_padded = _vpad(hp_str, 12)
-        dr_padded = _vpad(dr_str, 14)
-        fdr_padded = _vpad(fdr_str, 14)
+        name_padded = _vpad(name, 30)
+        hp_padded = _vpad(hp_str, 14)
+        dr_padded = _vpad(dr_str, 16)
+        fdr_padded = _vpad(fdr_str, 16)
 
-        return f" {ftag} {ctrl} {name_padded} {hp_padded} {dr_padded} {fdr_padded} {wound_str}"
+        line = f" {ftag} {ctrl} {name_padded} {hp_padded} {dr_padded} {fdr_padded} {wound_str}"
+        if sys_str:
+            line += f" {sys_str}"
+        return line
 
     def _render_engagements(self, session) -> list[str]:
         """Render all active engagements."""

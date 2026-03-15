@@ -178,3 +178,72 @@ def classify_ship(sm: int, chase_bonus: int) -> str:
         return "corvette"
     else:
         return "capital"
+
+
+# ---------------------------------------------------------------------------
+# Luck (reroll mechanic)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class LuckRerollResult:
+    """Result of applying Luck to reroll dice."""
+    original_roll: int
+    rerolls: list[int]
+    chosen_roll: int
+    pick_mode: str  # "best" or "worst"
+
+
+def apply_luck_reroll(
+    original_roll: int,
+    rerolls: list[int],
+    pick: str = "best",
+) -> LuckRerollResult:
+    """
+    Apply Luck to a dice roll.
+
+    RAW: Roll 2 more times, take the best or worst of all 3.
+    - Defensive Luck (player uses on own roll): pick="best" → lowest roll
+    - Offensive Luck (forced on opponent): pick="worst" → highest roll
+
+    For attack/defense rolls, LOWER is better (roll under skill).
+    So "best" = min, "worst" = max.
+
+    Args:
+        original_roll: The original 3d6 roll.
+        rerolls: List of 2 additional 3d6 rolls.
+        pick: "best" (lowest) or "worst" (highest).
+    """
+    all_rolls = [original_roll] + rerolls
+
+    if pick == "best":
+        chosen = min(all_rolls)
+    else:
+        chosen = max(all_rolls)
+
+    return LuckRerollResult(
+        original_roll=original_roll,
+        rerolls=rerolls,
+        chosen_roll=chosen,
+        pick_mode=pick,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Flesh Wound (Impulse / Character Points)
+# ---------------------------------------------------------------------------
+
+def apply_flesh_wound(wound_level: str) -> str:
+    """
+    Apply Flesh Wound cinematic rule.
+
+    RAW: Spending 1 character point reduces any wound severity to Minor.
+    Accumulation after flesh wound can only trigger disabled systems,
+    nothing worse.
+
+    Args:
+        wound_level: Current wound level to reduce.
+
+    Returns:
+        "minor" (always).
+    """
+    return "minor"

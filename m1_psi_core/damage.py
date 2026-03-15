@@ -349,6 +349,47 @@ def check_wound_accumulation(
 
 
 # ---------------------------------------------------------------------------
+# Operational HT rolls (crippling/mortal wounds)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class OperationalHTResult:
+    """Result of HT roll to remain operational after severe wound."""
+    still_operational: bool
+    destroyed: bool
+
+
+def check_operational_ht_roll(wound_level: str, ht_succeeded: bool) -> OperationalHTResult:
+    """
+    Check if a ship remains operational after a severe wound.
+
+    RAW:
+    - Crippling: HT roll or reduced to minimum systems (not operational).
+    - Mortal: HT roll or DESTROYED. If HT succeeds, then roll again
+      for operational status (like crippling).
+
+    Args:
+        wound_level: The wound level that triggered this check.
+        ht_succeeded: Whether the HT roll succeeded.
+    """
+    if wound_level == "mortal":
+        if not ht_succeeded:
+            return OperationalHTResult(still_operational=False, destroyed=True)
+        # Mortal + HT success: not destroyed, but still needs operational check
+        # (in practice, a second HT roll — for simplicity, mortal + HT success
+        # means still operational but barely)
+        return OperationalHTResult(still_operational=True, destroyed=False)
+    elif wound_level == "crippling":
+        return OperationalHTResult(
+            still_operational=ht_succeeded,
+            destroyed=False,
+        )
+    else:
+        # Wounds below crippling don't require this check
+        return OperationalHTResult(still_operational=True, destroyed=False)
+
+
+# ---------------------------------------------------------------------------
 # Cinematic injury
 # ---------------------------------------------------------------------------
 
