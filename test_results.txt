@@ -1,0 +1,130 @@
+============================================================
+PSI-WARS WEB UI TEST RESULTS — v0.2.6
+Date: 2026-03-15 21:57
+Total: 94  Pass: 60  Fail: 23
+============================================================
+
+
+--- Pre-Flight ---
+  [0.1] Y         Open https://pwdev.simonious.com/ in your browser.
+  [0.2] Y         Click the 'Enter Combat' button.
+  [0.3] Y         Look at the bottom-right corner of the page.
+  [0.4] Y         Look at the page fonts — the title, card text, and log text.
+
+--- Ship Cards — Display ---
+  [1.1] Y         Look at the top strip.
+  [1.2] Y         Red Fox should have a blue/cyan glowing top border (it's the active ship).
+  [1.3] Y         Blue Jay should have a red glowing top border (it's being targeted).
+  [1.4] N — wraith is smaller, iron maw is the same size. It would be useful to include something like active ship, targetting ship, pursing ship as well as the color coding  Iron Maw and Wraith should be narrow/compact cards (just name, HP bar, dots).
+  [1.5] Y         Wraith is destroyed. Its card should be faded/dimmed.
+  [1.6] Y         Red Fox's card should show 2 weapons listed.
+  [1.7] N — I have a previous design for these that is a little nicer, these are acceptable for now, but will probably want to redesign. I've added a file called ship_cards.png to the resource files for this project that shows what they used to look like.  Do you like the overall look of the ship cards?
+  [1.8] Y         Is the card text readable at your screen size?
+  [1.9] none      Any info you'd want to see on the default (non-expanded) card that isn't there?
+
+--- Ship Cards — Expand ---
+  [2.1] N — the card expands, but no more details become visible  Click on Red Fox's card body (NOT on a stat number or subsystem dot).
+  [2.2] N — I don't see armor, I do see performance stats including handling, SR, DR/F, SPD, HT and ECM - these should be written out or at least have hover overs that expand them. I don't see electroncs, but maybe these ships just lack them. I do see wapons and damage and damage types, but ranges are missing, I do see pilot details including p16 and g14, this could probably be expanded a bit. Chase shall also be included in this display  In the expanded view, do you see:
+  [2.3] N — I don't see a source page atI would love to see the ship name, wildcat in this case, link to the psi wars page for that ship  Red Fox should show a '→ Source Page' link at the bottom of the expanded view.
+  [2.4] Y         Click the card again to collapse it.
+
+--- Subsystem Dots ---
+  [3.1] Y         Look at Red Fox's subsystem dots (PROP, WEAP, SENS, RCTR, COMM, LIFE).
+  [3.2] Y         Blue Jay should have its SENS dot in yellow (sensors disabled).
+  [3.3] Y         Click Red Fox's PROP dot once.
+  [3.4] Y         Click the same PROP dot again.
+  [3.5] Y         Click it one more time.
+  [3.6] N — nothing went wrong it did NOT create a log entry, which is the intended behavior.  Check the combat log at the bottom.
+  [3.7] Y         Try clicking a subsystem dot on Iron Maw (the compact card).
+  [3.8] Y         Do the dots feel easy to click? Good visual feedback?
+
+--- Click-to-Edit ---
+  [4.1] Y         Hover your mouse over Red Fox's HP number (the current HP value next to the HP bar).
+  [4.2] Y         Click the HP number.
+  [4.3] Y         Type 30 and press Enter.
+  [4.4] Y         Click the HP number again. Type 0 and press Enter.
+  [4.5] Y         Click the HP number, type 120, Enter.
+  [4.6] Y         Click the HND value in the stat grid. Change it. Press Enter.
+  [4.7] Y         Click the DR/F value in the stat grid. Change it. Press Enter.
+  [4.8] N — nothing went wrong, those updates did NOT appear in the chat log, this is expected behavior  Check the combat log.
+  [4.9] Y         Click 'Hide GM' to hide the GM panel.
+  [4.10] Y         Click 'Show GM' to bring the panel back.
+  [4.11] N — I can edit pilot and gunnary skills, but facing seems to be missing, however it may be that the wildcat doesn't have those values to edit  Expand Red Fox and try editing a value in the expanded detail section
+  [4.12] Y         Is click-to-edit intuitive? Does it feel natural?
+  [4.13] none      Any stats you wish were editable that aren't?
+
+--- Engagements ---
+  [5.1] Y         Look between the ship cards and the combat log.
+  [5.2] Y         First engagement should show:
+  [5.3] Y         The 'MED' range label should be in yellow/amber.
+  [5.4] N — I do actually see it, but it should be next to the red fox name rather than at the far right  It should show '◀ ADV' indicating Red Fox has advantage.
+  [5.5] Y         It should show a green 'MATCHED' tag (matched speed).
+  [5.6] N — it's there, but I want to adv arrow or the no adv to appear immediately under the range so med over <- adv or long over no adv  Second engagement: Iron Maw — LONG — Blue Jay
+  [5.7] N — yes actually, but hover over should reveal that faction information  Are ship names in the engagement strip colored by faction?
+  [5.8] Y         Is the engagement display useful at a glance?
+  [5.9] Y         Would you want to click/edit engagement values (range, advantage) directly?
+
+--- Combat Log ---
+  [6.1] Y         The combat log should have pre-loaded mock entries.
+  [6.2] Y         Turn headers ('TURN 1', 'TURN 2') should be gold/yellow with a line under them.
+  [6.3] Y         Look at the different entry colors:
+  [6.4] Y         Can you scroll up through the log history?
+  [6.5] Y         Type 'hello world' in the input box and press Enter.
+  [6.6] Y         Select some text in the log and try to copy it (Ctrl+C).
+  [6.7] Y         Is the log font size readable?
+  [6.8] it's helpful, we may make amendments to this later so make sure this is modular and well documented so it's easy to update  Is the color coding helpful or is it too much?
+
+--- Dice — Basic ---
+  [7.1] Y         Type [[3d6]] in the chat input and press Enter.
+  [7.2] Y         Type [[1d20]] — result 1-20?
+  [7.3] N — the answer is yes on all of these rolls so far, but the dice breakout is only supposed to be visible on hover over [[3d7]] should produce an output of ONLY a number 3-18 rather than the whole expansion, the whole expansion including what ws rolled shall be available on hover over, if the whole expansion is desired to be visible the player will use [[3d6v]] where the v is for verbose  Type [[2d6+5]] — result 7-17?
+  [7.4] Y         Type [[1d20-3]] — result -2 to 17?
+  [7.5] Y         Do dice results show in cyan/accent color?
+
+--- Dice — Advanced ---
+  [8.1] N         Type [[1d20a]] — advantage roll.
+  [8.2] N — is claims d20 library not installed, this may be a mistake I made  Type [[1d20d]] — disadvantage roll.
+  [8.3] N — d20 library missing  Type [[4d6kh3]] — keep highest 3.
+  [8.4] N — d20 library missing  Type [[6d8dl2]] — drop lowest 2.
+  [8.5] N — d20 library missing  Type [[5d6kh3v]] — verbose mode.
+  [8.6] N — d20 library missing  Type [[10x3d6]] — batch sum.
+  [8.7] N — d20 library missing  Type [[4t3d6]] — individual batch.
+  [8.8] N — d20 library missing  Type [[4#1d6]] — same as t.
+
+--- Dice — Commands ---
+  [9.1] Y         Type [[help]]
+  [9.2] Y         Is the help text readable? (proper line breaks, not garbled)
+  [9.3] Y         Type [[about]]
+  [9.4] Y         Type [[stats 3d6]]
+  [9.5] Y         Do the stats look reasonable? (3d6: min ~3, max ~18, mean ~10.5)
+  [9.6] N — cannot compute - I'm sure because  the d20 library is missing  Type [[stats 4d6kh3]]
+  [9.7] N — this does show an error, it should not [[garbage]] should be ignored since it isn't any for the dicebot uses  Type [[garbage]]
+
+--- Dice — Inline ---
+  [10.1] N — yes, but this is not intended - it should install show my text with the result of the roll where the roll was and the hover over should reveal what was rolled and the individual dice values  Type: I attack with [[3d6+4]] damage
+  [10.2] Y         Type: Rolling [[1d20]] to hit and [[2d6+3]] damage
+  [10.3] Y         Does inline rolling feel natural?
+
+--- GM Panel ---
+  [11.1] Y         Is the GM panel visible on the right side?
+  [11.2] Y         Click 'Hide GM' — does the panel disappear and the log expand?
+  [11.3] Y         Click 'Show GM' — does it come back?
+  [11.4] Y         Dice Review section — click 'None' filter.
+  [11.5] Y         Click 'NPC Only' — shows only NPC rolls?
+  [11.6] Y         Click 'All' — shows everything again?
+  [11.7] looks good for now  What's missing from the GM panel? What would make it more useful?
+
+--- Overall ---
+  [12.1] 6         Rate the overall visual design on a scale of 1-10.
+  [12.2] it feels like a turn based game mid development  Does it feel like a tactical combat tool, or a generic web app?
+  [12.3] Y         Is the dark theme comfortable? Could you use this for a long session?
+  [12.4] no        Any colors that are hard to read or that clash?
+  [12.5] Y         Is the layout intuitive?
+  [12.6] the cards need to be improved as previously detailed  What's the SINGLE thing you'd most want changed right now?
+  [12.7] the general layout  What's working best? What do you like most?
+  [12.8] not so far  Any features from the terminal UI that you miss in the web version?
+  [12.9] more ui polish next  Ready to move on to session instances & login?
+
+============================================================
+END OF REPORT — Paste this to Claude
+============================================================

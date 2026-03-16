@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psi-Wars Combat Simulator</title>
+<link rel="stylesheet" href="/static/css/main.css?v=0.2.9">
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-title">Psi-Wars</div>
+    <div class="header-turn" id="turn-display">Turn 0</div>
+    <div class="header-controls">
+      <button class="header-btn" id="gm-toggle">Hide GM</button>
+    </div>
+  </div>
+  <div class="ship-strip" id="ship-strip"></div>
+  <div class="engagement-strip" id="engagement-strip"></div>
+  <div class="combat-log" id="combat-log"></div>
+  <div class="gm-panel" id="gm-panel"></div>
+</div>
+<div class="version-stamp">v0.3.0</div>
+<script type="module" src="/static/js/app.js?v=0.2.9"></script>
+</body>
+</html>
