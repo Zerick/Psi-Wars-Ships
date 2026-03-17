@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # Version stamp — update with each deploy
-VERSION = "0.4.7"
+VERSION = "0.5.0"
 
 app = FastAPI(
     title="Psi-Wars Combat Simulator",

@@ -42,6 +42,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+from ship_catalog import ShipCatalog
+from faction_manager import FactionManager
+
 logger = logging.getLogger(__name__)
 
 
@@ -225,6 +228,9 @@ class SessionState:
     ship_assign_mode: str = ShipAssignMode.GM_ASSIGN.value
     ships: list[dict] = field(default_factory=list)
     engagements: list[dict] = field(default_factory=list)
+    factions: list[dict] = field(default_factory=list)
+    faction_relationships: dict[str, str] = field(default_factory=dict)
+    targeting_warnings_acknowledged: list[str] = field(default_factory=list)
     combat_log: list[dict] = field(default_factory=list)
     dice_log: list[dict] = field(default_factory=list)
     chat_log: list[dict] = field(default_factory=list)
@@ -251,6 +257,9 @@ class SessionState:
             "ship_assign_mode": self.ship_assign_mode,
             "ships": self.ships,
             "engagements": self.engagements,
+            "factions": self.factions,
+            "faction_relationships": self.faction_relationships,
+            "targeting_warnings_acknowledged": self.targeting_warnings_acknowledged,
             "combat_log": self.combat_log,
             "dice_log": self.dice_log,
             "chat_log": self.chat_log,
@@ -281,6 +290,9 @@ class SessionState:
             ship_assign_mode=data.get("ship_assign_mode", ShipAssignMode.GM_ASSIGN.value),
             ships=data.get("ships", []),
             engagements=data.get("engagements", []),
+            factions=data.get("factions", []),
+            faction_relationships=data.get("faction_relationships", {}),
+            targeting_warnings_acknowledged=data.get("targeting_warnings_acknowledged", []),
             combat_log=data.get("combat_log", []),
             dice_log=data.get("dice_log", []),
             chat_log=data.get("chat_log", []),
@@ -414,18 +426,33 @@ class SessionManager:
         changes, add asyncio.Lock per session.
     """
 
-    def __init__(self, sessions_dir: Path | str = DEFAULT_SESSIONS_DIR):
+    def __init__(
+        self,
+        sessions_dir: Path | str = DEFAULT_SESSIONS_DIR,
+        templates_dir: Path | str | None = None,
+    ):
         """
         Initialize the session manager.
 
         Args:
-            sessions_dir: Directory for session JSON files. Created if needed.
+            sessions_dir:  Directory for session JSON files. Created if needed.
+            templates_dir: Directory for ship template JSON files. If None,
+                           the catalog will be empty (templates can be loaded
+                           later via ship_catalog.load_from_list()).
         """
         self.sessions_dir = Path(sessions_dir)
         self.sessions_dir.mkdir(parents=True, exist_ok=True)
 
         # Active sessions indexed by keyword
         self._sessions: dict[str, SessionState] = {}
+
+        # Ship template catalog
+        self.ship_catalog = ShipCatalog(templates_dir=templates_dir)
+        if templates_dir:
+            self.ship_catalog.load()
+
+        # Faction manager (stateless — shared across all sessions)
+        self.faction_mgr = FactionManager()
 
         logger.info("SessionManager initialized. Sessions dir: %s", self.sessions_dir)
 
@@ -794,6 +821,21 @@ class SessionManager:
         if "ship_id" not in ship_data or not ship_data["ship_id"]:
             ship_data["ship_id"] = f"ship_{len(session.ships) + 1}"
 
+        # Ensure default faction exists if the ship references it
+        ship_faction = ship_data.get("faction", "")
+        if ship_faction:
+            state_dict = session.to_dict()
+            faction_names = {f["name"] for f in state_dict.get("factions", [])}
+            if ship_faction not in faction_names:
+                # Auto-create the faction (handles "NPC Hostiles" and any other)
+                from faction_manager import DEFAULT_FACTION_NAME, DEFAULT_FACTION_COLOR
+                if ship_faction == DEFAULT_FACTION_NAME:
+                    self.faction_mgr.ensure_default_faction(state_dict)
+                else:
+                    self.faction_mgr.create_faction(state_dict, ship_faction)
+                session.factions = state_dict["factions"]
+                session.faction_relationships = state_dict["faction_relationships"]
+
         session.ships.append(ship_data)
 
         # In player-select mode, new ships start as available
@@ -808,8 +850,11 @@ class SessionManager:
         """
         Remove a ship from a session.
 
-        Also removes the ship from any user's ship_ids list and from
-        available_ship_ids.
+        Also:
+          - Removes the ship from any user's ship_ids list
+          - Removes from available_ship_ids
+          - Clears target_id on any ship that was targeting the removed ship
+          - Removes all engagements involving the removed ship
 
         Args:
             keyword: Session keyword.
@@ -828,12 +873,27 @@ class SessionManager:
         if len(session.ships) == original_count:
             return False
 
-        # Clean up references
+        # Clean up user assignments
         for user in session.users.values():
             if ship_id in user.ship_ids:
                 user.ship_ids.remove(ship_id)
         if ship_id in session.available_ship_ids:
             session.available_ship_ids.remove(ship_id)
+
+        # Clear target_id on ships that were targeting the removed ship
+        for ship in session.ships:
+            if ship.get("target_id") == ship_id:
+                ship["target_id"] = None
+
+        # Remove engagements involving this ship (as pursuer or target)
+        session.engagements = [
+            e for e in session.engagements
+            if ship_id not in (
+                e.get("ship_a_id"), e.get("ship_b_id"),
+                # Also check the directional key format
+                e.get("pursuer_id"), e.get("target_id"),
+            )
+        ]
 
         self._save_session(session)
         logger.info("Removed ship '%s' from session '%s'", ship_id, keyword)
@@ -1322,3 +1382,452 @@ class SessionManager:
         if not user:
             return False
         return user.role == UserRole.GM.value
+
+    # ------------------------------------------------------------------
+    # Ship template catalog
+    # ------------------------------------------------------------------
+
+    def get_ship_catalog(self) -> dict:
+        """
+        Get the categorized ship template catalog for the UI picker.
+
+        Returns a dict with "categories" list, each containing "label",
+        "description", and "ships" list with summary stats.
+        """
+        return self.ship_catalog.get_catalog()
+
+    def add_ship_from_template(
+        self,
+        keyword: str,
+        template_id: str,
+        ship_id: str = "",
+    ) -> Optional[str]:
+        """
+        Add a ship to a session by instantiating a template.
+
+        Creates a new ship with all template stats, default NPC pilot
+        (all skills at 12), default "NPC Hostiles" faction, and NPC
+        control mode. The default faction is auto-created if it doesn't
+        exist yet.
+
+        Args:
+            keyword:     Session keyword.
+            template_id: Template to instantiate (e.g. "wildcat_v1").
+            ship_id:     Optional ship_id. Auto-generated if empty.
+
+        Returns:
+            The ship_id of the new ship, or None if template not found.
+
+        Raises:
+            KeyError: Session not found.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            raise KeyError(f"Session '{keyword}' not found.")
+
+        # Generate a ship_id if not provided
+        if not ship_id:
+            existing_ids = {s.get("ship_id", "") for s in session.ships}
+            counter = len(session.ships) + 1
+            while f"ship_{counter}" in existing_ids:
+                counter += 1
+            ship_id = f"ship_{counter}"
+
+        # Create ship instance from template
+        ship = self.ship_catalog.create_ship_from_template(template_id, ship_id)
+        if not ship:
+            return None
+
+        # Ensure default faction exists
+        state_dict = session.to_dict()
+        self.faction_mgr.ensure_default_faction(state_dict)
+        session.factions = state_dict["factions"]
+        session.faction_relationships = state_dict["faction_relationships"]
+
+        # Add the ship
+        session.ships.append(ship)
+
+        # In player-select mode, new ships start as available
+        if session.ship_assign_mode == ShipAssignMode.PLAYER_SELECT.value:
+            session.available_ship_ids.append(ship_id)
+
+        self._save_session(session)
+        logger.info(
+            "Added ship '%s' (template=%s) to session '%s'",
+            ship_id, template_id, keyword,
+        )
+        return ship_id
+
+    # ------------------------------------------------------------------
+    # Faction management (delegates to FactionManager)
+    # ------------------------------------------------------------------
+
+    def create_faction(self, keyword: str, name: str, color: str = "") -> dict:
+        """
+        Create a new faction in a session.
+
+        See FactionManager.create_faction() for details.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            raise KeyError(f"Session '{keyword}' not found.")
+
+        state_dict = session.to_dict()
+        result = self.faction_mgr.create_faction(state_dict, name, color)
+        session.factions = state_dict["factions"]
+        session.faction_relationships = state_dict["faction_relationships"]
+        self._save_session(session)
+        return result
+
+    def get_factions(self, keyword: str) -> list[dict]:
+        """Get all factions in a session."""
+        session = self._sessions.get(keyword)
+        if not session:
+            return []
+        state_dict = session.to_dict()
+        return self.faction_mgr.get_factions(state_dict)
+
+    def remove_faction(self, keyword: str, name: str) -> dict:
+        """
+        Remove a faction from a session.
+
+        Ships referencing the removed faction are flagged as orphaned.
+        Returns a dict with "removed" and "orphaned_ships".
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            raise KeyError(f"Session '{keyword}' not found.")
+
+        state_dict = session.to_dict()
+        result = self.faction_mgr.remove_faction(state_dict, name)
+        session.factions = state_dict["factions"]
+        session.faction_relationships = state_dict["faction_relationships"]
+        session.ships = state_dict["ships"]
+        self._save_session(session)
+        return result
+
+    def set_faction_relationship(
+        self,
+        keyword: str,
+        from_faction: str,
+        to_faction: str,
+        relationship: str,
+    ) -> None:
+        """
+        Set the directional relationship from one faction to another.
+
+        See FactionManager.set_relationship() for details.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            raise KeyError(f"Session '{keyword}' not found.")
+
+        state_dict = session.to_dict()
+        self.faction_mgr.set_relationship(
+            state_dict, from_faction, to_faction, relationship,
+        )
+        session.faction_relationships = state_dict["faction_relationships"]
+        self._save_session(session)
+
+    def get_faction_relationship(
+        self,
+        keyword: str,
+        from_faction: str,
+        to_faction: str,
+    ) -> str:
+        """
+        Get the directional relationship from one faction to another.
+
+        Returns "neutral" if no relationship is set.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            return "neutral"
+
+        state_dict = session.to_dict()
+        return self.faction_mgr.get_relationship(
+            state_dict, from_faction, to_faction,
+        )
+
+    def escalate_faction_relationship(
+        self,
+        keyword: str,
+        attacker_faction: str,
+        defender_faction: str,
+    ) -> Optional[str]:
+        """
+        Escalate an NPC faction's relationship when attacked.
+
+        friendly → neutral → hostile. Only applies to NPC factions.
+        Returns the new relationship, or None if no change.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            return None
+
+        state_dict = session.to_dict()
+        result = self.faction_mgr.escalate_relationship(
+            state_dict, attacker_faction, defender_faction,
+        )
+        session.faction_relationships = state_dict["faction_relationships"]
+        self._save_session(session)
+        return result
+
+    # ------------------------------------------------------------------
+    # Targeting warnings
+    # ------------------------------------------------------------------
+
+    def check_targeting_warning(
+        self,
+        keyword: str,
+        attacker_ship_id: str,
+        target_ship_id: str,
+    ) -> Optional[str]:
+        """
+        Check if a targeting warning should be shown.
+
+        Returns a warning message string, or None if no warning needed.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            return None
+
+        attacker = next(
+            (s for s in session.ships if s.get("ship_id") == attacker_ship_id),
+            None,
+        )
+        target = next(
+            (s for s in session.ships if s.get("ship_id") == target_ship_id),
+            None,
+        )
+        if not attacker or not target:
+            return None
+
+        state_dict = session.to_dict()
+        return self.faction_mgr.check_targeting_warning(
+            state_dict, attacker, target,
+        )
+
+    def acknowledge_targeting_warning(
+        self,
+        keyword: str,
+        attacker_faction: str,
+        target_faction: str,
+    ) -> None:
+        """
+        Acknowledge a targeting warning so it doesn't repeat.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            return
+
+        state_dict = session.to_dict()
+        self.faction_mgr.acknowledge_targeting_warning(
+            state_dict, attacker_faction, target_faction,
+        )
+        session.targeting_warnings_acknowledged = state_dict["targeting_warnings_acknowledged"]
+        self._save_session(session)
+
+    # ------------------------------------------------------------------
+    # Target assignment and engagements
+    # ------------------------------------------------------------------
+
+    def set_ship_target(
+        self,
+        keyword: str,
+        ship_id: str,
+        target_id: Optional[str],
+        range_band: str = "long",
+        advantage: Optional[str] = None,
+        matched_speed: bool = False,
+    ) -> None:
+        """
+        Set a ship's target, creating or updating an engagement.
+
+        Setting a target creates a directional engagement (pursuer →
+        target). Changing a target removes the old engagement and
+        creates a new one. Setting target_id to None clears the target
+        and removes the engagement.
+
+        Args:
+            keyword:      Session keyword.
+            ship_id:      The pursuing ship's ID.
+            target_id:    The target ship's ID, or None to clear.
+            range_band:   Starting range band (default "long").
+            advantage:    Ship ID that has advantage, or None.
+            matched_speed: Whether speed is matched (default False).
+
+        Raises:
+            KeyError:   Session or ship not found.
+            ValueError: Ship targeting itself.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            raise KeyError(f"Session '{keyword}' not found.")
+
+        # Find the pursuing ship
+        ship = next(
+            (s for s in session.ships if s.get("ship_id") == ship_id),
+            None,
+        )
+        if not ship:
+            raise KeyError(f"Ship '{ship_id}' not found.")
+
+        if target_id == ship_id:
+            raise ValueError("A ship cannot target itself.")
+
+        # If target_id is provided, verify the target exists
+        if target_id is not None:
+            target_exists = any(
+                s.get("ship_id") == target_id for s in session.ships
+            )
+            if not target_exists:
+                raise KeyError(f"Target ship '{target_id}' not found.")
+
+        # Remove old engagement if the ship had a previous target
+        old_target = ship.get("target_id")
+        if old_target:
+            old_key = f"{ship_id}→{old_target}"
+            session.engagements = [
+                e for e in session.engagements
+                if e.get("key") != old_key
+            ]
+
+        # Set the new target
+        ship["target_id"] = target_id
+
+        # Create new engagement if target is set
+        if target_id is not None:
+            eng_key = f"{ship_id}→{target_id}"
+            engagement = {
+                "key": eng_key,
+                "pursuer_id": ship_id,
+                "target_id": target_id,
+                # Legacy fields for backward compatibility with display code
+                "ship_a_id": ship_id,
+                "ship_b_id": target_id,
+                "range_band": range_band,
+                "advantage": advantage,
+                "matched_speed": matched_speed,
+                "hugging": False,
+            }
+            session.engagements.append(engagement)
+
+        self._save_session(session)
+        logger.info(
+            "Ship '%s' target set to '%s' in session '%s'",
+            ship_id, target_id, keyword,
+        )
+
+    def get_engagements(self, keyword: str) -> dict:
+        """
+        Get all engagements as a dict keyed by "pursuer→target".
+
+        Returns a dict like:
+            {
+                "ship_1→ship_2": {
+                    "range_band": "long",
+                    "advantage": null,
+                    "matched_speed": false,
+                    "hugging": false
+                }
+            }
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            return {}
+
+        result = {}
+        for eng in session.engagements:
+            key = eng.get("key", f"{eng.get('ship_a_id', '')}→{eng.get('ship_b_id', '')}")
+            result[key] = {
+                "range_band": eng.get("range_band", "long"),
+                "advantage": eng.get("advantage"),
+                "matched_speed": eng.get("matched_speed", False),
+                "hugging": eng.get("hugging", False),
+                "pursuer_id": eng.get("pursuer_id", eng.get("ship_a_id")),
+                "target_id": eng.get("target_id", eng.get("ship_b_id")),
+            }
+        return result
+
+    # ------------------------------------------------------------------
+    # Combat transition
+    # ------------------------------------------------------------------
+
+    def start_combat(self, keyword: str) -> dict:
+        """
+        Transition a session from SETUP to ACTIVE.
+
+        Performs non-blocking validation and returns warnings about
+        incomplete setup (ships without targets, default pilots, etc.).
+        The transition proceeds regardless of warnings.
+
+        Args:
+            keyword: Session keyword.
+
+        Returns:
+            A dict with:
+                "status": "active"
+                "warnings": list of warning strings (advisory only)
+
+        Raises:
+            KeyError: Session not found.
+        """
+        session = self._sessions.get(keyword)
+        if not session:
+            raise KeyError(f"Session '{keyword}' not found.")
+
+        # Collect validation warnings (non-blocking)
+        warnings = []
+
+        for ship in session.ships:
+            sid = ship.get("ship_id", "?")
+            name = ship.get("display_name", sid)
+
+            # No target assigned
+            if not ship.get("target_id"):
+                warnings.append(f"Ship '{name}' has no target assigned.")
+
+            # Default pilot (all skills still at 12, or no pilot configured)
+            pilot = ship.get("pilot", {})
+            if not pilot:
+                warnings.append(f"Ship '{name}' has no pilot configured.")
+            elif (pilot.get("piloting_skill") == 12
+                    and pilot.get("gunnery_skill") == 12
+                    and pilot.get("basic_speed") == 6.0):
+                warnings.append(f"Ship '{name}' still has default pilot stats.")
+
+            # No player assigned (in multiplayer with human control)
+            if (ship.get("control") == "human"
+                    and not ship.get("assigned_player")):
+                warnings.append(f"Ship '{name}' is human-controlled but not assigned to a player.")
+
+        # Check for factions with no relationships
+        faction_names = {f["name"] for f in session.factions}
+        for fname in faction_names:
+            has_any_rel = any(
+                k.startswith(f"{fname}→") or k.endswith(f"→{fname}")
+                for k in session.faction_relationships
+            )
+            if not has_any_rel and len(faction_names) > 1:
+                warnings.append(f"Faction '{fname}' has no relationships defined.")
+
+        # Transition to active
+        session.status = SessionStatus.ACTIVE.value
+        session.active_state["current_turn"] = 1
+
+        # Add combat log entry
+        session.combat_log.append({
+            "message": "═══ COMBAT BEGINS ═══",
+            "event_type": "turn",
+            "turn": 1,
+        })
+
+        self._save_session(session)
+        logger.info("Combat started in session '%s' with %d warning(s)", keyword, len(warnings))
+
+        return {
+            "status": "active",
+            "warnings": warnings,
+        }
+

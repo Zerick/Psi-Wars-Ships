@@ -107,10 +107,105 @@ def safe_run(fn):
 # ---------------------------------------------------------------------------
 
 def make_manager():
-    """Create a fresh SessionManager with a temp directory."""
+    """Create a fresh SessionManager with a temp directory and test templates."""
     from session_manager import SessionManager
     tmpdir = tempfile.mkdtemp()
-    return SessionManager(sessions_dir=tmpdir), tmpdir
+    sm = SessionManager(sessions_dir=tmpdir)
+
+    # Load synthetic test templates so catalog and add_ship_from_template work.
+    # These cover enough variety to exercise all category assignments and
+    # template-to-instance conversion without needing real fixture files.
+    test_templates = [
+        {"template_id": "javelin_v1", "name": "Javelin Class Fighter",
+         "sm": 4, "ship_class": "fighter", "st_hp": 80, "ht": "9f",
+         "hnd": 4, "sr": 3, "accel": 20, "top_speed": 600, "stall_speed": 35,
+         "dr_front": 15, "dr_rear": 15, "dr_left": 15, "dr_right": 15,
+         "dr_top": 15, "dr_bottom": 15, "fdr_max": 0, "current_fdr": 0,
+         "force_screen_type": "none", "ecm_rating": -4, "targeting_bonus": 5,
+         "has_tactical_esm": True, "has_decoy_launcher": True,
+         "weapons": [{"name": "Imperial Fighter Blaster", "damage_str": "6d×5(5) burn",
+                       "acc": 9, "rof": 3, "mount": "fixed_front"}],
+         "description": "Standard Imperial fighter."},
+
+        {"template_id": "wildcat_v1", "name": "Wildcat Class Fighter",
+         "sm": 5, "ship_class": "fighter", "st_hp": 120, "ht": "13",
+         "hnd": 2, "sr": 4, "accel": 10, "top_speed": 400, "stall_speed": 60,
+         "dr_front": 50, "dr_rear": 25, "dr_left": 25, "dr_right": 25,
+         "dr_top": 25, "dr_bottom": 25, "fdr_max": 0, "current_fdr": 0,
+         "force_screen_type": "none", "ecm_rating": -4, "targeting_bonus": 5,
+         "has_tactical_esm": True, "has_decoy_launcher": True,
+         "weapons": [{"name": "B00-M Heavy Plasma Cannon", "damage_str": "6d×30(2) burn ex",
+                       "acc": 6, "rof": 1, "mount": "fixed_front"}],
+         "description": "Modular Redjack fighter."},
+
+        {"template_id": "hornet_v1", "name": "Hornet-Class Interceptor",
+         "sm": 4, "ship_class": "interceptor", "st_hp": 50, "ht": "12",
+         "hnd": 6, "sr": 3, "accel": 30, "top_speed": 700, "stall_speed": 50,
+         "dr_front": 20, "dr_rear": 10, "dr_left": 10, "dr_right": 10,
+         "dr_top": 10, "dr_bottom": 10, "fdr_max": 150, "current_fdr": 150,
+         "force_screen_type": "hardened", "ecm_rating": -4, "targeting_bonus": 5,
+         "has_tactical_esm": True, "has_decoy_launcher": True,
+         "weapons": [{"name": "Muonic Fighter Cannon", "damage_str": "6d×5(5) burn",
+                       "acc": 9, "rof": 3, "mount": "fixed_front"}],
+         "description": "Fast Imperial interceptor with force screen."},
+
+        {"template_id": "sword_v1", "name": "Sword-Pattern Battleship",
+         "sm": 11, "ship_class": "battleship", "st_hp": 1500, "ht": "13",
+         "hnd": -2, "sr": 5, "accel": 5, "top_speed": 100, "stall_speed": 0,
+         "dr_front": 500, "dr_rear": 250, "dr_left": 250, "dr_right": 250,
+         "dr_top": 250, "dr_bottom": 250, "fdr_max": 3000, "current_fdr": 3000,
+         "force_screen_type": "hardened", "ecm_rating": -6, "targeting_bonus": 5,
+         "has_tactical_esm": True, "has_decoy_launcher": True,
+         "weapons": [{"name": "Capital-Scale Cannon", "damage_str": "6d×100(3) burn",
+                       "acc": 9, "rof": 1, "mount": "turret"}],
+         "description": "Imperial battleship."},
+
+        {"template_id": "skirmisher_v1", "name": "Skirmisher-class Corvette",
+         "sm": 7, "ship_class": "corvette", "st_hp": 300, "ht": "12",
+         "hnd": 2, "sr": 4, "accel": 10, "top_speed": 300, "stall_speed": 40,
+         "dr_front": 100, "dr_rear": 50, "dr_left": 50, "dr_right": 50,
+         "dr_top": 50, "dr_bottom": 50, "fdr_max": 200, "current_fdr": 200,
+         "force_screen_type": "standard", "ecm_rating": -4, "targeting_bonus": 5,
+         "has_tactical_esm": True, "has_decoy_launcher": True,
+         "weapons": [{"name": "Light Turbolaser", "damage_str": "6d×20(3) burn",
+                       "acc": 9, "rof": 1, "mount": "turret"}],
+         "description": "Light patrol corvette."},
+
+        {"template_id": "scarab_v1", "name": "Scarab-class Defense Frigate",
+         "sm": 8, "ship_class": "frigate", "st_hp": 500, "ht": "13",
+         "hnd": 1, "sr": 5, "accel": 8, "top_speed": 200, "stall_speed": 30,
+         "dr_front": 150, "dr_rear": 75, "dr_left": 75, "dr_right": 75,
+         "dr_top": 75, "dr_bottom": 75, "fdr_max": 400, "current_fdr": 400,
+         "force_screen_type": "hardened", "ecm_rating": -5, "targeting_bonus": 5,
+         "has_tactical_esm": True, "has_decoy_launcher": True,
+         "weapons": [{"name": "Medium Turbolaser", "damage_str": "6d×30(3) burn",
+                       "acc": 9, "rof": 1, "mount": "turret"}],
+         "description": "Defensive frigate."},
+
+        {"template_id": "kodiak_v1", "name": "Kodiak-Class Light Cruiser",
+         "sm": 9, "ship_class": "light_cruiser", "st_hp": 700, "ht": "13",
+         "hnd": 0, "sr": 5, "accel": 6, "top_speed": 150, "stall_speed": 0,
+         "dr_front": 200, "dr_rear": 100, "dr_left": 100, "dr_right": 100,
+         "dr_top": 100, "dr_bottom": 100, "fdr_max": 600, "current_fdr": 600,
+         "force_screen_type": "hardened", "ecm_rating": -5, "targeting_bonus": 5,
+         "has_tactical_esm": True, "has_decoy_launcher": True,
+         "weapons": [{"name": "Heavy Turbolaser", "damage_str": "6d×50(3) burn",
+                       "acc": 9, "rof": 1, "mount": "turret"}],
+         "description": "Light cruiser."},
+
+        {"template_id": "fugitive_v1", "name": "Fugitive-Class Escape Craft",
+         "sm": 4, "ship_class": "escape_craft", "st_hp": 30, "ht": "10",
+         "hnd": 3, "sr": 3, "accel": 15, "top_speed": 500, "stall_speed": 0,
+         "dr_front": 5, "dr_rear": 5, "dr_left": 5, "dr_right": 5,
+         "dr_top": 5, "dr_bottom": 5, "fdr_max": 0, "current_fdr": 0,
+         "force_screen_type": "none", "ecm_rating": -4, "targeting_bonus": 3,
+         "has_tactical_esm": False, "has_decoy_launcher": False,
+         "weapons": [],
+         "description": "Unarmed escape pod."},
+    ]
+
+    sm.ship_catalog.load_from_list(test_templates)
+    return sm, tmpdir
 
 
 def make_gm_session(sm):
