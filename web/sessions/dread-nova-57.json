@@ -1,0 +1,34 @@
+{
+  "keyword": "dread-nova-57",
+  "created": "2026-03-17T01:50:04.810567+00:00",
+  "updated": "2026-03-17T02:48:18.217778+00:00",
+  "status": "setup",
+  "has_gm": false,
+  "gm_password_hash": "",
+  "ship_assign_mode": "player_select",
+  "ships": [],
+  "engagements": [],
+  "combat_log": [],
+  "dice_log": [],
+  "chat_log": [],
+  "active_state": {
+    "active_ship_id": null,
+    "targets": [],
+    "targeting": [],
+    "current_turn": 0
+  },
+  "users": {
+    "Simonious": {
+      "name": "Simonious",
+      "role": "host",
+      "ship_ids": [],
+      "token": "bd72e6ea5e1014abb55ecc82d446c5ae",
+      "connected": false,
+      "last_seen": "2026-03-17T02:48:18.217760+00:00",
+      "see_stats": false
+    }
+  },
+  "available_ship_ids": [],
+  "settings": {},
+  "version": "1.0.0"
+}

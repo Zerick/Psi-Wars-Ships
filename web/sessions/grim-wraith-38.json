@@ -1,0 +1,34 @@
+{
+  "keyword": "grim-wraith-38",
+  "created": "2026-03-17T02:55:25.422255+00:00",
+  "updated": "2026-03-17T03:05:35.505654+00:00",
+  "status": "setup",
+  "has_gm": true,
+  "gm_password_hash": "c4adc63b3115207c6005c2221cffb599:1d7375ff51a1add9e4f43d6dc256afae682c8a2d0115ef92847d3b192bbaae5d",
+  "ship_assign_mode": "gm_assign",
+  "ships": [],
+  "engagements": [],
+  "combat_log": [],
+  "dice_log": [],
+  "chat_log": [],
+  "active_state": {
+    "active_ship_id": null,
+    "targets": [],
+    "targeting": [],
+    "current_turn": 0
+  },
+  "users": {
+    "Simonious": {
+      "name": "Simonious",
+      "role": "gm",
+      "ship_ids": [],
+      "token": "8a46c246ff532c49afc759ef4ca3a484",
+      "connected": false,
+      "last_seen": "2026-03-17T03:05:35.505628+00:00",
+      "see_stats": false
+    }
+  },
+  "available_ship_ids": [],
+  "settings": {},
+  "version": "1.0.0"
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Session — Psi-Wars</title>
+  <link rel="stylesheet" href="/static/css/main.css?v={{ version }}">
+</head>
+<body class="page-form">
+
+  <div class="form-container">
+    <header class="form-header">
+      <a href="/" class="back-link">← Back</a>
+      <h1>Create Session</h1>
+      <p class="form-subtitle">Set up a new combat session for your group.</p>
+    </header>
+
+    <form id="create-form" class="session-form">
+      <!-- Creator name -->
+      <div class="form-group">
+        <label for="creator-name">Your Display Name</label>
+        <input type="text" id="creator-name" name="creator_name"
+               placeholder="e.g. GM Dave" required maxlength="30"
+               autocomplete="off">
+      </div>
+
+      <!-- GM mode toggle -->
+      <div class="form-group">
+        <label class="toggle-label">
+          <input type="checkbox" id="has-gm" name="has_gm" checked>
+          <span class="toggle-text">Session has a GM</span>
+        </label>
+        <p class="form-hint">
+          Uncheck for a GM-less session. You'll be the host with setup
+          powers but no GM visibility.
+        </p>
+      </div>
+
+      <!-- GM password (shown only when has-gm is checked) -->
+      <div class="form-group" id="password-group">
+        <label for="gm-password">GM Password</label>
+        <input type="password" id="gm-password" name="gm_password"
+               placeholder="Password for GM access" autocomplete="new-password">
+        <p class="form-hint">
+          Share this with anyone who needs GM access.
+          Players don't need it.
+        </p>
+      </div>
+
+      <!-- Ship assignment mode -->
+      <div class="form-group">
+        <label>Ship Assignment Mode</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="ship_assign_mode" value="gm_assign" checked>
+            <span>GM / Host assigns ships to players</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="ship_assign_mode" value="player_select">
+            <span>Players select their own ships</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn-primary btn-large btn-full">
+        Create Session
+      </button>
+
+      <!-- Error display -->
+      <div id="create-error" class="form-error" hidden></div>
+
+      <!-- Success display -->
+      <div id="create-success" class="form-success" hidden>
+        <h2>Session Created!</h2>
+        <div class="keyword-display">
+          <span class="keyword-label">Session Keyword:</span>
+          <span id="session-keyword" class="keyword-value"></span>
+          <button type="button" id="copy-keyword" class="btn btn-ghost btn-small">
+            Copy
+          </button>
+        </div>
+        <p class="form-hint">Share this keyword with your players so they can join.</p>
+        <div class="success-actions">
+          <a id="enter-session-link" href="#" class="btn btn-primary">
+            Enter Session
+          </a>
+          <a id="join-link" href="#" class="btn btn-secondary">
+            Share Join Link
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="version-stamp">v{{ version }}</div>
+
+  <script>
+    // ---------------------------------------------------------------------------
+    // Create Session Form Logic
+    // ---------------------------------------------------------------------------
+
+    const form = document.getElementById('create-form');
+    const hasGmCheckbox = document.getElementById('has-gm');
+    const passwordGroup = document.getElementById('password-group');
+    const errorEl = document.getElementById('create-error');
+    const successEl = document.getElementById('create-success');
+
+    // Toggle password field visibility
+    hasGmCheckbox.addEventListener('change', () => {
+      passwordGroup.style.display = hasGmCheckbox.checked ? '' : 'none';
+      if (!hasGmCheckbox.checked) {
+        document.getElementById('gm-password').value = '';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      successEl.hidden = true;
+
+      const creatorName = document.getElementById('creator-name').value.trim();
+      const hasGm = hasGmCheckbox.checked;
+      const gmPassword = document.getElementById('gm-password').value;
+      const shipAssignMode = document.querySelector('input[name="ship_assign_mode"]:checked').value;
+
+      if (!creatorName) {
+        errorEl.textContent = 'Please enter your display name.';
+        errorEl.hidden = false;
+        return;
+      }
+
+      if (hasGm && !gmPassword) {
+        errorEl.textContent = 'GM password is required when the session has a GM.';
+        errorEl.hidden = false;
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/session/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            creator_name: creatorName,
+            has_gm: hasGm,
+            gm_password: gmPassword,
+            ship_assign_mode: shipAssignMode,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Failed to create session.';
+          errorEl.hidden = false;
+          return;
+        }
+
+        // Store auth in localStorage for reconnection
+        localStorage.setItem('psi-wars-keyword', data.keyword);
+        localStorage.setItem('psi-wars-token', data.user.token);
+        localStorage.setItem('psi-wars-name', data.user.name);
+        localStorage.setItem('psi-wars-role', data.user.role);
+
+        // Show success
+        document.getElementById('session-keyword').textContent = data.keyword;
+        document.getElementById('enter-session-link').href = `/combat/${data.keyword}`;
+        document.getElementById('join-link').href = `/join/${data.keyword}`;
+        successEl.hidden = false;
+
+        // Hide the form fields
+        form.querySelectorAll('.form-group, button[type="submit"]').forEach(el => {
+          el.style.display = 'none';
+        });
+
+      } catch (err) {
+        errorEl.textContent = 'Network error. Is the server running?';
+        errorEl.hidden = false;
+      }
+    });
+
+    // Copy keyword to clipboard
+    document.getElementById('copy-keyword')?.addEventListener('click', () => {
+      const keyword = document.getElementById('session-keyword').textContent;
+      navigator.clipboard.writeText(keyword).then(() => {
+        const btn = document.getElementById('copy-keyword');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+  </script>
+
+</body>
+</html>

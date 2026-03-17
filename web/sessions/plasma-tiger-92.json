@@ -1,0 +1,34 @@
+{
+  "keyword": "plasma-tiger-92",
+  "created": "2026-03-17T02:53:59.807979+00:00",
+  "updated": "2026-03-17T02:55:17.388809+00:00",
+  "status": "setup",
+  "has_gm": true,
+  "gm_password_hash": "dba599030a76d499a9a0898d5ad0aa7a:6e8938fe444839cad7eb08e09d1fa5aba41247527484b6e1be7cfe26f6c22bc0",
+  "ship_assign_mode": "gm_assign",
+  "ships": [],
+  "engagements": [],
+  "combat_log": [],
+  "dice_log": [],
+  "chat_log": [],
+  "active_state": {
+    "active_ship_id": null,
+    "targets": [],
+    "targeting": [],
+    "current_turn": 0
+  },
+  "users": {
+    "Simonious": {
+      "name": "Simonious",
+      "role": "gm",
+      "ship_ids": [],
+      "token": "59bf6a51f29078e6a367dd074f134c5a",
+      "connected": false,
+      "last_seen": "2026-03-17T02:55:17.388785+00:00",
+      "see_stats": false
+    }
+  },
+  "available_ship_ids": [],
+  "settings": {},
+  "version": "1.0.0"
+}

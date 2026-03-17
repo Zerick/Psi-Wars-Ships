@@ -1,0 +1,34 @@
+{
+  "keyword": "crystal-serpent-23",
+  "created": "2026-03-17T02:02:48.920224+00:00",
+  "updated": "2026-03-17T02:53:02.918931+00:00",
+  "status": "setup",
+  "has_gm": true,
+  "gm_password_hash": "537e3093beba223e8275d9eca371b61f:2376acd3bbdb7858e6940523d6257278b43512cb4367939656c5fa6f93120012",
+  "ship_assign_mode": "gm_assign",
+  "ships": [],
+  "engagements": [],
+  "combat_log": [],
+  "dice_log": [],
+  "chat_log": [],
+  "active_state": {
+    "active_ship_id": null,
+    "targets": [],
+    "targeting": [],
+    "current_turn": 0
+  },
+  "users": {
+    "Simonious": {
+      "name": "Simonious",
+      "role": "gm",
+      "ship_ids": [],
+      "token": "69258d37a9e9ed028504e0a7ac32fa32",
+      "connected": false,
+      "last_seen": "2026-03-17T02:53:02.918907+00:00",
+      "see_stats": false
+    }
+  },
+  "available_ship_ids": [],
+  "settings": {},
+  "version": "1.0.0"
+}

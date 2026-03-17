@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Session — Psi-Wars</title>
+  <link rel="stylesheet" href="/static/css/main.css?v={{ version }}">
+</head>
+<body class="page-form">
+
+  <div class="form-container">
+    <header class="form-header">
+      <a href="/" class="back-link">← Back</a>
+      <h1>Join Session</h1>
+      <p class="form-subtitle">Enter the keyword shared by your GM or host.</p>
+    </header>
+
+    <form id="join-form" class="session-form">
+      <!-- Session keyword -->
+      <div class="form-group">
+        <label for="keyword">Session Keyword</label>
+        <input type="text" id="keyword" name="keyword"
+               placeholder="e.g. iron-hawk-7" required
+               autocomplete="off"
+               value="{{ keyword | default('') }}">
+      </div>
+
+      <!-- Player name -->
+      <div class="form-group">
+        <label for="player-name">Your Display Name</label>
+        <input type="text" id="player-name" name="player_name"
+               placeholder="e.g. Alice" required maxlength="30"
+               autocomplete="off">
+      </div>
+
+      <!-- GM password (optional) -->
+      <div class="form-group">
+        <label for="gm-password">GM Password <span class="optional-tag">(optional)</span></label>
+        <input type="password" id="gm-password" name="gm_password"
+               placeholder="Leave blank if you're a player"
+               autocomplete="new-password">
+        <p class="form-hint">Only enter this if you're the GM for this session.</p>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn-primary btn-large btn-full">
+        Join Session
+      </button>
+
+      <!-- Error display -->
+      <div id="join-error" class="form-error" hidden></div>
+    </form>
+  </div>
+
+  <div class="version-stamp">v{{ version }}</div>
+
+  <script>
+    const form = document.getElementById('join-form');
+    const errorEl = document.getElementById('join-error');
+
+    // On load, check if we have a stored token for auto-reconnect
+    (function checkReconnect() {
+      const storedKeyword = localStorage.getItem('psi-wars-keyword');
+      const storedToken = localStorage.getItem('psi-wars-token');
+      const storedName = localStorage.getItem('psi-wars-name');
+
+      // If we have stored credentials and the keyword field matches (or is empty),
+      // try to go straight to the combat page (WebSocket will handle auth)
+      if (storedKeyword && storedToken && storedName) {
+        const keywordInput = document.getElementById('keyword');
+        const urlKeyword = keywordInput.value.trim();
+
+        // If the URL has a keyword and it matches our stored one, auto-redirect
+        if (urlKeyword && urlKeyword === storedKeyword) {
+          window.location.href = `/combat/${storedKeyword}`;
+          return;
+        }
+
+        // If no URL keyword, pre-fill from stored
+        if (!urlKeyword) {
+          keywordInput.value = storedKeyword;
+          document.getElementById('player-name').value = storedName;
+        }
+      }
+    })();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+
+      const keyword = document.getElementById('keyword').value.trim().toLowerCase();
+      const name = document.getElementById('player-name').value.trim();
+      const gmPassword = document.getElementById('gm-password').value;
+
+      if (!keyword || !name) {
+        errorEl.textContent = 'Keyword and display name are required.';
+        errorEl.hidden = false;
+        return;
+      }
+
+      // Store credentials for WebSocket auth (the actual join happens via WS)
+      localStorage.setItem('psi-wars-keyword', keyword);
+      localStorage.setItem('psi-wars-name', name);
+      if (gmPassword) {
+        // Temporarily store GM password for the WS auth handshake
+        // It gets cleared after successful auth in ws-client.js
+        localStorage.setItem('psi-wars-gm-password', gmPassword);
+      }
+      // Clear any stale token — we're doing a fresh join
+      localStorage.removeItem('psi-wars-token');
+
+      // Navigate to combat page — WS will handle authentication
+      window.location.href = `/combat/${keyword}`;
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "keyword": "stellar-arrow-48",
+  "created": "2026-03-17T03:05:43.352528+00:00",
+  "updated": "2026-03-17T03:08:16.353226+00:00",
+  "status": "setup",
+  "has_gm": true,
+  "gm_password_hash": "6caf7b36f0cc1030dbdd344a2479ed0d:56e539ec166b0b88b8ee2fa2702b04d2dc403f6b4291ed500453ccc4248c00bb",
+  "ship_assign_mode": "gm_assign",
+  "ships": [],
+  "engagements": [],
+  "combat_log": [],
+  "dice_log": [],
+  "chat_log": [],
+  "active_state": {
+    "active_ship_id": null,
+    "targets": [],
+    "targeting": [],
+    "current_turn": 0
+  },
+  "users": {
+    "Simonious": {
+      "name": "Simonious",
+      "role": "gm",
+      "ship_ids": [],
+      "token": "855f3afa29f612d90c420b9c9666f315",
+      "connected": false,
+      "last_seen": "2026-03-17T03:08:16.353201+00:00",
+      "see_stats": false
+    }
+  },
+  "available_ship_ids": [],
+  "settings": {},
+  "version": "1.0.0"
+}

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WS Diagnostic — Psi-Wars</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #eee; padding: 2rem; }
+    .pass { color: #4ade80; }
+    .fail { color: #f87171; }
+    .warn { color: #facc15; }
+    .info { color: #60a5fa; }
+    #log { white-space: pre-wrap; line-height: 1.8; }
+    button { padding: 0.5em 1em; margin: 0.5em; font-size: 1rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Psi-Wars WebSocket Diagnostic</h1>
+  <div>
+    <button onclick="runDiagnostic()">Run Full Diagnostic</button>
+    <button onclick="testWSRaw()">Test Raw WebSocket</button>
+    <button onclick="clearLog()">Clear</button>
+  </div>
+  <div id="log"></div>
+
+  <script>
+    const logEl = document.getElementById('log');
+
+    function log(msg, cls = 'info') {
+      logEl.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function clearLog() { logEl.innerHTML = ''; }
+
+    async function runDiagnostic() {
+      clearLog();
+      log('═══ Psi-Wars WebSocket Diagnostic ═══');
+      log('');
+
+      // Step 1: Test HTTP health endpoint
+      log('1. Testing HTTP health endpoint...');
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        log(`   ✓ Server responding: version=${data.version}, sessions=${data.active_sessions}`, 'pass');
+      } catch (err) {
+        log(`   ✗ HTTP health check failed: ${err.message}`, 'fail');
+        log('   → Server may not be running or routes not loaded.', 'fail');
+        return;
+      }
+
+      // Step 2: Create a test session
+      log('');
+      log('2. Creating a test session via REST API...');
+      let keyword, token, userName;
+      try {
+        const res = await fetch('/api/session/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            creator_name: 'DiagUser_' + Date.now(),
+            has_gm: false,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          log(`   ✗ Create failed: ${data.error}`, 'fail');
+          return;
+        }
+        keyword = data.keyword;
+        token = data.user.token;
+        userName = data.user.name;
+        log(`   ✓ Session created: keyword=${keyword}`, 'pass');
+        log(`   ✓ User: ${userName}, role=${data.user.role}`, 'pass');
+        log(`   ✓ Token: ${token.substring(0, 8)}...`, 'pass');
+      } catch (err) {
+        log(`   ✗ Create request failed: ${err.message}`, 'fail');
+        return;
+      }
+
+      // Step 3: Test WebSocket connection
+      log('');
+      log('3. Testing WebSocket connection...');
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws/${keyword}`;
+      log(`   URL: ${wsUrl}`);
+
+      try {
+        await testWebSocket(wsUrl, userName, token);
+      } catch (err) {
+        log(`   ✗ WebSocket test failed: ${err.message}`, 'fail');
+      }
+
+      // Step 4: Cleanup — delete test session
+      log('');
+      log('4. Cleaning up test session...');
+      try {
+        await fetch(`/api/session/${keyword}`, { method: 'DELETE' });
+        log(`   ✓ Session ${keyword} deleted.`, 'pass');
+      } catch (err) {
+        log(`   ⚠ Cleanup failed (not critical): ${err.message}`, 'warn');
+      }
+
+      log('');
+      log('═══ Diagnostic Complete ═══');
+    }
+
+    function testWebSocket(url, name, token) {
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          log(`   ✗ WebSocket timed out after 10 seconds.`, 'fail');
+          log(`   → Possible causes:`, 'fail');
+          log(`     - Cloudflare tunnel not forwarding WebSocket`, 'fail');
+          log(`     - uvicorn missing 'websockets' package`, 'fail');
+          log(`     - Firewall blocking upgrade requests`, 'fail');
+          ws.close();
+          reject(new Error('Timeout'));
+        }, 10000);
+
+        log(`   Opening WebSocket...`);
+        const ws = new WebSocket(url);
+
+        ws.onopen = () => {
+          log(`   ✓ WebSocket OPEN`, 'pass');
+          log(`   Sending AUTH message...`);
+
+          ws.send(JSON.stringify({
+            type: 'AUTH',
+            payload: {
+              name: name,
+              token: token,
+              gm_password: '',
+            },
+          }));
+        };
+
+        ws.onmessage = (event) => {
+          clearTimeout(timeout);
+          try {
+            const data = JSON.parse(event.data);
+            log(`   ✓ Received: type=${data.type}`, 'pass');
+
+            if (data.type === 'AUTH_OK') {
+              log(`   ✓ AUTH_OK — authenticated as ${data.payload.user.name} (${data.payload.user.role})`, 'pass');
+              log(`   ✓ State received: ${data.payload.state.ships?.length || 0} ships, ${data.payload.state.connected_users?.length || 0} users`, 'pass');
+              ws.close(1000, 'Diagnostic complete');
+              resolve();
+            } else if (data.type === 'AUTH_FAIL') {
+              log(`   ✗ AUTH_FAIL: ${data.payload.error}`, 'fail');
+              ws.close();
+              reject(new Error(data.payload.error));
+            } else {
+              log(`   ⚠ Unexpected message type: ${data.type}`, 'warn');
+              log(`   payload: ${JSON.stringify(data.payload).substring(0, 200)}`, 'warn');
+            }
+          } catch (err) {
+            log(`   ✗ Failed to parse message: ${event.data.substring(0, 200)}`, 'fail');
+          }
+        };
+
+        ws.onerror = (event) => {
+          clearTimeout(timeout);
+          log(`   ✗ WebSocket ERROR`, 'fail');
+          log(`   → The WebSocket connection was refused or failed.`, 'fail');
+          log(`   → Check browser console (F12) for details.`, 'fail');
+        };
+
+        ws.onclose = (event) => {
+          clearTimeout(timeout);
+          if (event.code !== 1000) {
+            log(`   ✗ WebSocket CLOSED unexpectedly: code=${event.code}, reason="${event.reason}"`, 'fail');
+            if (event.code === 1006) {
+              log(`   → Code 1006 = abnormal closure. The server rejected the connection.`, 'fail');
+              log(`   → Check: is uvicorn running? Does it have 'websockets' installed?`, 'fail');
+              log(`   → Run: pip install websockets`, 'fail');
+            }
+            reject(new Error(`Closed with code ${event.code}`));
+          } else {
+            log(`   ✓ WebSocket closed cleanly.`, 'pass');
+          }
+        };
+      });
+    }
+
+    function testWSRaw() {
+      clearLog();
+      log('═══ Raw WebSocket Test ═══');
+      log('Testing basic WebSocket connectivity (no auth)...');
+      log('');
+
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const url = `${protocol}//${window.location.host}/ws/test-nonexistent-session`;
+      log(`URL: ${url}`);
+      log('');
+
+      const timeout = setTimeout(() => {
+        log('✗ Timed out after 10 seconds — WebSocket not reaching server.', 'fail');
+        log('');
+        log('Likely causes:', 'fail');
+        log('  1. uvicorn missing websockets: pip install websockets', 'fail');
+        log('  2. Cloudflare tunnel config issue', 'fail');
+        log('  3. Firewall blocking WebSocket upgrade', 'fail');
+      }, 10000);
+
+      const ws = new WebSocket(url);
+
+      ws.onopen = () => {
+        clearTimeout(timeout);
+        log('✓ WebSocket connection OPENED', 'pass');
+        log('  (The server accepted the WebSocket upgrade — connectivity works!)', 'pass');
+        log('  Waiting for server response...');
+      };
+
+      ws.onmessage = (event) => {
+        clearTimeout(timeout);
+        log(`✓ Received message: ${event.data.substring(0, 300)}`, 'pass');
+        ws.close();
+      };
+
+      ws.onerror = () => {
+        clearTimeout(timeout);
+        log('✗ WebSocket ERROR — connection refused', 'fail');
+      };
+
+      ws.onclose = (event) => {
+        clearTimeout(timeout);
+        log(`WebSocket closed: code=${event.code}, reason="${event.reason}"`);
+        if (event.code === 1006) {
+          log('');
+          log('Code 1006 means the connection never fully established.', 'fail');
+          log('Most likely: pip install websockets', 'fail');
+        }
+      };
+    }
+  </script>
+</body>
+</html>

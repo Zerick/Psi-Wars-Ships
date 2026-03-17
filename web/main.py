@@ -1,123 +1,326 @@
 """
-Psi-Wars Combat Simulator — Web UI Server v0.3.0
+Psi-Wars Web UI — FastAPI Server (v0.4.0)
+==========================================
+
+Main application entry point. Handles:
+  - HTTP routes for pages (landing, create, join, combat, sessions)
+  - REST API for session management and ship templates
+  - WebSocket endpoint for real-time multiplayer
+  - Dice rolling API (server-side)
+
+Route map:
+  GET  /                   → Landing page
+  GET  /create             → Session creation form
+  GET  /join               → Session join form
+  GET  /join/{keyword}     → Pre-filled join form for a specific session
+  GET  /combat/{keyword}   → Combat UI for a specific session
+  GET  /sessions           → Session browser (GM management page)
+  WS   /ws/{keyword}       → WebSocket for real-time session sync
+
+  POST /api/session/create → Create a new session (REST)
+  GET  /api/session/list   → List all sessions (REST)
+  DELETE /api/session/{keyword} → Delete a session (REST)
+  POST /api/dice/roll      → Roll dice (REST, for non-WS clients)
+
+Modification guide:
+  - To add a new page: add template + route function
+  - To add a new API endpoint: add route with @app.post/get/etc
+  - To change WebSocket behavior: edit ws_handler.py
+  - To change session logic: edit session_manager.py
+  - To change dice behavior: edit psi_dice.py
+
+Dependencies: fastapi, uvicorn, psi_dice
 """
 
-from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
-from pathlib import Path
-import re
-import time
+from __future__ import annotations
 
-from psi_dice import process_command
+import logging
+from pathlib import Path
+
+from fastapi import FastAPI, WebSocket, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+from session_manager import SessionManager
+from ws_handler import WebSocketHandler
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# App setup
+# ---------------------------------------------------------------------------
+
+# Version stamp — update with each deploy
+VERSION = "0.4.1"
 
 app = FastAPI(
     title="Psi-Wars Combat Simulator",
-    version="0.3.0",
-    docs_url="/api/docs",
+    version=VERSION,
 )
 
+# Paths (relative to this file)
 BASE_DIR = Path(__file__).parent
-app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+TEMPLATES_DIR = BASE_DIR / "templates"
+STATIC_DIR = BASE_DIR / "static"
+SESSIONS_DIR = BASE_DIR / "sessions"
+
+# Mount static files with cache busting via query param
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# Templates
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
+# Core services
+session_manager = SessionManager(sessions_dir=SESSIONS_DIR)
+
+# Dice roller — import with graceful fallback
+dice_roller = None
+try:
+    from psi_dice import roll_dice
+    dice_roller = roll_dice
+    logger.info("Dice engine loaded (psi_dice).")
+except ImportError:
+    logger.warning("psi_dice not available. Dice rolls will be disabled.")
+
+# WebSocket handler
+ws_handler = WebSocketHandler(
+    session_manager=session_manager,
+    dice_roller=dice_roller,
+)
+
+# ---------------------------------------------------------------------------
+# Startup
+# ---------------------------------------------------------------------------
+
+@app.on_event("startup")
+async def startup():
+    """Load persisted sessions on server startup."""
+    count = session_manager.load_all()
+    logger.info("Server starting. Version %s. Loaded %d sessions.", VERSION, count)
 
 
-def render_template(name: str) -> HTMLResponse:
-    path = BASE_DIR / "templates" / name
-    return HTMLResponse(path.read_text())
+# ---------------------------------------------------------------------------
+# Page routes
+# ---------------------------------------------------------------------------
 
-
-# -- Pages --
 @app.get("/", response_class=HTMLResponse)
-async def index():
-    return render_template("index.html")
+async def landing_page(request: Request):
+    """Landing page — entry point for the web UI."""
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "version": VERSION,
+    })
 
-@app.get("/combat", response_class=HTMLResponse)
-async def combat():
-    return render_template("combat.html")
+
+@app.get("/diagnostic", response_class=HTMLResponse)
+async def diagnostic_page(request: Request):
+    """WebSocket diagnostic page — tests connectivity layer by layer."""
+    return templates.TemplateResponse("diagnostic.html", {
+        "request": request,
+        "version": VERSION,
+    })
 
 
-# -- Health --
+@app.get("/create", response_class=HTMLResponse)
+async def create_page(request: Request):
+    """Session creation form."""
+    return templates.TemplateResponse("create.html", {
+        "request": request,
+        "version": VERSION,
+    })
+
+
+@app.get("/join", response_class=HTMLResponse)
+async def join_page(request: Request):
+    """Session join form (no keyword pre-filled)."""
+    return templates.TemplateResponse("join.html", {
+        "request": request,
+        "version": VERSION,
+    })
+
+
+@app.get("/join/{keyword}", response_class=HTMLResponse)
+async def join_page_with_keyword(request: Request, keyword: str):
+    """Session join form with keyword pre-filled from URL."""
+    return templates.TemplateResponse("join.html", {
+        "request": request,
+        "version": VERSION,
+        "keyword": keyword,
+    })
+
+
+@app.get("/combat/{keyword}", response_class=HTMLResponse)
+async def combat_page(request: Request, keyword: str):
+    """
+    Main combat UI for a specific session.
+
+    The page loads, then the JavaScript opens a WebSocket to /ws/{keyword}
+    and authenticates using the token stored in localStorage. If no token
+    is found, it redirects to the join page.
+    """
+    session = session_manager.get_session(keyword)
+    if not session:
+        return templates.TemplateResponse("error.html", {
+            "request": request,
+            "version": VERSION,
+            "error_title": "Session Not Found",
+            "error_message": f"No session with keyword '{keyword}' exists.",
+        }, status_code=404)
+
+    return templates.TemplateResponse("combat.html", {
+        "request": request,
+        "version": VERSION,
+        "keyword": keyword,
+    })
+
+
+@app.get("/sessions", response_class=HTMLResponse)
+async def sessions_page(request: Request):
+    """Session browser — view all sessions, manage/purge them."""
+    return templates.TemplateResponse("sessions.html", {
+        "request": request,
+        "version": VERSION,
+    })
+
+
+# ---------------------------------------------------------------------------
+# API routes — Session management
+# ---------------------------------------------------------------------------
+
+@app.post("/api/session/create")
+async def api_create_session(request: Request):
+    """
+    Create a new session.
+
+    Body: {
+        "creator_name": "GM Dave",
+        "has_gm": true,
+        "gm_password": "secret",
+        "ship_assign_mode": "gm_assign"  // or "player_select"
+    }
+
+    Returns: {
+        "keyword": "iron-hawk-7",
+        "user": { "name": ..., "role": ..., "token": ... }
+    }
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "Invalid JSON body."}, status_code=400)
+
+    creator_name = body.get("creator_name", "").strip()
+    has_gm = body.get("has_gm", True)
+    gm_password = body.get("gm_password", "").strip()
+    ship_assign_mode = body.get("ship_assign_mode", "gm_assign")
+
+    if not creator_name:
+        return JSONResponse({"error": "Creator name is required."}, status_code=400)
+
+    try:
+        session, user = session_manager.create_session(
+            creator_name=creator_name,
+            has_gm=has_gm,
+            gm_password=gm_password,
+            ship_assign_mode=ship_assign_mode,
+        )
+    except ValueError as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
+
+    return JSONResponse({
+        "keyword": session.keyword,
+        "user": {
+            "name": user.name,
+            "role": user.role,
+            "ship_ids": user.ship_ids,
+            "token": user.token,
+        },
+    })
+
+
+@app.get("/api/session/list")
+async def api_list_sessions():
+    """List all sessions with summary info."""
+    sessions = session_manager.list_sessions()
+    return JSONResponse({"sessions": sessions})
+
+
+@app.delete("/api/session/{keyword}")
+async def api_delete_session(keyword: str):
+    """Delete a session permanently."""
+    deleted = session_manager.purge_session(keyword)
+    if deleted:
+        return JSONResponse({"deleted": keyword})
+    return JSONResponse({"error": "Session not found."}, status_code=404)
+
+
+# ---------------------------------------------------------------------------
+# API routes — Dice
+# ---------------------------------------------------------------------------
+
+@app.post("/api/dice/roll")
+async def api_dice_roll(request: Request):
+    """
+    Roll dice via the server-side engine.
+
+    Body: { "expression": "3d6+4" }
+    Returns: { "result": "14", "breakdown": "3d6+4: [3, 5, 2]+4 = 14" }
+    """
+    if not dice_roller:
+        return JSONResponse({"error": "Dice engine not available."}, status_code=503)
+
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "Invalid JSON body."}, status_code=400)
+
+    expression = body.get("expression", "").strip()
+    if not expression:
+        return JSONResponse({"error": "Expression is required."}, status_code=400)
+
+    try:
+        result = dice_roller(expression)
+    except Exception as e:
+        return JSONResponse({"error": f"Dice error: {e}"}, status_code=400)
+
+    return JSONResponse(result)
+
+
+# ---------------------------------------------------------------------------
+# WebSocket endpoint
+# ---------------------------------------------------------------------------
+
+@app.websocket("/ws/{keyword}")
+async def websocket_endpoint(websocket: WebSocket, keyword: str):
+    """
+    WebSocket endpoint for real-time session sync.
+
+    The client connects, sends an AUTH message, and then enters
+    bidirectional message exchange. See ws_protocol.py for the
+    full message specification.
+    """
+    await ws_handler.handle_connection(websocket, keyword)
+
+
+# ---------------------------------------------------------------------------
+# Health check
+# ---------------------------------------------------------------------------
+
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "timestamp": time.time(), "version": "0.3.0"}
-
-
-# -- Dice --
-@app.post("/api/dice/roll")
-async def dice_roll(request: Request):
-    """Process one or more [[expression]] commands.
-
-    Body: { "expression": "3d6+2" }
-      or: { "text": "I attack with [[3d6+4]] damage" }
-
-    Single expression returns the command result.
-    Text mode finds all [[...]] and returns processed results.
-    """
-    body = await request.json()
-
-    # Single expression mode
-    if "expression" in body:
-        result = process_command(body["expression"])
-        return result
-
-    # Text mode — find all [[...]] in text
-    if "text" in body:
-        text = body["text"]
-        pattern = re.compile(r'\[\[([^\]]+)\]\]')
-        matches = pattern.findall(text)
-        results = []
-        for m in matches:
-            result = process_command(m)
-            results.append(result)
-        return {"text": text, "matches": matches, "results": results}
-
-    return JSONResponse({"error": "Provide 'expression' or 'text'"}, status_code=400)
-
-
-# -- Ship Catalog --
-@app.get("/api/catalog/ships")
-async def catalog_ships():
-    return {"categories": [], "_mock": True}
-
-
-# -- Session Lifecycle --
-@app.post("/api/session/create")
-async def session_create():
-    return {"session_id": "stub", "_mock": True}
-
-@app.post("/api/session/add-faction")
-async def session_add_faction(request: Request):
-    body = await request.json()
-    return {"ok": True, "faction": body.get("name"), "_mock": True}
-
-@app.post("/api/session/set-relationship")
-async def session_set_relationship(request: Request):
-    return {"ok": True, "_mock": True}
-
-@app.post("/api/session/add-ship")
-async def session_add_ship(request: Request):
-    body = await request.json()
-    return {"ok": True, "ship_id": "ship_stub", "display_name": body.get("display_name", "Unknown"), "_mock": True}
-
-@app.post("/api/session/create-engagement")
-async def session_create_engagement(request: Request):
-    return {"ok": True, "_mock": True}
-
-@app.get("/api/session/state")
-async def session_state():
-    return {"ships": [], "engagements": [], "factions": [], "_mock": True}
-
-
-# -- Combat Turn --
-@app.post("/api/turn/begin")
-async def turn_begin():
-    return {"phase": "AWAITING_DECLARATIONS", "status": "Engine not connected.", "prompt": "", "prompt_type": "info", "options": [], "ship_id": None, "context": {}, "combat_log_entries": [], "_mock": True}
-
-@app.post("/api/turn/decide")
-async def turn_decide(request: Request):
-    body = await request.json()
-    return {"phase": "TURN_COMPLETE", "status": f"Received: {body.get('decision_type', '?')}", "prompt": "", "prompt_type": "info", "options": [], "ship_id": None, "context": {}, "combat_log_entries": [], "_mock": True}
-
-@app.post("/api/turn/advance")
-async def turn_advance():
-    return {"phase": "TURN_COMPLETE", "status": "Nothing to advance.", "prompt": "", "prompt_type": "info", "options": [], "ship_id": None, "context": {}, "combat_log_entries": [], "_mock": True}
+    """Health check endpoint."""
+    return JSONResponse({
+        "status": "ok",
+        "version": VERSION,
+        "active_sessions": len(session_manager._sessions),
+        "dice_available": dice_roller is not None,
+    })

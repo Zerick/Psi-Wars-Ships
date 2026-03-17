@@ -1,0 +1,34 @@
+{
+  "keyword": "broken-blade-40",
+  "created": "2026-03-17T03:08:23.426418+00:00",
+  "updated": "2026-03-17T03:11:10.061194+00:00",
+  "status": "setup",
+  "has_gm": true,
+  "gm_password_hash": "9044f8f071da8253bcd9dc9126d0025d:e905bff819c2b5cf4cf6aad995828dc0b77327dd59751542d1d898962f9013d9",
+  "ship_assign_mode": "gm_assign",
+  "ships": [],
+  "engagements": [],
+  "combat_log": [],
+  "dice_log": [],
+  "chat_log": [],
+  "active_state": {
+    "active_ship_id": null,
+    "targets": [],
+    "targeting": [],
+    "current_turn": 0
+  },
+  "users": {
+    "Simonious": {
+      "name": "Simonious",
+      "role": "gm",
+      "ship_ids": [],
+      "token": "d653950fd209bbbc09dc9836686eae05",
+      "connected": false,
+      "last_seen": "2026-03-17T03:11:10.061168+00:00",
+      "see_stats": false
+    }
+  },
+  "available_ship_ids": [],
+  "settings": {},
+  "version": "1.0.0"
+}

@@ -1,0 +1,34 @@
+{
+  "keyword": "dread-arrow-12",
+  "created": "2026-03-17T03:11:17.613885+00:00",
+  "updated": "2026-03-17T03:11:18.970408+00:00",
+  "status": "setup",
+  "has_gm": true,
+  "gm_password_hash": "b92ce2c60bd2bebcb3439ef22ccb7007:efc8033b595ae138b2757f2ad6ab27501e72d9f3a056c7411399a2ef6c02bd57",
+  "ship_assign_mode": "gm_assign",
+  "ships": [],
+  "engagements": [],
+  "combat_log": [],
+  "dice_log": [],
+  "chat_log": [],
+  "active_state": {
+    "active_ship_id": null,
+    "targets": [],
+    "targeting": [],
+    "current_turn": 0
+  },
+  "users": {
+    "Simonious": {
+      "name": "Simonious",
+      "role": "gm",
+      "ship_ids": [],
+      "token": "37925d0033ec3cbcb3cd739b0c82a07c",
+      "connected": false,
+      "last_seen": "2026-03-17T03:11:18.970383+00:00",
+      "see_stats": false
+    }
+  },
+  "available_ship_ids": [],
+  "settings": {},
+  "version": "1.0.0"
+}

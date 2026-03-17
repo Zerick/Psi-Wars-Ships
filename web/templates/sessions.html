@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sessions — Psi-Wars</title>
+  <link rel="stylesheet" href="/static/css/main.css?v={{ version }}">
+</head>
+<body class="page-form">
+
+  <div class="form-container" style="max-width: 800px;">
+    <header class="form-header">
+      <a href="/" class="back-link">← Back</a>
+      <h1>Session Browser</h1>
+      <p class="form-subtitle">View and manage all game sessions on this server.</p>
+    </header>
+
+    <div id="sessions-loading" class="loading-message">Loading sessions…</div>
+    <div id="sessions-empty" class="empty-message" hidden>
+      No sessions found. <a href="/create">Create one?</a>
+    </div>
+
+    <div id="sessions-list" class="sessions-list" hidden></div>
+  </div>
+
+  <div class="version-stamp">v{{ version }}</div>
+
+  <script>
+    const listEl = document.getElementById('sessions-list');
+    const loadingEl = document.getElementById('sessions-loading');
+    const emptyEl = document.getElementById('sessions-empty');
+
+    async function loadSessions() {
+      try {
+        const res = await fetch('/api/session/list');
+        const data = await res.json();
+        const sessions = data.sessions || [];
+
+        loadingEl.hidden = true;
+
+        if (sessions.length === 0) {
+          emptyEl.hidden = false;
+          return;
+        }
+
+        listEl.hidden = false;
+        listEl.innerHTML = sessions.map(s => {
+          const created = new Date(s.created).toLocaleString();
+          const updated = s.updated ? new Date(s.updated).toLocaleString() : '—';
+          const statusClass = `status-${s.status}`;
+
+          return `
+            <div class="session-card">
+              <div class="session-card-header">
+                <span class="session-keyword">${s.keyword}</span>
+                <span class="session-status ${statusClass}">${s.status.toUpperCase()}</span>
+              </div>
+              <div class="session-card-details">
+                <span>Ships: ${s.ship_count}</span>
+                <span>Players: ${s.player_count}</span>
+                <span>GM: ${s.has_gm ? (s.gm_connected ? '🟢 Online' : '🔴 Offline') : 'None'}</span>
+              </div>
+              <div class="session-card-times">
+                <span>Created: ${created}</span>
+                <span>Updated: ${updated}</span>
+              </div>
+              <div class="session-card-actions">
+                <a href="/combat/${s.keyword}" class="btn btn-small btn-secondary">Enter</a>
+                <a href="/join/${s.keyword}" class="btn btn-small btn-ghost">Join Link</a>
+                <button class="btn btn-small btn-danger" onclick="purgeSession('${s.keyword}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        loadingEl.textContent = 'Failed to load sessions. Is the server running?';
+      }
+    }
+
+    async function purgeSession(keyword) {
+      if (!confirm(`Permanently delete session "${keyword}"? This cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/session/${keyword}`, { method: 'DELETE' });
+        if (res.ok) {
+          loadSessions(); // Refresh the list
+        } else {
+          alert('Failed to delete session.');
+        }
+      } catch (err) {
+        alert('Network error.');
+      }
+    }
+
+    loadSessions();
+  </script>
+
+</body>
+</html>

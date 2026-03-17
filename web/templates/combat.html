@@ -1,26 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Psi-Wars Combat Simulator</title>
-<link rel="stylesheet" href="/static/css/main.css?v=0.2.9">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Psi-Wars — Combat</title>
+  <link rel="stylesheet" href="/static/css/main.css?v={{ version }}">
 </head>
-<body>
-<div id="app">
-  <div class="header">
-    <div class="header-title">Psi-Wars</div>
-    <div class="header-turn" id="turn-display">Turn 0</div>
-    <div class="header-controls">
-      <button class="header-btn" id="gm-toggle">Hide GM</button>
+<body class="page-combat">
+
+  <!-- Connection overlay — shown during auth/reconnect -->
+  <div id="connection-overlay" class="connection-overlay">
+    <div class="connection-box">
+      <h2>Connecting…</h2>
+      <p id="connection-status">Establishing connection to session <strong>{{ keyword }}</strong></p>
+      <div id="connection-error" class="form-error" hidden></div>
+      <a href="/join/{{ keyword }}" id="rejoin-link" class="btn btn-secondary" hidden>
+        Rejoin Session
+      </a>
     </div>
   </div>
-  <div class="ship-strip" id="ship-strip"></div>
-  <div class="engagement-strip" id="engagement-strip"></div>
-  <div class="combat-log" id="combat-log"></div>
-  <div class="gm-panel" id="gm-panel"></div>
-</div>
-<div class="version-stamp">v0.3.0</div>
-<script type="module" src="/static/js/app.js?v=0.2.9"></script>
+
+  <!-- Main combat UI — hidden until authenticated -->
+  <div id="combat-ui" class="combat-layout" hidden>
+
+    <!-- Header bar -->
+    <header class="combat-header">
+      <div class="header-left">
+        <h1 class="header-title">PSI-WARS</h1>
+        <span class="header-keyword" title="Session keyword">{{ keyword }}</span>
+        <span id="session-status-badge" class="status-badge">SETUP</span>
+      </div>
+      <div class="header-center">
+        <span id="turn-display" class="turn-counter">Turn 0</span>
+      </div>
+      <div class="header-right">
+        <span id="user-role-badge" class="role-badge"></span>
+        <span id="user-name-display" class="user-name"></span>
+
+        <!-- See Stats toggle (non-GM players only) -->
+        <label id="see-stats-toggle" class="toggle-label see-stats-toggle" hidden>
+          <input type="checkbox" id="see-stats-checkbox">
+          <span class="toggle-text">See All Stats</span>
+          <span id="see-stats-indicator" class="see-stats-indicator" title=""></span>
+        </label>
+
+        <!-- Connected users indicator -->
+        <span id="connected-count" class="connected-count" title="Connected users">0 online</span>
+
+        <!-- GM panel toggle -->
+        <button id="gm-toggle" class="btn btn-ghost btn-small" hidden>GM Panel</button>
+
+        <!-- Log view toggle (combat / chat / both) -->
+        <div class="log-view-toggle">
+          <button class="btn btn-ghost btn-small log-toggle-btn active" data-view="both">Both</button>
+          <button class="btn btn-ghost btn-small log-toggle-btn" data-view="combat">Combat</button>
+          <button class="btn btn-ghost btn-small log-toggle-btn" data-view="chat">Chat</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Ship strip -->
+    <section id="ship-strip" class="ship-strip"></section>
+
+    <!-- Engagement strip -->
+    <section id="engagement-strip" class="engagement-strip"></section>
+
+    <!-- Main content: log + panel -->
+    <div class="combat-main">
+      <!-- Combined log area -->
+      <section id="combat-log" class="combat-log-container"></section>
+
+      <!-- GM Panel (hidden for players unless GM) -->
+      <aside id="gm-panel" class="gm-panel" hidden></aside>
+    </div>
+
+  </div>
+
+  <div class="version-stamp">v{{ version }}</div>
+
+  <!-- Pass session keyword to JavaScript (must be before module load) -->
+  <script>
+    window.PSI_WARS_KEYWORD = "{{ keyword }}";
+  </script>
+
+  <!-- Load app as ES module (imports ws-client.js internally) -->
+  <script type="module" src="/static/js/app.js?v={{ version }}"></script>
+
 </body>
 </html>

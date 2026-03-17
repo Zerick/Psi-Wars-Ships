@@ -1,90 +1,136 @@
 /* =============================================================================
-   GM Panel Component v0.3.0
-   Dice review, undo/redo, combat controls.
-   Ship editing is handled inline on cards.
+   GM Panel Component (v0.4.0)
+   =========================================================================
+
+   Right-side panel visible to GM only. Contains:
+     - Combat controls (Undo, Redo, Pause, End Combat)
+     - Dice review log with filters (All, NPC Only, Player Only, None)
+     - Quick actions (placeholders for future features)
+
+   Updated from v0.3.0: callbacks now fire WebSocket messages instead of
+   local-only actions.
+
+   Usage:
+     const panel = createGMPanel(container, {
+       onUndo: () => ws.send('UNDO'),
+       onRedo: () => ws.send('REDO'),
+     });
+     panel.loadDiceLog(entries);
+     panel.addDiceEntry(entry);
+
+   Modification guide:
+     - To add new controls: add buttons in _createControls()
+     - To change dice review format: edit _renderDiceEntry()
+     - To add new filters: extend the filter buttons and _applyFilter()
    ============================================================================= */
 
-export function createGMPanel(containerEl, options = {}) {
-  const { onUndo, onRedo, onDiceFilter } = options;
 
-  containerEl.innerHTML = `
-    <div class="gm-header">
-      <span class="gm-header-title">GM Panel</span>
-    </div>
-    <div class="gm-body">
+/**
+ * Create the GM panel component.
+ *
+ * @param {HTMLElement} container - Container element.
+ * @param {Object} callbacks - Event callbacks:
+ *   @param {Function} callbacks.onUndo - Called when Undo button clicked.
+ *   @param {Function} callbacks.onRedo - Called when Redo button clicked.
+ * @returns {Object} Panel API: { loadDiceLog, addDiceEntry }
+ */
+export function createGMPanel(container, callbacks = {}) {
+  container.innerHTML = '';
 
-      <div class="gm-section">
-        <div class="gm-section-title">Combat Controls</div>
-        <button class="gm-btn" id="gm-undo">↩ Undo Last Round</button>
-        <button class="gm-btn" id="gm-redo">↪ Redo Round</button>
-        <button class="gm-btn" id="gm-pause">⏸ Pause Combat</button>
-        <button class="gm-btn danger" id="gm-end">✕ End Combat</button>
-      </div>
-
-      <div class="gm-section">
-        <div class="gm-section-title">Dice Review</div>
-        <div class="gm-filter-row">
-          <button class="gm-filter-btn" data-filter="none">None</button>
-          <button class="gm-filter-btn active" data-filter="all">All</button>
-          <button class="gm-filter-btn" data-filter="npc">NPC Only</button>
-          <button class="gm-filter-btn" data-filter="player">Player Only</button>
-        </div>
-        <div class="gm-dice-log" id="gm-dice-log"></div>
-      </div>
-
-      <div class="gm-section">
-        <div class="gm-section-title">Quick Actions</div>
-        <button class="gm-btn" id="gm-add-log">+ Add GM Note</button>
-        <button class="gm-btn" id="gm-reveal-npc">👁 Reveal NPC Rolls</button>
-        <button class="gm-btn" id="gm-hide-npc">🔒 Hide NPC Rolls</button>
-      </div>
-
+  // --- Combat Controls ---
+  const controlsSection = document.createElement('div');
+  controlsSection.className = 'gm-section';
+  controlsSection.innerHTML = `
+    <div class="gm-section-title">Combat Controls</div>
+    <div class="gm-controls">
+      <button class="btn btn-small" id="gm-undo">Undo</button>
+      <button class="btn btn-small" id="gm-redo">Redo</button>
+      <button class="btn btn-small" id="gm-pause">Pause</button>
+      <button class="btn btn-small btn-danger" id="gm-end">End Combat</button>
     </div>
   `;
+  container.appendChild(controlsSection);
 
-  const filterBtns = containerEl.querySelectorAll('.gm-filter-btn');
+  // Wire control buttons
+  controlsSection.querySelector('#gm-undo')?.addEventListener('click', () => callbacks.onUndo?.());
+  controlsSection.querySelector('#gm-redo')?.addEventListener('click', () => callbacks.onRedo?.());
+
+  // --- Dice Review ---
+  const diceSection = document.createElement('div');
+  diceSection.className = 'gm-section';
+  diceSection.innerHTML = `
+    <div class="gm-section-title">Dice Review</div>
+    <div class="gm-controls" id="dice-filters">
+      <button class="btn btn-small btn-ghost" data-filter="none">None</button>
+      <button class="btn btn-small btn-ghost active" data-filter="all">All</button>
+      <button class="btn btn-small btn-ghost" data-filter="npc">NPC</button>
+      <button class="btn btn-small btn-ghost" data-filter="player">Player</button>
+    </div>
+    <div class="dice-review" id="dice-review"></div>
+  `;
+  container.appendChild(diceSection);
+
+  // Filter state
   let currentFilter = 'all';
+  let diceEntries = [];
+  const diceReview = diceSection.querySelector('#dice-review');
 
-  filterBtns.forEach(btn => {
+  // Wire filter buttons
+  diceSection.querySelectorAll('#dice-filters button').forEach(btn => {
     btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
       currentFilter = btn.dataset.filter;
-      if (onDiceFilter) onDiceFilter(currentFilter);
-      refreshDiceLog();
+      diceSection.querySelectorAll('#dice-filters button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _refreshDiceLog();
     });
   });
 
-  containerEl.querySelector('#gm-undo')?.addEventListener('click', () => { if (onUndo) onUndo(); });
-  containerEl.querySelector('#gm-redo')?.addEventListener('click', () => { if (onRedo) onRedo(); });
+  function _refreshDiceLog() {
+    if (!diceReview) return;
 
-  let diceEntries = [];
-  const diceLogEl = containerEl.querySelector('#gm-dice-log');
+    let filtered;
+    switch (currentFilter) {
+      case 'none':
+        filtered = [];
+        break;
+      case 'npc':
+        filtered = diceEntries.filter(d => d.is_npc);
+        break;
+      case 'player':
+        filtered = diceEntries.filter(d => !d.is_npc);
+        break;
+      default:
+        filtered = diceEntries;
+    }
 
-  function refreshDiceLog() {
-    const filtered = diceEntries.filter(d => {
-      if (currentFilter === 'none') return false;
-      if (currentFilter === 'npc') return d.is_npc;
-      if (currentFilter === 'player') return !d.is_npc;
-      return true;
-    });
-
-    diceLogEl.innerHTML = filtered.map(d => `
-      <div class="gm-dice-entry">
-        <span class="roll-ship">${d.ship}</span>
-        ${d.context}:
-        <span class="roll-value">${d.total}</span>
-        vs ${d.target !== null ? d.target : '—'}
-        ${d.success !== null ? (d.success ? ' ✓' : ' ✗') : ''}
-        ${d.margin !== null ? `(${d.margin >= 0 ? '+' : ''}${d.margin})` : ''}
-        <span style="color: var(--text-muted)">[${d.rolls.join(',')}]</span>
+    diceReview.innerHTML = filtered.map(d => `
+      <div class="dice-entry">
+        <strong>${_esc(d.ship || d.roller || '?')}</strong>
+        ${_esc(d.context || '')}:
+        ${d.expression} = ${d.total ?? d.result ?? '?'}
+        ${d.target != null ? ` vs ${d.target}` : ''}
+        ${d.success != null ? (d.success ? ' ✓' : ' ✗') : ''}
+        ${d.margin != null ? `(${d.margin >= 0 ? '+' : ''}${d.margin})` : ''}
       </div>
     `).join('');
   }
 
   return {
-    loadDiceLog(entries) { diceEntries = entries; refreshDiceLog(); },
-    addDiceEntry(entry) { diceEntries.push(entry); refreshDiceLog(); },
-    getCurrentFilter() { return currentFilter; }
+    loadDiceLog(entries) {
+      diceEntries = entries || [];
+      _refreshDiceLog();
+    },
+    addDiceEntry(entry) {
+      diceEntries.push(entry);
+      _refreshDiceLog();
+    },
   };
+}
+
+
+function _esc(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
