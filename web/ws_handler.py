@@ -496,6 +496,12 @@ class WebSocketHandler:
 
         self.sm.add_chat_message(conn.keyword, chat_entry)
 
+        room_size = len(self._rooms.get(conn.keyword, []))
+        logger.info(
+            "CHAT from '%s' in '%s' — broadcasting to %d connection(s): %s",
+            conn.user_name, conn.keyword, room_size, message_text[:50],
+        )
+
         await self._broadcast(conn.keyword, {
             "type": "CHAT_MESSAGE",
             "payload": chat_entry,
@@ -505,8 +511,9 @@ class WebSocketHandler:
         """
         Handle a DICE_ROLL message — roll via server engine, broadcast result.
 
-        The dice expression is extracted from the context text (anything
-        inside [[ ]] brackets) or used directly from the expression field.
+        The psi_dice.roll_dice() function may return different formats
+        depending on the command (roll, stats, help, about). We normalize
+        the result into a consistent dict with 'result' and 'breakdown' keys.
         """
         expression = payload.get("expression", "").strip()
         context = payload.get("context", "").strip()
@@ -518,19 +525,62 @@ class WebSocketHandler:
         result = None
         if self.dice_roller:
             try:
-                result = self.dice_roller(expression)
+                raw_result = self.dice_roller(expression)
+
+                # Normalize: psi_dice returns different formats depending on version.
+                # Known formats:
+                #   - tuple: (total, breakdown_str, is_verbose_bool)
+                #   - dict:  {"total": int, "breakdown": str, ...}
+                #   - d20 Result object: has .total and __str__
+                #   - str: raw text (help, about, stats commands)
+                if isinstance(raw_result, tuple):
+                    # psi_dice.roll_dice() returns (total, breakdown, verbose_flag)
+                    total = raw_result[0] if len(raw_result) > 0 else 0
+                    breakdown = raw_result[1] if len(raw_result) > 1 else str(total)
+                    result = {
+                        "result": str(total),
+                        "breakdown": str(breakdown),
+                        "total": total,
+                    }
+                elif isinstance(raw_result, dict):
+                    result = {
+                        "result": str(raw_result.get("total", raw_result.get("result", "?"))),
+                        "breakdown": raw_result.get("breakdown", str(raw_result)),
+                        "total": raw_result.get("total", 0),
+                    }
+                elif isinstance(raw_result, str):
+                    result = {
+                        "result": raw_result,
+                        "breakdown": raw_result,
+                        "total": raw_result,
+                    }
+                else:
+                    # d20 library Result object — has .total and str() representation
+                    result = {
+                        "result": str(getattr(raw_result, 'total', raw_result)),
+                        "breakdown": str(raw_result),
+                        "total": getattr(raw_result, 'total', 0),
+                    }
+
             except Exception as e:
                 logger.warning("Dice roll failed: %s — %s", expression, e)
                 await conn.send({
                     "type": "ERROR",
                     "payload": {
-                        "error": f"Invalid dice expression: {expression}",
+                        "error": f"Dice error: {expression} — {e}",
                         "request_id": req_id,
                     },
                 })
                 return
 
         if result is None:
+            await conn.send({
+                "type": "ERROR",
+                "payload": {
+                    "error": "Dice engine not available.",
+                    "request_id": req_id,
+                },
+            })
             return
 
         # Determine if verbose
@@ -551,7 +601,7 @@ class WebSocketHandler:
 
         self.sm.add_dice_entry(conn.keyword, dice_entry)
 
-        # Broadcast to all
+        # Broadcast to all (including the roller)
         await self._broadcast(conn.keyword, {
             "type": "DICE_RESULT",
             "payload": {

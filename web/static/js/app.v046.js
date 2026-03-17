@@ -20,11 +20,11 @@
      - To change state rendering: edit _renderFullState()
    ============================================================================= */
 
-import { WSClient, clearStoredCredentials } from './ws-client.js';
-import { renderShipStrip } from './components/ship-card.js';
-import { createCombatLog, loadMockLog } from './components/combat-log.js';
-import { renderEngagementStrip } from './components/engagement-display.js';
-import { createGMPanel } from './components/gm-panel.js';
+import { WSClient, clearStoredCredentials } from './ws-client.v046.js';
+import { renderShipStrip } from './components/ship-card.v046.js';
+import { createCombatLog, loadMockLog } from './components/combat-log.v046.js';
+import { renderEngagementStrip } from './components/engagement-display.v046.js';
+import { createGMPanel } from './components/gm-panel.v046.js';
 
 
 // ---------------------------------------------------------------------------

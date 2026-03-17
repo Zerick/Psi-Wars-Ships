@@ -1,7 +1,7 @@
 {
   "keyword": "dread-arrow-12",
   "created": "2026-03-17T03:11:17.613885+00:00",
-  "updated": "2026-03-17T03:11:18.970408+00:00",
+  "updated": "2026-03-17T03:35:30.797601+00:00",
   "status": "setup",
   "has_gm": true,
   "gm_password_hash": "b92ce2c60bd2bebcb3439ef22ccb7007:efc8033b595ae138b2757f2ad6ab27501e72d9f3a056c7411399a2ef6c02bd57",
@@ -9,8 +9,96 @@
   "ships": [],
   "engagements": [],
   "combat_log": [],
-  "dice_log": [],
-  "chat_log": [],
+  "dice_log": [
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "(11, '2, 3, 6 = 11', False)",
+      "breakdown": "(11, '2, 3, 6 = 11', False)",
+      "total": 0,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:17:40.876192+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "16",
+      "breakdown": "6, 4, 6 = 16",
+      "total": 16,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:21:53.993460+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "7",
+      "breakdown": "2, 4, 1 = 7",
+      "total": 7,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:24:30.060410+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "10",
+      "breakdown": "1, 5, 4 = 10",
+      "total": 10,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:34:47.706136+00:00"
+    }
+  ],
+  "chat_log": [
+    {
+      "sender": "Simonious",
+      "message": "[[]]",
+      "timestamp": "2026-03-17T03:12:07.874450+00:00",
+      "role": "gm"
+    },
+    {
+      "sender": "David",
+      "message": "test",
+      "timestamp": "2026-03-17T03:13:00.833506+00:00",
+      "role": "player"
+    },
+    {
+      "sender": "Simonious",
+      "message": "test",
+      "timestamp": "2026-03-17T03:13:04.694664+00:00",
+      "role": "gm"
+    },
+    {
+      "sender": "Simonious",
+      "message": "test",
+      "timestamp": "2026-03-17T03:13:07.056288+00:00",
+      "role": "gm"
+    },
+    {
+      "sender": "David",
+      "message": "test",
+      "timestamp": "2026-03-17T03:13:14.188325+00:00",
+      "role": "player"
+    },
+    {
+      "sender": "Simonious",
+      "message": "test",
+      "timestamp": "2026-03-17T03:17:24.220438+00:00",
+      "role": "gm"
+    },
+    {
+      "sender": "David",
+      "message": "test",
+      "timestamp": "2026-03-17T03:17:27.380622+00:00",
+      "role": "player"
+    }
+  ],
   "active_state": {
     "active_ship_id": null,
     "targets": [],
@@ -24,7 +112,16 @@
       "ship_ids": [],
       "token": "37925d0033ec3cbcb3cd739b0c82a07c",
       "connected": false,
-      "last_seen": "2026-03-17T03:11:18.970383+00:00",
+      "last_seen": "2026-03-17T03:34:56.426847+00:00",
+      "see_stats": false
+    },
+    "David": {
+      "name": "David",
+      "role": "player",
+      "ship_ids": [],
+      "token": "88b727e68d0adc31d9bdaac06373674f",
+      "connected": false,
+      "last_seen": "2026-03-17T03:35:30.797576+00:00",
       "see_stats": false
     }
   },

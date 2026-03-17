@@ -41,6 +41,13 @@ export function createCombatLog(container, onDiceRoll = null, onChatMessage = nu
   const inputBar = _createInputBar(onDiceRoll, onChatMessage);
   container.appendChild(inputBar);
 
+  /**
+   * Add an entry to the log.
+   *
+   * @param {string} message - Plain text message.
+   * @param {string} eventType - CSS class suffix for coloring.
+   * @param {string|null} tooltip - If provided, the message gets a hover tooltip.
+   */
   function addEntry(message, eventType = 'info', tooltip = null) {
     const el = document.createElement('div');
     el.className = `log-entry log-${eventType}`;
@@ -57,11 +64,36 @@ export function createCombatLog(container, onDiceRoll = null, onChatMessage = nu
     _scrollToBottom(entries);
   }
 
+  /**
+   * Add a rich entry with mixed plain text and hoverable dice results.
+   *
+   * @param {Array} parts - Array of { text, tooltip? } objects.
+   *   Parts with a tooltip render as hoverable spans; others as plain text.
+   * @param {string} eventType - CSS class suffix for coloring.
+   */
+  function addRichEntry(parts, eventType = 'info') {
+    const el = document.createElement('div');
+    el.className = `log-entry log-${eventType}`;
+    for (const part of parts) {
+      if (part.tooltip) {
+        const span = document.createElement('span');
+        span.textContent = part.text;
+        span.className = 'dice-result-hover';
+        span.dataset.tooltip = part.tooltip;
+        el.appendChild(span);
+      } else {
+        el.appendChild(document.createTextNode(part.text));
+      }
+    }
+    entries.appendChild(el);
+    _scrollToBottom(entries);
+  }
+
   function clear() {
     entries.innerHTML = '';
   }
 
-  return { addEntry, clear };
+  return { addEntry, addRichEntry, clear };
 }
 
 
@@ -100,14 +132,18 @@ function _createInputBar(onDiceRoll, onChatMessage) {
     if (!text) return;
     input.value = '';
 
-    // Check for dice expressions: [[...]]
-    const diceMatch = text.match(/\[\[(.+?)\]\]/);
-    if (diceMatch && onDiceRoll) {
-      onDiceRoll(diceMatch[1]);
+    // Find ALL dice expressions: [[...]]
+    const diceMatches = [...text.matchAll(/\[\[(.+?)\]\]/g)];
+
+    if (diceMatches.length > 0 && onDiceRoll) {
+      // Send each expression as a separate roll, with the full text as context
+      for (const match of diceMatches) {
+        onDiceRoll(match[1], text);
+      }
       return;
     }
 
-    // Otherwise it's a chat message
+    // No dice expressions — it's a chat message
     if (onChatMessage) {
       onChatMessage(text);
     }

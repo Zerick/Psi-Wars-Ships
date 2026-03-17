@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dice Roller Test — Psi-Wars</title>
+  <style>
+    body { font-family: 'Consolas', monospace; background: #0a0c10; color: #e8eaf0; padding: 2rem; }
+    h1 { color: #00e5ff; margin-bottom: 0.5rem; }
+    h2 { color: #9ea3b5; font-size: 1rem; margin-top: 1.5rem; }
+    .pass { color: #4ade80; }
+    .fail { color: #f87171; }
+    .warn { color: #facc15; }
+    .info { color: #60a5fa; }
+    .muted { color: #5c6178; }
+    table { border-collapse: collapse; width: 100%; margin: 0.5rem 0 1.5rem; }
+    th, td { text-align: left; padding: 0.4em 0.8em; border-bottom: 1px solid #2a2e3e; }
+    th { color: #9ea3b5; font-size: 0.85rem; text-transform: uppercase; }
+    td { font-size: 0.9rem; }
+    .result-cell { font-weight: 600; }
+    button { padding: 0.6em 1.2em; margin: 0.3em; font-size: 1rem; cursor: pointer;
+             background: #1c2030; color: #e8eaf0; border: 1px solid #3a3f52; border-radius: 4px; }
+    button:hover { border-color: #00e5ff; }
+    #status { margin: 1rem 0; padding: 0.8em; background: #151820; border-radius: 4px; }
+    .test-row-pass td:first-child::before { content: '✓ '; color: #4ade80; }
+    .test-row-fail td:first-child::before { content: '✗ '; color: #f87171; }
+    pre { background: #151820; padding: 1em; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h1>Dice Roller Test Suite</h1>
+  <p class="muted">Tests the server-side dice engine via REST API (/api/dice/roll)</p>
+
+  <div>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <button onclick="runFormatTests()">Format Tests Only</button>
+    <button onclick="clearResults()">Clear</button>
+  </div>
+
+  <div id="status"></div>
+  <div id="results"></div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const resultsEl = document.getElementById('results');
+
+    function setStatus(msg, cls = 'info') {
+      statusEl.innerHTML = `<span class="${cls}">${msg}</span>`;
+    }
+
+    function clearResults() {
+      resultsEl.innerHTML = '';
+      statusEl.innerHTML = '';
+    }
+
+    // ------------------------------------------------------------------
+    // Roll a single expression via the REST API
+    // ------------------------------------------------------------------
+    async function rollDice(expression) {
+      const res = await fetch('/api/dice/roll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expression }),
+      });
+      return await res.json();
+    }
+
+    // ------------------------------------------------------------------
+    // Test definitions
+    // ------------------------------------------------------------------
+
+    const BASIC_TESTS = [
+      { expr: '3d6',     desc: 'Basic 3d6',           expectMin: 3,   expectMax: 18 },
+      { expr: '1d20',    desc: 'Single d20',           expectMin: 1,   expectMax: 20 },
+      { expr: '2d6+5',   desc: 'Modifier positive',    expectMin: 7,   expectMax: 17 },
+      { expr: '2d6-2',   desc: 'Modifier negative',    expectMin: 0,   expectMax: 10 },
+      { expr: '1d6+0',   desc: 'Zero modifier',        expectMin: 1,   expectMax: 6 },
+      { expr: '1d100',   desc: 'Percentile',           expectMin: 1,   expectMax: 100 },
+    ];
+
+    const KEEPDROP_TESTS = [
+      { expr: '5d6kh3',  desc: 'Keep highest 3',       expectMin: 3,   expectMax: 18 },
+      { expr: '4d6dh1',  desc: 'Drop highest 1',       expectMin: 3,   expectMax: 18 },
+      { expr: '10d10kl1',desc: 'Keep lowest 1',        expectMin: 1,   expectMax: 10 },
+      { expr: '6d8dl2',  desc: 'Drop lowest 2',        expectMin: 4,   expectMax: 32 },
+    ];
+
+    const VERBOSE_TESTS = [
+      { expr: '3d6v',    desc: 'Verbose flag',         expectVerbose: true },
+      { expr: '5d6kh3v', desc: 'Verbose + keep',       expectVerbose: true },
+      { expr: '3d6',     desc: 'Non-verbose',          expectVerbose: false },
+    ];
+
+    const ADVANTAGE_TESTS = [
+      { expr: '1d20a',   desc: 'Advantage',            expectMin: 1,   expectMax: 20 },
+      { expr: '1d20d',   desc: 'Disadvantage',         expectMin: 1,   expectMax: 20 },
+    ];
+
+    const FORMAT_TESTS = [
+      {
+        expr: '3d6',
+        desc: 'Return format: tuple (total, breakdown, verbose)',
+        validate: (r) => {
+          const checks = [];
+          // Result should have result, breakdown, total keys after server normalization
+          if (r.error) return [{ pass: false, msg: `Got error: ${r.error}` }];
+          checks.push({ pass: r.result !== undefined, msg: `Has 'result' field: ${r.result}` });
+          checks.push({ pass: r.breakdown !== undefined, msg: `Has 'breakdown' field: ${r.breakdown}` });
+          checks.push({ pass: r.total !== undefined, msg: `Has 'total' field: ${r.total}` });
+          // Result should be a number string
+          const num = parseInt(r.result);
+          checks.push({ pass: !isNaN(num), msg: `Result is numeric: "${r.result}"` });
+          // Breakdown should contain = sign
+          checks.push({ pass: r.breakdown.includes('='), msg: `Breakdown has '=': "${r.breakdown}"` });
+          // Breakdown should contain individual dice
+          checks.push({ pass: r.breakdown.includes(','), msg: `Breakdown shows dice: "${r.breakdown}"` });
+          return checks;
+        }
+      },
+      {
+        expr: '5d6kh3',
+        desc: 'Keep/drop shows dropped dice in parens',
+        validate: (r) => {
+          if (r.error) return [{ pass: false, msg: `Got error: ${r.error}` }];
+          // Dropped dice should be in parentheses like (1)
+          const hasParens = r.breakdown.includes('(');
+          return [{ pass: hasParens, msg: `Breakdown has parens for dropped: "${r.breakdown}"` }];
+        }
+      },
+      {
+        expr: '3d6v',
+        desc: 'Verbose flag detected',
+        validate: (r) => {
+          if (r.error) return [{ pass: false, msg: `Got error: ${r.error}` }];
+          return [{ pass: true, msg: `Verbose roll result: ${r.result}, breakdown: ${r.breakdown}` }];
+        }
+      },
+    ];
+
+    // ------------------------------------------------------------------
+    // Test runners
+    // ------------------------------------------------------------------
+
+    async function runAllTests() {
+      clearResults();
+      setStatus('Running all tests...');
+
+      let passed = 0, failed = 0;
+
+      // Basic rolls
+      const r1 = await runRangeTests('Basic Rolls', BASIC_TESTS);
+      passed += r1.passed; failed += r1.failed;
+
+      // Keep/drop
+      const r2 = await runRangeTests('Keep/Drop', KEEPDROP_TESTS);
+      passed += r2.passed; failed += r2.failed;
+
+      // Advantage/disadvantage
+      const r3 = await runRangeTests('Advantage/Disadvantage', ADVANTAGE_TESTS);
+      passed += r3.passed; failed += r3.failed;
+
+      // Format tests
+      const r4 = await runFormatTests();
+      passed += r4.passed; failed += r4.failed;
+
+      // Multi-roll validation (run same expr 10 times, check all in range)
+      const r5 = await runStressTest();
+      passed += r5.passed; failed += r5.failed;
+
+      const total = passed + failed;
+      if (failed === 0) {
+        setStatus(`All ${total} tests passed!`, 'pass');
+      } else {
+        setStatus(`${passed}/${total} passed, ${failed} failed`, 'fail');
+      }
+    }
+
+    async function runRangeTests(title, tests) {
+      let html = `<h2>${title}</h2><table><tr><th>Expression</th><th>Description</th><th>Result</th><th>Range</th><th>Status</th></tr>`;
+      let passed = 0, failed = 0;
+
+      for (const test of tests) {
+        try {
+          const r = await rollDice(test.expr);
+          if (r.error) {
+            html += `<tr class="test-row-fail"><td>${test.expr}</td><td>${test.desc}</td><td class="result-cell">${r.error}</td><td>—</td><td class="fail">ERROR</td></tr>`;
+            failed++;
+            continue;
+          }
+
+          const total = parseInt(r.result || r.total);
+          const inRange = !isNaN(total) && total >= test.expectMin && total <= test.expectMax;
+          const cls = inRange ? 'test-row-pass' : 'test-row-fail';
+          const statusText = inRange ? '<span class="pass">PASS</span>' : '<span class="fail">FAIL</span>';
+
+          html += `<tr class="${cls}"><td>${test.expr}</td><td>${test.desc}</td><td class="result-cell">${total}</td><td>${test.expectMin}–${test.expectMax}</td><td>${statusText}</td></tr>`;
+
+          if (inRange) passed++; else failed++;
+        } catch (err) {
+          html += `<tr class="test-row-fail"><td>${test.expr}</td><td>${test.desc}</td><td colspan="3" class="fail">Network error: ${err.message}</td></tr>`;
+          failed++;
+        }
+      }
+
+      html += '</table>';
+      resultsEl.innerHTML += html;
+      return { passed, failed };
+    }
+
+    async function runFormatTests() {
+      let html = '<h2>Return Format Validation</h2>';
+      let passed = 0, failed = 0;
+
+      for (const test of FORMAT_TESTS) {
+        try {
+          const r = await rollDice(test.expr);
+          const checks = test.validate(r);
+
+          html += `<div style="margin-bottom:0.8rem;"><strong>${test.expr}</strong> — ${test.desc}</div>`;
+          for (const check of checks) {
+            const cls = check.pass ? 'pass' : 'fail';
+            html += `<div style="margin-left:1.5rem;"><span class="${cls}">${check.pass ? '✓' : '✗'}</span> ${check.msg}</div>`;
+            if (check.pass) passed++; else failed++;
+          }
+        } catch (err) {
+          html += `<div class="fail">✗ ${test.expr}: ${err.message}</div>`;
+          failed++;
+        }
+      }
+
+      resultsEl.innerHTML += html;
+      return { passed, failed };
+    }
+
+    async function runStressTest() {
+      let html = '<h2>Stress Test (10 rolls each)</h2><table><tr><th>Expression</th><th>Range</th><th>All Results</th><th>Status</th></tr>';
+      let passed = 0, failed = 0;
+
+      const stressTests = [
+        { expr: '3d6', min: 3, max: 18 },
+        { expr: '1d20', min: 1, max: 20 },
+        { expr: '2d6+5', min: 7, max: 17 },
+      ];
+
+      for (const test of stressTests) {
+        const results = [];
+        let allInRange = true;
+
+        for (let i = 0; i < 10; i++) {
+          try {
+            const r = await rollDice(test.expr);
+            const total = parseInt(r.result || r.total);
+            results.push(total);
+            if (isNaN(total) || total < test.min || total > test.max) {
+              allInRange = false;
+            }
+          } catch (err) {
+            results.push('ERR');
+            allInRange = false;
+          }
+        }
+
+        const cls = allInRange ? 'test-row-pass' : 'test-row-fail';
+        const statusText = allInRange ? '<span class="pass">PASS</span>' : '<span class="fail">FAIL</span>';
+        html += `<tr class="${cls}"><td>${test.expr}</td><td>${test.min}–${test.max}</td><td class="muted">${results.join(', ')}</td><td>${statusText}</td></tr>`;
+
+        if (allInRange) passed++; else failed++;
+      }
+
+      html += '</table>';
+      resultsEl.innerHTML += html;
+      return { passed, failed };
+    }
+  </script>
+</body>
+</html>

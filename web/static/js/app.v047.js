@@ -20,11 +20,11 @@
      - To change state rendering: edit _renderFullState()
    ============================================================================= */
 
-import { WSClient, clearStoredCredentials } from './ws-client.js';
-import { renderShipStrip } from './components/ship-card.js';
-import { createCombatLog, loadMockLog } from './components/combat-log.js';
-import { renderEngagementStrip } from './components/engagement-display.js';
-import { createGMPanel } from './components/gm-panel.js';
+import { WSClient, clearStoredCredentials } from './ws-client.v047.js';
+import { renderShipStrip } from './components/ship-card.v047.js';
+import { createCombatLog, loadMockLog } from './components/combat-log.v047.js';
+import { renderEngagementStrip } from './components/engagement-display.v047.js';
+import { createGMPanel } from './components/gm-panel.v047.js';
 
 
 // ---------------------------------------------------------------------------
@@ -215,20 +215,104 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ------------------------------------------------------------------
+  // Dice result accumulator
+  // ------------------------------------------------------------------
+  // When a user types "I attack with [[3d6+4]] for [[1d6]] damage",
+  // the client sends two DICE_ROLL messages with the same context.
+  // Results arrive as separate DICE_RESULT messages. We accumulate
+  // results for the same context, then render one rich log entry
+  // with each total individually hoverable.
+  // ------------------------------------------------------------------
+
+  const _pendingDice = {};  // context -> { parts: [], timer, roller, expressions: [] }
+
   ws.on('DICE_RESULT', ({ roller, expression, result, breakdown, is_verbose, context, dice_entry }) => {
-    if (combatLog) {
-      if (is_verbose) {
-        // Verbose: show full breakdown inline
-        combatLog.addEntry(`${roller} rolls ${breakdown}`, 'info');
-      } else {
-        // Normal: show total only, breakdown on hover
-        combatLog.addEntry(`${roller} rolls ${result}`, 'info', `${expression}: ${breakdown}`);
-      }
-    }
     if (gmPanel && dice_entry) {
       gmPanel.addDiceEntry(dice_entry);
     }
+
+    if (!combatLog) return;
+
+    // If there's no context (bare roll), display immediately
+    if (!context || context === expression || !context.includes('[[')) {
+      if (is_verbose) {
+        combatLog.addEntry(`${roller} rolls ${breakdown}`, 'info');
+      } else {
+        combatLog.addRichEntry([
+          { text: `${roller} rolls ` },
+          { text: result, tooltip: `${expression}: ${breakdown}` },
+        ], 'info');
+      }
+      return;
+    }
+
+    // Accumulate results for multi-roll context
+    const key = `${roller}:${context}`;
+    if (!_pendingDice[key]) {
+      _pendingDice[key] = {
+        roller,
+        context,
+        results: {},
+        is_verbose,
+      };
+    }
+
+    // Store this result keyed by expression
+    _pendingDice[key].results[expression] = { result, breakdown, is_verbose };
+
+    // Clear any existing timer and set a new short one
+    // (results arrive almost simultaneously, so 200ms is plenty)
+    clearTimeout(_pendingDice[key].timer);
+    _pendingDice[key].timer = setTimeout(() => {
+      _flushPendingDice(key);
+    }, 200);
   });
+
+  function _flushPendingDice(key) {
+    const pending = _pendingDice[key];
+    if (!pending) return;
+    delete _pendingDice[key];
+
+    // Build the rich entry by replacing [[expr]] in context with results
+    const parts = [];
+    let remaining = pending.context;
+
+    while (remaining.length > 0) {
+      const match = remaining.match(/\[\[(.+?)\]\]/);
+      if (!match) {
+        // No more expressions — add remaining text
+        parts.push({ text: remaining });
+        break;
+      }
+
+      // Add text before the match
+      if (match.index > 0) {
+        parts.push({ text: remaining.substring(0, match.index) });
+      }
+
+      // Replace [[expr]] with the result
+      const expr = match[1];
+      const roll = pending.results[expr];
+      if (roll) {
+        if (roll.is_verbose) {
+          parts.push({ text: roll.breakdown });
+        } else {
+          parts.push({ text: roll.result, tooltip: `${expr}: ${roll.breakdown}` });
+        }
+      } else {
+        // No result for this expression (shouldn't happen, but be safe)
+        parts.push({ text: `[[${expr}]]` });
+      }
+
+      remaining = remaining.substring(match.index + match[0].length);
+    }
+
+    // Prepend roller name
+    parts.unshift({ text: `${pending.roller}: ` });
+
+    combatLog.addRichEntry(parts, 'info');
+  }
 
   // ------------------------------------------------------------------
   // User events
@@ -361,8 +445,8 @@ function _showCombatUI(user, state) {
   // Initialize combat log
   try {
     const logContainer = document.getElementById('combat-log');
-    combatLog = createCombatLog(logContainer, (inputText) => {
-      ws.send('DICE_ROLL', { expression: inputText, context: '' });
+    combatLog = createCombatLog(logContainer, (expression, context) => {
+      ws.send('DICE_ROLL', { expression, context: context || '' });
     }, (chatText) => {
       ws.send('CHAT', { message: chatText });
     });

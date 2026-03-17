@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # Version stamp — update with each deploy
-VERSION = "0.4.1"
+VERSION = "0.4.7"
 
 app = FastAPI(
     title="Psi-Wars Combat Simulator",
@@ -73,8 +73,26 @@ TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 SESSIONS_DIR = BASE_DIR / "sessions"
 
-# Mount static files with cache busting via query param
+# Mount static files
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.middleware("http")
+async def no_cache_static(request: Request, call_next):
+    """
+    Prevent browser caching of JS and CSS files during development.
+
+    ES module imports (import ... from './component.js') don't carry
+    query-string cache busters, so the browser caches them aggressively.
+    This middleware adds no-cache headers for all static JS/CSS requests.
+    """
+    response = await call_next(request)
+    path = request.url.path
+    if path.startswith("/static/") and (path.endswith(".js") or path.endswith(".css")):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
 
 # Templates
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -273,7 +291,7 @@ async def api_dice_roll(request: Request):
     Roll dice via the server-side engine.
 
     Body: { "expression": "3d6+4" }
-    Returns: { "result": "14", "breakdown": "3d6+4: [3, 5, 2]+4 = 14" }
+    Returns: { "result": "14", "breakdown": "4, 5, 1 = 14", "total": 14 }
     """
     if not dice_roller:
         return JSONResponse({"error": "Dice engine not available."}, status_code=503)
@@ -288,11 +306,44 @@ async def api_dice_roll(request: Request):
         return JSONResponse({"error": "Expression is required."}, status_code=400)
 
     try:
-        result = dice_roller(expression)
+        raw = dice_roller(expression)
     except Exception as e:
         return JSONResponse({"error": f"Dice error: {e}"}, status_code=400)
 
-    return JSONResponse(result)
+    # Normalize: psi_dice returns tuple (total, breakdown, is_verbose)
+    if isinstance(raw, tuple):
+        total = raw[0] if len(raw) > 0 else 0
+        breakdown = raw[1] if len(raw) > 1 else str(total)
+        is_verbose = raw[2] if len(raw) > 2 else False
+
+        # Check for error results
+        if total == 'Error':
+            return JSONResponse({"error": str(breakdown)}, status_code=400)
+
+        return JSONResponse({
+            "result": str(total),
+            "breakdown": str(breakdown),
+            "total": total,
+            "is_verbose": is_verbose,
+            "expression": expression,
+        })
+    elif isinstance(raw, dict):
+        return JSONResponse(raw)
+    else:
+        return JSONResponse({
+            "result": str(raw),
+            "breakdown": str(raw),
+            "total": str(raw),
+        })
+
+
+@app.get("/dice-test", response_class=HTMLResponse)
+async def dice_test_page(request: Request):
+    """Web-based dice roller test suite."""
+    return templates.TemplateResponse("dice_test.html", {
+        "request": request,
+        "version": VERSION,
+    })
 
 
 # ---------------------------------------------------------------------------

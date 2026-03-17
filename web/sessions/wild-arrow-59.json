@@ -1,0 +1,183 @@
+{
+  "keyword": "wild-arrow-59",
+  "created": "2026-03-17T03:35:06.077076+00:00",
+  "updated": "2026-03-17T03:57:28.257264+00:00",
+  "status": "setup",
+  "has_gm": true,
+  "gm_password_hash": "90371ec2c42ac7dd1752214586beeaa6:99b6e888a993d92c8b6c3590d3b902afec267682e2305c3b5210802b7c2baec6",
+  "ship_assign_mode": "gm_assign",
+  "ships": [],
+  "engagements": [],
+  "combat_log": [],
+  "dice_log": [
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "7",
+      "breakdown": "2, 1, 4 = 7",
+      "total": 7,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:35:11.639324+00:00"
+    },
+    {
+      "ship": "David",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "10",
+      "breakdown": "4, 3, 3 = 10",
+      "total": 10,
+      "is_npc": false,
+      "roller": "David",
+      "timestamp": "2026-03-17T03:35:44.799655+00:00"
+    },
+    {
+      "ship": "David",
+      "context": "Roll",
+      "expression": "3d6+1",
+      "result": "8",
+      "breakdown": "2, 2, 3 = 8",
+      "total": 8,
+      "is_npc": false,
+      "roller": "David",
+      "timestamp": "2026-03-17T03:35:47.954630+00:00"
+    },
+    {
+      "ship": "David",
+      "context": "Roll",
+      "expression": "3d6+1v",
+      "result": "6",
+      "breakdown": "1, 2, 2 = 6",
+      "total": 6,
+      "is_npc": false,
+      "roller": "David",
+      "timestamp": "2026-03-17T03:35:51.558273+00:00"
+    },
+    {
+      "ship": "David",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "11",
+      "breakdown": "6, 2, 3 = 11",
+      "total": 11,
+      "is_npc": false,
+      "roller": "David",
+      "timestamp": "2026-03-17T03:38:10.460282+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "6",
+      "breakdown": "2, 1, 3 = 6",
+      "total": 6,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:38:18.709496+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "9",
+      "breakdown": "2, 5, 2 = 9",
+      "total": 9,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:38:23.661964+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "9",
+      "breakdown": "1, 2, 6 = 9",
+      "total": 9,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:49:58.879691+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "Roll",
+      "expression": "3d6",
+      "result": "10",
+      "breakdown": "4, 2, 4 = 10",
+      "total": 10,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:50:18.676962+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "[[3d6]] [[1d20a]]",
+      "expression": "3d6",
+      "result": "9",
+      "breakdown": "5, 1, 3 = 9",
+      "total": 9,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:57:12.244272+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "[[3d6]] [[1d20a]]",
+      "expression": "1d20a",
+      "result": "12",
+      "breakdown": "(1), 12 = 12",
+      "total": 12,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:57:12.245964+00:00"
+    },
+    {
+      "ship": "Simonious",
+      "context": "i attack with [[3d6+4]] damage",
+      "expression": "3d6+4",
+      "result": "11",
+      "breakdown": "1, 1, 5 = 11",
+      "total": 11,
+      "is_npc": false,
+      "roller": "Simonious",
+      "timestamp": "2026-03-17T03:57:28.257233+00:00"
+    }
+  ],
+  "chat_log": [
+    {
+      "sender": "David",
+      "message": "huh",
+      "timestamp": "2026-03-17T03:35:40.260051+00:00",
+      "role": "player"
+    }
+  ],
+  "active_state": {
+    "active_ship_id": null,
+    "targets": [],
+    "targeting": [],
+    "current_turn": 0
+  },
+  "users": {
+    "Simonious": {
+      "name": "Simonious",
+      "role": "gm",
+      "ship_ids": [],
+      "token": "75443b0a000ccccf7ba34a68195ae84b",
+      "connected": false,
+      "last_seen": "2026-03-17T03:57:06.529894+00:00",
+      "see_stats": false
+    },
+    "David": {
+      "name": "David",
+      "role": "player",
+      "ship_ids": [],
+      "token": "a5b6fd801f1cfe4fe260bae9735aa24f",
+      "connected": false,
+      "last_seen": "2026-03-17T03:57:03.859003+00:00",
+      "see_stats": false
+    }
+  },
+  "available_ship_ids": [],
+  "settings": {},
+  "version": "1.0.0"
+}
